@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Facade;
 
 return [
 
+    // force_https
+    'force_https' => env('FORCE_HTTPS', true),
+
     /*
     |--------------------------------------------------------------------------
     | Application Name
@@ -210,7 +213,7 @@ return [
 
         // Get Client Browser Information
         Jenssegers\Agent\AgentServiceProvider::class,
-        
+
 
         // Import/Export Excel
         Maatwebsite\Excel\ExcelServiceProvider::class,

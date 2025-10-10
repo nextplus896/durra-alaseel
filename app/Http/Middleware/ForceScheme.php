@@ -20,7 +20,7 @@ class ForceScheme
     public function handle(Request $request, Closure $next)
     {
         try{
-            if(!$request->secure() && App::environment('production')) {
+            if(!$request->secure() && config('app.force_https')) {
                 $query = $request->getQueryString() ? '?'. $request->getQueryString() : "";
                 $secure_redirect = $request->path() . $query;
                 if(BasicSettingsProvider::get()->force_ssl) return redirect()->secure($secure_redirect);
