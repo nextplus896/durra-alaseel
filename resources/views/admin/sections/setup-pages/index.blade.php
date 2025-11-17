@@ -3,7 +3,7 @@
 @push('css')
     <style>
         .switch-toggles {
-            margin-left: auto;
+            margin-inline-start: auto;
         }
     </style>
 @endpush
@@ -52,7 +52,8 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <a href="{{ setRoute('admin.setup.pages.details',$item->slug) }}" class="btn btn--base"><i class="las la-eye"></i></a>
+                                    <a href="{{ setRoute('admin.setup.pages.details', $item->slug) }}" class="btn btn--base"><i
+                                            class="las la-eye"></i></a>
                                 </td>
                             </tr>
                         @empty

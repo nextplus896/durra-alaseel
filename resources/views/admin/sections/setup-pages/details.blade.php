@@ -2,9 +2,10 @@
 
 @push('css')
     <style>
-        .switch-toggles{
-            margin-left: auto;
+        .switch-toggles {
+            margin-inline-start: auto;
         }
+
         .page-section-status {
             min-width: 200px;
         }
@@ -12,16 +13,19 @@
 @endpush
 
 @section('page-title')
-    @include('admin.components.page-title',['title' => __($page_title)])
+    @include('admin.components.page-title', ['title' => __($page_title)])
 @endsection
 
 @section('breadcrumb')
-    @include('admin.components.breadcrumb',['breadcrumbs' => [
-        [
-            'name'  => __("Dashboard"),
-            'url'   => setRoute("admin.dashboard"),
-        ]
-    ], 'active' => __($page_title)])
+    @include('admin.components.breadcrumb', [
+        'breadcrumbs' => [
+            [
+                'name' => __('Dashboard'),
+                'url' => setRoute('admin.dashboard'),
+            ],
+        ],
+        'active' => __($page_title),
+    ])
 @endsection
 
 @section('content')
@@ -29,37 +33,41 @@
         <div class="col-xl-12 col-lg-12 mb-10">
             <div class="custom-card">
                 <div class="card-header">
-                    <h5 class="title">{{ __($setup_page->title) }} {{ __("Page") }}</h5>
+                    <h5 class="title">{{ __($setup_page->title) }} {{ __('Page') }}</h5>
                 </div>
                 <div class="card-body">
-                    <form class="card-form" action="{{ setRoute('admin.setup.pages.update.section',$setup_page->slug) }}" method="POST">
+                    <form class="card-form" action="{{ setRoute('admin.setup.pages.update.section', $setup_page->slug) }}"
+                        method="POST">
                         @csrf
                         <ol id="page_sections" class="dragable-card-wrapper">
 
                             @foreach ($site_sections ?? [] as $item)
                                 @php
-                                    $page_section_data = $setup_page->sections->where('site_section_id', $item->id)->first();
+                                    $page_section_data = $setup_page->sections
+                                        ->where('site_section_id', $item->id)
+                                        ->first();
                                     $status = $page_section_data ? $page_section_data->status : 0;
                                 @endphp
 
                                 <li class="dragable-item">
                                     <i class="dragable-icon"></i>
-                                    <span class="dragable-text">{{ __(Str::title(str_replace(['_','-'], ' ', $item->key))) }}</span>
+                                    <span
+                                        class="dragable-text">{{ __(Str::title(str_replace(['_', '-'], ' ', $item->key))) }}</span>
 
                                     <div class="page-section-status">
-                                        @include('admin.components.form.switcher',[
-                                            'name'          => 'status[]',
-                                            'value'         => $status,
-                                            'options'       => [__('Enable') => 1,__('Disable') => 0],
-                                            'onload'        => false,
-                                            'permission'    => 'admin.setup.pages.store.section'
+                                        @include('admin.components.form.switcher', [
+                                            'name' => 'status[]',
+                                            'value' => $status,
+                                            'options' => [__('Enable') => 1, __('Disable') => 0],
+                                            'onload' => false,
+                                            'permission' => 'admin.setup.pages.store.section',
                                         ])
                                     </div>
                                     <input name="sections[]" type="hidden" value="{{ $item->key }}">
                                 </li>
                             @endforeach
                         </ol>
-                        <button type="submit" class="btn--base w-100 mt-10">{{ __("Save & Update") }}</button>
+                        <button type="submit" class="btn--base w-100 mt-10">{{ __('Save & Update') }}</button>
                     </form>
                 </div>
             </div>
@@ -68,7 +76,7 @@
 @endsection
 
 @push('script')
-<script src="{{ asset('public/backend/js/jquery-ui.js') }}"></script>
+    <script src="{{ asset('public/backend/js/jquery-ui.js') }}"></script>
 
 
     <script>
@@ -145,5 +153,5 @@
                 }
             }
         })(jQuery);
-</script>
+    </script>
 @endpush

@@ -10,6 +10,7 @@ use App\Http\Helpers\Response;
 use App\Models\Vendor\Cars\Car;
 use App\Models\Admin\Cars\CarArea;
 use App\Models\Admin\Cars\CarType;
+use App\Models\Admin\Cars\CarModel;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\Admin\Language;
@@ -22,9 +23,9 @@ class CarController extends Controller
     public function index()
     {
         $page_title = __("My Cars");
-        $cars = Car::where('vendor_id',auth()->guard('vendor')->user()->id)->paginate(6);
+        $cars = Car::where('vendor_id', auth()->guard('vendor')->user()->id)->paginate(6);
 
-        return view('vendor-end.sections.my-car.index',compact('page_title','cars'));
+        return view('vendor-end.sections.my-car.index', compact('page_title', 'cars'));
     }
     /**
      * Method for show car create page
@@ -34,37 +35,33 @@ class CarController extends Controller
     public function create()
     {
         $page_title = __("Car Create");
-        $car_area = CarArea::orderBy('name', 'ASC')->get();
         $car_type = CarType::orderBy('name', 'ASC')->get();
         $languages = Language::get();
         return view('vendor-end.sections.my-car.add', compact(
             'page_title',
-            'car_area',
             'car_type',
             'languages',
         ));
     }
     /**
-     * Method for get all departments based on branch
-     * @param string $slug
+     * Method for get all car models based on type
      * @param \Illuminate\Http\Request  $request
      */
-    public function getAreaTypes(Request $request)
+    public function getCarModels(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'area'  => 'required|integer',
+            'type_id'  => 'required|integer',
         ]);
         if ($validator->fails()) {
             return Response::error($validator->errors()->all());
         }
-        $area = CarArea::with(['types' => function ($type) {
-            $type->with(['type'=> function($car_type){
-                $car_type->where('status', true);
-            }]);
-        }])->find($request->area);
-        if (!$area) return Response::error([__('Area Not Found')], 404);
 
-        return Response::success([__('Data fetch successfully')], ['area' => $area], 200);
+        $models = CarModel::where('car_type_id', $request->type_id)
+            ->where('status', true)
+            ->orderBy('name', 'ASC')
+            ->get();
+
+        return Response::success([__('Data fetch successfully')], ['models' => $models], 200);
     }
     /**
      * Method for store car
@@ -74,12 +71,9 @@ class CarController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'area'        => 'required',
             'type'        => 'required',
-            'car_model'   => 'required|string',
-            'car_number'  => 'required|string|max:100',
+            'car_model_id' => 'required|exists:car_models,id',
             'seat'        => 'required|numeric',
-            'experience'  => 'required|numeric',
             'fees'        => 'required|numeric',
             'image'       => 'required|image|mimes:png,jpg,jpeg,svg,webp',
         ]);
@@ -97,21 +91,15 @@ class CarController extends Controller
         $validated                   = $validator->validate();
         $validated['vendor_id']      = auth()->guard('vendor')->user()->id;
         $validated['slug']           = Str::uuid();
-        $validated['car_area_id']    = $validated['area'];
         $validated['car_type_id']    = $validated['type'];
         $validated['car_title']      = $car_title;
 
-        if (Car::where('car_number', $validated['car_number'])->exists()) {
-            throw ValidationException::withMessages([
-                'car_number'  => __("Car already exists!"),
-            ]);
-        }
         if ($request->hasFile("image")) {
             $image = get_files_from_fileholder($request, 'image');
             $upload = upload_files_from_path_dynamic($image, 'site-section');
             $validated['image'] = $upload;
         }
-        $validated = Arr::except($validated, ['area', 'type']);
+        $validated = Arr::except($validated, ['type']);
         try {
             $car = Car::create($validated);
         } catch (Exception $e) {
@@ -160,14 +148,12 @@ class CarController extends Controller
         $cars  = Car::find($id);
         if (!$cars) return back()->with(['error' => [__("Car Does not exists")]]);
 
-        $car_area = CarArea::where('status', true)->orderBy('name', 'ASC')->get();
         $car_type = CarType::where('status', true)->get();
         $languages = Language::get();
 
         return view('vendor-end.sections.my-car.edit', compact(
             'page_title',
             'cars',
-            'car_area',
             'car_type',
             'languages',
         ));
@@ -181,12 +167,9 @@ class CarController extends Controller
     {
         $car = Car::find($id);
         $validator = Validator::make($request->all(), [
-            'area'        => 'required',
             'type'        => 'required',
-            'car_model'   => 'required|string',
-            'car_number'  => 'required|string|max:100',
+            'car_model_id' => 'required|exists:car_models,id',
             'seat'        => 'required|numeric',
-            'experience'  => 'required|numeric',
             'fees'        => 'required|numeric',
             'image'       => 'nullable|image|mimes:png,jpg,jpeg,svg,webp',
         ]);
@@ -204,7 +187,6 @@ class CarController extends Controller
         $validated                 = $validator->validate();
         $validated['vendor_id']    = auth()->guard('vendor')->user()->id;
         $validated['slug']         = Str::uuid();
-        $validated['car_area_id']  = $validated['area'];
         $validated['car_type_id']  = $validated['type'];
         $validated['car_title']    = $car_title;
 
@@ -213,7 +195,7 @@ class CarController extends Controller
             $upload = upload_files_from_path_dynamic($image, 'site-section', $car->image);
             $validated['image'] = $upload;
         }
-        $validated = Arr::except($validated, ['area', 'type']);
+        $validated = Arr::except($validated, ['type']);
         try {
             $car->update($validated);
         } catch (Exception $e) {
@@ -233,7 +215,7 @@ class CarController extends Controller
         ]);
         $cars = Car::find($request->target);
         try {
-            delete_file(get_files_path('site-section').'/'. $cars->image);
+            delete_file(get_files_path('site-section') . '/' . $cars->image);
             $cars->delete();
         } catch (Exception $e) {
             return back()->with(['error'  =>  [__("Something went wrong! Please try again.")]]);

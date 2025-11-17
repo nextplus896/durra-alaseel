@@ -67,6 +67,11 @@
                             'icon' => 'menu-icon las la-coins',
                         ],
                         [
+                            'title' => __('Car Models'),
+                            'route' => 'admin.car.model.index',
+                            'icon' => 'menu-icon las la-car',
+                        ],
+                        [
                             'title' => __('Car Area'),
                             'route' => 'admin.car.area.index',
                             'icon' => 'menu-icon las la-wallet',
@@ -571,10 +576,10 @@
                     'icon' => 'menu-icon las la-sitemap',
                 ])
 
-                @include('admin.components.side-nav.link',[
-                    'route'     => 'admin.error.logs.index',
-                    'title'     => __("Error Logs"),
-                    'icon'      => "menu-icon las la-bug",
+                @include('admin.components.side-nav.link', [
+                    'route' => 'admin.error.logs.index',
+                    'title' => __('Error Logs'),
+                    'icon' => 'menu-icon las la-bug',
                 ])
 
                 @include('admin.components.side-nav.link', [

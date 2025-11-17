@@ -450,6 +450,9 @@ function files_path($slug)
         'error-images'   => [
             'path'      => 'error-images',
         ],
+        'car-models'        => [
+            'path'          => 'backend/images/car-models',
+        ],
     ];
 
     return (object) $data[$slug];
@@ -465,17 +468,17 @@ function get_amount($amount, $currency = null, $precision = null)
 {
     $basic_settings = BasicSettingsProvider::get();
 
-    if(!$precision && $basic_settings->precision) {
+    if (!$precision && $basic_settings->precision) {
         $precision = $basic_settings->precision;
     }
 
-    if($amount == "" || $amount == null) $amount = 0;
+    if ($amount == "" || $amount == null) $amount = 0;
 
     if (!is_numeric($amount)) return "Not Number";
 
-    if($precision == "double") {
-        $amount = (double) $amount;
-    }else {
+    if ($precision == "double") {
+        $amount = (float) $amount;
+    } else {
         $amount = ($precision) ? number_format($amount, $precision, ".", "") : number_format($amount, 2, ".", "");
     }
 
@@ -958,7 +961,7 @@ function modifyEnv($replace_array = [])
     $env_content_string = File::get(App::environmentFilePath());
     $lines = array_values(array_filter(explode("\n", $env_content_string)));
     $env_content = [];
-    foreach($lines as $line) {
+    foreach ($lines as $line) {
         $line = trim($line);
         if ($line) {
             list($key, $value) = explode('=', $line, 2);
@@ -971,15 +974,15 @@ function modifyEnv($replace_array = [])
     $update_array = ["APP_ENV" => App::environment()];
     foreach ($env_content as $key => $value) {
         foreach ($array_going_to_modify as $modify_key => $modify_value) {
-            if(!array_key_exists($modify_key,$env_content) && !array_key_exists($modify_key,$update_array)) {
-                $update_array[$modify_key] = set_env_value($modify_key,$modify_value);
+            if (!array_key_exists($modify_key, $env_content) && !array_key_exists($modify_key, $update_array)) {
+                $update_array[$modify_key] = set_env_value($modify_key, $modify_value);
                 break;
             }
             if ($key == $modify_key) {
-                $update_array[$key] = set_env_value($key,$modify_value);
+                $update_array[$key] = set_env_value($key, $modify_value);
                 break;
             } else {
-                $update_array[$key] = set_env_value($key,$value);
+                $update_array[$key] = set_env_value($key, $value);
             }
         }
     }
@@ -992,11 +995,12 @@ function modifyEnv($replace_array = [])
     File::put($env_file, $string_content);
 }
 
-function set_env_value($key,$value) {
-    if($key == "APP_KEY") {
+function set_env_value($key, $value)
+{
+    if ($key == "APP_KEY") {
         return $value;
     }
-    return '"' .$value . '"';
+    return '"' . $value . '"';
 }
 
 
@@ -1702,15 +1706,16 @@ function get_only_numeric_data($string)
     return preg_replace("/[^0-9]/", "", $string);
 }
 
-function get_api_languages(){
-    $lang = Language::get()->map(function($data,$index){
-        if(file_exists(base_path('lang/') . $data->code . '.json') == false) return false;
-        $json = json_decode(file_get_contents(base_path('lang/') . $data->code . '.json'),true);
+function get_api_languages()
+{
+    $lang = Language::get()->map(function ($data, $index) {
+        if (file_exists(base_path('lang/') . $data->code . '.json') == false) return false;
+        $json = json_decode(file_get_contents(base_path('lang/') . $data->code . '.json'), true);
         $lan_key_values = [];
-        if($json != null) {
-            foreach($json as $lan_key=>$item) {
+        if ($json != null) {
+            foreach ($json as $lan_key => $item) {
                 $lan_key_original = $lan_key;
-                if(Str::startsWith($lan_key_original, "appL")) $lan_key_values[$lan_key] = $item;
+                if (Str::startsWith($lan_key_original, "appL")) $lan_key_values[$lan_key] = $item;
             }
         }
         return [
@@ -1718,9 +1723,9 @@ function get_api_languages(){
             'code'                  => $data->code,
             'status'                => $data->status,
             'dir'                   => $data->dir ?? "ltr",
-            'translate_key_values'  =>$lan_key_values,
+            'translate_key_values'  => $lan_key_values,
         ];
-    })->reject(function($value) {
+    })->reject(function ($value) {
         return $value == false;
     });
     return $lang;
@@ -1731,7 +1736,8 @@ function get_api_languages(){
  * Get Full URL Path
  */
 
-function get_full_url_host(){
+function get_full_url_host()
+{
     $base_url = url('/');
     $parse_base_url = parse_url($base_url);
     $host = $parse_base_url['host'] ?? "";
@@ -1901,28 +1907,29 @@ function getAmount($amount, $length = 8)
 
 function get_user_notifications()
 {
-    $notifications = UserNotification::where('user_id',auth()->user()->id)->latest()->take(4)->get();
+    $notifications = UserNotification::where('user_id', auth()->user()->id)->latest()->take(4)->get();
     return $notifications;
 }
 
 function get_vendor_notifications()
 {
-    $notifications = VendorNotification::where('vendor_id',auth()->user()->id)->latest()->take(4)->get();
+    $notifications = VendorNotification::where('vendor_id', auth()->user()->id)->latest()->take(4)->get();
     return $notifications;
 }
 
 function get_default_currency_symbol($default_currency = null)
 {
-    if($default_currency == null) $default_currency = CurrencyProvider::default();
+    if ($default_currency == null) $default_currency = CurrencyProvider::default();
     if ($default_currency != false) {
         return $default_currency->symbol;
     }
     return "";
 }
 
-function booking_count($id){
-    $count = CarBooking::where('status', 1)->whereHas('cars',function($query) use($id){
-        $query->where('vendor_id',$id);
+function booking_count($id)
+{
+    $count = CarBooking::where('status', 1)->whereHas('cars', function ($query) use ($id) {
+        $query->where('vendor_id', $id);
     })->count();
 
     return $count;
@@ -1933,17 +1940,20 @@ function get_default_language_dir()
     return session()->get('local_dir') ?? "ltr";
 }
 
-function site_section_const() {
+function site_section_const()
+{
     return SiteSectionConst::class;
 }
 
-function get_system_role_permissions(){
+function get_system_role_permissions()
+{
     $permissions = config('system-role-permissions');
 
     return $permissions;
 }
 
-function getPaymentCredentials($credentials,$label){
+function getPaymentCredentials($credentials, $label)
+{
     $data = null;
     foreach ($credentials as $object) {
         $object = (object)$object;

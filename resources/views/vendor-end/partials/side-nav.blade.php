@@ -1,97 +1,117 @@
 <div class="sidebar">
-    <div class="sidebar-inner">
-        <div class="sidebar-inner-wrapper">
-            <div class="sidebar-logo">
-                <a href="{{ setRoute('frontend.index') }}" class="sidebar-main-logo">
-                    <img src="{{ get_logo_vendor($basic_settings) }}"
-                        data-white_img="{{ get_logo_vendor($basic_settings, 'dark') }}"
-                        data-dark_img="{{ get_logo_vendor($basic_settings) }}" alt="logo">
+    <div class="sidebar-header">
+        <a href="{{ setRoute('frontend.index') }}" class="sidebar-logo">
+            <img src="{{ get_logo_vendor($basic_settings) }}"
+                data-white_img="{{ get_logo_vendor($basic_settings, 'dark') }}"
+                data-dark_img="{{ get_logo_vendor($basic_settings) }}" alt="logo">
+        </a>
+        <button class="sidebar-toggle" type="button">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <nav class="sidebar-nav">
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ setRoute('vendor.dashboard.index') }}" class="sidebar-link">
+                    <i class="las la-palette"></i>
+                    <span>{{ __('Dashboard') }}</span>
                 </a>
-                <button class="sidebar-menu-bar">
-                    <i class="fas fa-exchange-alt"></i>
-                </button>
-            </div>
-            <div class="sidebar-menu-wrapper">
-                <ul class="sidebar-menu">
-                    <li class="sidebar-menu-item">
-                        <a href="{{ setRoute('vendor.dashboard.index') }}">
-                            <i class="menu-icon las la-palette"></i>
-                            <span class="menu-title">{{ __('Dashboard') }}</span>
-                        </a>
-                    </li>
-                    <li class="sidebar-menu-item">
-                        <a href="{{ setRoute('vendor.car.index') }}">
-                            <i class="menu-icon las la-user"></i>
-                            <span class="menu-title">{{ __('My Car') }}</span>
-                        </a>
-                    </li>
-                    <li class="sidebar-menu-item">
-                        <a href="{{ setRoute('vendor.withdraw.money.index') }}">
-                            <i class="menu-icon las la-user"></i>
-                            <span class="menu-title">{{ __('Withdraw Money') }}</span>
-                        </a>
-                    </li>
-                    <li class="sidebar-menu-item">
-                        <a href="{{ setRoute('vendor.booking.index') }}">
-                            <i class="menu-icon las la-tasks"></i>
-                            <span class="menu-title">{{ __('Booking Request') }}</span>
-                            <div class="sidebar-item-badge">
-                                @php
-                                    $booking_count = booking_count(auth()->guard('vendor')->user()->id);
-                                @endphp
-                                @if ($booking_count > 0)
-                                    <span class="badge">{{ $booking_count }}</span>
-                                @endif
-                            </div>
-                        </a>
-                    </li>
-                    <li class="sidebar-menu-item">
-                        <a href="{{ setRoute('vendor.history.index') }}">
-                            <i class="menu-icon las la-cart-plus"></i>
-                            <span class="menu-title">{{ __('History') }}</span>
-                        </a>
-                    </li>
-                    @if ($basic_settings->vendor_kyc_verification)
-                        <li class="sidebar-menu-item">
-                            <a href="{{ setRoute('vendor.kyc.index') }}">
-                                <i class="menu-icon las la-cart-plus"></i>
-                                <span class="menu-title">{{ __('KYC Verification') }}</span>
-                            </a>
-                        </li>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{{ setRoute('vendor.car.index') }}" class="sidebar-link">
+                    <i class="las la-car"></i>
+                    <span>{{ __('My Car') }}</span>
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{{ setRoute('vendor.withdraw.money.index') }}" class="sidebar-link">
+                    <i class="las la-wallet"></i>
+                    <span>{{ __('Withdraw Money') }}</span>
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{{ setRoute('vendor.booking.index') }}" class="sidebar-link">
+                    <i class="las la-tasks"></i>
+                    <span>{{ __('Booking Request') }}</span>
+                    @php
+                        $booking_count = booking_count(auth()->guard('vendor')->user()->id);
+                    @endphp
+                    @if ($booking_count > 0)
+                        <span class="sidebar-badge">{{ $booking_count }}</span>
                     @endif
-                    <li class="sidebar-menu-item">
-                        <a href="{{ setRoute('vendor.security.google.2fa') }}">
-                            <i class="menu-icon las la-cart-plus"></i>
-                            <span class="menu-title">{{ __('2FA Security') }}</span>
-                        </a>
-                    </li>
-                    <li class="sidebar-menu-item">
-                        <a href="javascript:void(0)" class="logout-btn">
-                            <i class="menu-icon las la-sign-out-alt"></i>
-                            <span class="menu-title">{{ __('Logout') }}</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        <div class="sidebar-doc-box bg-overlay-base bg_img"
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{{ setRoute('vendor.history.index') }}" class="sidebar-link">
+                    <i class="las la-history"></i>
+                    <span>{{ __('History') }}</span>
+                </a>
+            </li>
+            @if ($basic_settings->vendor_kyc_verification)
+                <li class="sidebar-menu-item">
+                    <a href="{{ setRoute('vendor.kyc.index') }}" class="sidebar-link">
+                        <i class="las la-user-check"></i>
+                        <span>{{ __('KYC Verification') }}</span>
+                    </a>
+                </li>
+            @endif
+            <li class="sidebar-menu-item">
+                <a href="{{ setRoute('vendor.security.google.2fa') }}" class="sidebar-link">
+                    <i class="las la-shield-alt"></i>
+                    <span>{{ __('2FA Security') }}</span>
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="javascript:void(0)" class="sidebar-link logout-btn">
+                    <i class="las la-sign-out-alt"></i>
+                    <span>{{ __('Logout') }}</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="sidebar-help bg-overlay-base bg_img"
             data-background="{{ asset('public/frontend/images/element/sidebar-img.webp') }}">
-            <div class="sidebar-doc-icon">
+            <div class="sidebar-help-icon">
                 <i class="las la-headphones-alt"></i>
             </div>
-            <div class="sidebar-doc-content">
-                <h4 class="title">{{ __('Help Center') }}</h4>
-                <p>{{ __('Please contact our support') }}.</p>
-                <div class="sidebar-doc-btn">
-                    <a href="{{ setRoute('vendor.support.ticket.index') }}"
-                        class="btn--base w-100">{{ __('Get Support') }}</a>
-                </div>
+            <div class="sidebar-help-content">
+                <h5>{{ __('Help Center') }}</h5>
+                <p>{{ __('Please contact our support') }}</p>
+                <a href="{{ setRoute('vendor.support.ticket.index') }}"
+                    class="btn--base w-100">{{ __('Get Support') }}</a>
             </div>
         </div>
     </div>
 </div>
 @push('script')
     <script>
+        // Sidebar toggle for mobile
+        $('.sidebar-toggle').on('click', function() {
+            $('.sidebar').toggleClass('active');
+            $('.body-overlay').toggleClass('active');
+        });
+
+        // Close sidebar on body overlay click
+        $('.body-overlay').on('click', function() {
+            $('.sidebar').removeClass('active');
+            $(this).removeClass('active');
+        });
+
+        // Set active menu item based on current URL
+        $(document).ready(function() {
+            var currentUrl = window.location.href;
+            $('.sidebar-link').each(function() {
+                var linkUrl = $(this).attr('href');
+                if (currentUrl.indexOf(linkUrl) !== -1 && linkUrl !== 'javascript:void(0)') {
+                    $(this).closest('.sidebar-menu-item').addClass('active');
+                }
+            });
+        });
+
+        // Logout confirmation
         $(".logout-btn").click(function() {
             var actionRoute = "{{ setRoute('vendor.logout') }}";
             var target = 1;

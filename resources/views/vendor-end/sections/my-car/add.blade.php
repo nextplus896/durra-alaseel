@@ -21,14 +21,19 @@
                     <h4 class="title">{{ __('Add New Car') }}</h4>
                 </div>
                 <div class="card-body">
-                    <form class="card-form" action="{{ setRoute('vendor.car.store') }}" method="POST" enctype="multipart/form-data">
+                    <form class="card-form" action="{{ setRoute('vendor.car.store') }}" method="POST"
+                        enctype="multipart/form-data">
                         @csrf
                         <div class="row mb-10-none">
                             <div class="col-xl-12 col-lg-12 col-md-6 mb-10 form-group">
                                 <nav>
                                     <div class="nav nav-tabs car-tab-button" id="nav-tab" role="tablist">
                                         @foreach ($languages as $item)
-                                            <button class="nav-link @if (get_default_language_code() == $item->code) active @endif" id="{{$item->code}}-tab" data-bs-toggle="tab" data-bs-target="#{{$item->code}}" type="button" role="tab" aria-controls="{{ $item->code }}" aria-selected="true">{{ $item->name }}</button>
+                                            <button class="nav-link @if (get_default_language_code() == $item->code) active @endif"
+                                                id="{{ $item->code }}-tab" data-bs-toggle="tab"
+                                                data-bs-target="#{{ $item->code }}" type="button" role="tab"
+                                                aria-controls="{{ $item->code }}"
+                                                aria-selected="true">{{ $item->name }}</button>
                                         @endforeach
 
                                     </div>
@@ -38,36 +43,29 @@
                                         @php
                                             $lang_code = $item->code;
                                         @endphp
-                                        <div class="tab-pane @if (get_default_language_code() == $item->code) fade show active @endif" id="{{ $item->code }}" role="tabpanel" aria-labelledby="english-tab">
+                                        <div class="tab-pane @if (get_default_language_code() == $item->code) fade show active @endif"
+                                            id="{{ $item->code }}" role="tabpanel" aria-labelledby="english-tab">
                                             <div class="form-group">
-                                                @include('admin.components.form.input',[
-                                                    'label'         => __("Car Title"),
-                                                    'label_after'   => "*",
-                                                    'placeholder'   => __("Write Here").'...',
-                                                    'name'      => $lang_code . "_car_title",
-                                                    'value'     => old($lang_code . "_car_title",$data->value->language->$lang_code->car_title ?? "")
-
+                                                @include('admin.components.form.input', [
+                                                    'label' => __('Car Title'),
+                                                    'label_after' => '*',
+                                                    'placeholder' => __('Write Here') . '...',
+                                                    'name' => $lang_code . '_car_title',
+                                                    'value' => old(
+                                                        $lang_code . '_car_title',
+                                                        $data->value->language->$lang_code->car_title ?? ''),
                                                 ])
                                             </div>
                                         </div>
                                     @endforeach
                                 </div>
-                                <div class="vehicle-type">
-                                    <label>{{ __('Area') }}<span>*</span></label>
-                                    <select class="select2 select2-basic" name="area" value="{{ old('area') }}">
-                                        <option disabled selected>{{ __('Select Area') }}</option>
-                                        @forelse ($car_area ?? [] as $value)
-                                            <option value="{{ $value->id }}">{{ $value->name }}</option>
-                                        @empty
-                                        @endforelse
-                                    </select>
-                                </div>
                             </div>
-                            <div class="col-xl-4 col-lg-4 col-md-6 mb-10 form-group">
+                            <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
                                 <div class="vehicle-type">
                                     <label>{{ __('Vehicle Type') }}<span>*</span></label>
-                                    <select class="select2 select2-basic" name="type" value="{{ old('type') }}">
-                                        <option disabled selected>{{ __('Select Vehicle') }}</option>
+                                    <select class="select2 select2-basic" name="type" id="car_type"
+                                        value="{{ old('type') }}">
+                                        <option disabled selected>{{ __('Select Vehicle Type') }}</option>
                                         @forelse ($car_type ?? [] as $value)
                                             <option value="{{ $value->id }}">{{ $value->name }}</option>
                                         @empty
@@ -75,41 +73,32 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-xl-4 col-lg-4 col-md-6 mb-10 form-group">
-                                <label>{{ __('Vehicle Model') }}<span>*</span></label>
-                                <input type="text" class="form--control" name="car_model" placeholder="Enter Model"
-                                    value="{{ old('car_model') }}">
+                            <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
+                                <div class="vehicle-type">
+                                    <label>{{ __('Vehicle Model') }}<span>*</span></label>
+                                    <select class="select2 select2-basic" name="car_model_id" id="car_model">
+                                        <option disabled selected>{{ __('Select Vehicle Model') }}</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="col-xl-3 col-lg-3 col-md-6 mb-10 form-group">
-                                <label>{{ __('Vehicle Number') }}<span>*</span></label>
-                                <input type="text" class="form--control" name="car_number" placeholder="Enter Number"
-                                    value="{{ old('car_number') }}">
-                            </div>
-                            <div class="col-xl-3 col-lg-3 col-md-6 mb-10 form-group">
+                            <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
                                 <label>{{ __('Total Seat') }}<span>*</span></label>
                                 <input type="number" class="form--control" id="seat" name="seat"
                                     placeholder="Enter Number" value="{{ old('seat') }}">
                             </div>
-                            <div class="col-xl-3 col-lg-3 col-md-6 mb-10 form-group">
-                                <label>{{ __('Per K/M Charge') }}<span>*</span></label>
-                                <input type="text" class="form--control klm-charge" name="fees" placeholder="Enter Charge"
-                                    value="{{ old('fees') }}">
+                            <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
+                                <label>{{ __('Rental Price Day') }}<span>*</span></label>
+                                <input type="text" class="form--control klm-charge" name="fees"
+                                    placeholder="{{ __('Enter Rental Price') }}" value="{{ old('fees') }}">
                                 <span class="charge-currency">{{ get_default_currency_code() }}</span>
                             </div>
-                            <div class="col-xl-3 col-lg-3 col-md-6 mb-10 form-group">
-                                <label>{{ __('Experience') }} <span class="text--base">*</span></label>
-                                <input type="text" class="form--control" name="experience" placeholder="Enter Experience"
-                                    value="{{ old('experience') }}">
-                            </div>
                             <div class="col-xl-12 col-lg-12 mb-10 form-group">
-                                <label>{{ __('Image') }}<span>*</span></label>
-                                <div class="file-holder-wrapper">
-                                    @include('admin.components.form.input-file', [
-                                        'name' => 'image',
-                                        'class' => 'file-holder',
-                                        'old_files_path' => files_asset_path('site-section'),
-                                        'old_files' => old('old_image'),
-                                    ])
+                                <label>{{ __('Car Model Image') }}</label>
+                                <div class="car-model-image-display">
+                                    <img id="modelImage" src="" alt="Car Model Image"
+                                        style="max-width: 100%; height: auto; border-radius: 8px; display: none;">
+                                    <p id="noImage" style="color: #999;">
+                                        {{ __('Select a vehicle model to see the image') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -126,33 +115,64 @@
 @push('script')
     <script>
         $(document).ready(function() {
-            var getTypeURL = "{{ setRoute('vendor.car.get.area.types') }}";
+            var getModelsURL = "{{ setRoute('vendor.car.get.models') }}";
 
-            $('select[name="area"]').on('change', function() {
-                var area = $(this).val();
+            $('select[name="type"]').on('change', function() {
+                var typeId = $(this).val();
 
-                if (area == "" || area == null) {
+                if (typeId == "" || typeId == null) {
                     return false;
                 }
-                $.post(getTypeURL, {
-                    area: area,
+
+                $.post(getModelsURL, {
+                    type_id: typeId,
                     _token: "{{ csrf_token() }}"
                 }, function(response) {
-
-                    var option = '';
-                    if (response.data.area.types.length > 0) {
-                        $.each(response.data.area.types, function(index, item) {
+                    var option =
+                        '<option disabled selected>{{ __('Select Vehicle Model') }}</option>';
+                    if (response.data.models.length > 0) {
+                        $.each(response.data.models, function(index, item) {
                             option +=
-                                `<option value="${item.car_type_id}">${item.type.name}</option>`
+                                `<option value="${item.id}" data-image="${item.image}">${item.name}</option>`;
                         });
 
-                        $("select[name=type]").html(option);
-                        $("select[name=type]").select2();
+                        $("select[name=car_model_id]").html(option);
+                        $("select[name=car_model_id]").select2();
+                    } else {
+                        $("select[name=car_model_id]").html(option);
+                        $("select[name=car_model_id]").select2();
                     }
                 }).fail(function(response) {
                     var errorText = response.responseJSON;
                 });
             });
+
+            // Load image when car model is selected
+            $('select[name="car_model_id"]').on('change', function() {
+                loadModelImage($(this).val());
+            });
+
+            // Function to load and display model image
+            function loadModelImage(modelId) {
+                if (!modelId) {
+                    $('#modelImage').hide();
+                    $('#noImage').show();
+                    return;
+                }
+
+                // Get model data from the select options
+                var selectedOption = $('#car_model option:selected');
+                var modelImage = selectedOption.data('image');
+
+                if (modelImage) {
+                    var imageUrl = "{{ files_asset_path('car-models') }}" + "/" + modelImage;
+                    $('#modelImage').attr('src', imageUrl).show();
+                    $('#noImage').hide();
+                } else {
+                    $('#modelImage').hide();
+                    $('#noImage').show();
+                }
+            }
         });
     </script>
     <script>

@@ -42,6 +42,7 @@ use App\Http\Controllers\Admin\BookingController;
 use App\Http\Controllers\Admin\Cars\CarAreaController;
 use App\Http\Controllers\Admin\Cars\CarController;
 use App\Http\Controllers\Admin\Cars\CarTypeController;
+use App\Http\Controllers\Admin\Cars\CarModelController;
 use App\Http\Controllers\Admin\ErrorLogsController;
 use App\Http\Controllers\Admin\PaymentGatewayCurrencyController;
 use App\Http\Controllers\Admin\SetupNotificationController;
@@ -50,31 +51,30 @@ use App\Http\Controllers\Admin\VendorCareController;
 
 // All Admin Route Is Here
 Route::name('admin.')->group(function () {
-    Route::middleware(['web','guest','admin.login.guard'])->group(function(){
-        Route::get('/',function(){
-        return redirect()->route('admin.login');
+    Route::middleware(['web', 'guest', 'admin.login.guard'])->group(function () {
+        Route::get('/', function () {
+            return redirect()->route('admin.login');
+        });
+        Route::get('login', [LoginController::class, "showLoginForm"])->name('login');
+        Route::post('login/submit', [LoginController::class, "login"])->name('login.submit');
+
+        Route::get('password/forgot', [ForgotPasswordController::class, "showLinkRequestForm"])->withoutMiddleware(['admin.login.guard', 'guest'])->name('password.forgot');
+        Route::post('password/forgot', [ForgotPasswordController::class, "sendResetLinkEmail"])->withoutMiddleware(['admin.login.guard', 'guest'])->name('password.forgot.request');
+
+        Route::get('password/reset/{token}', [ResetPasswordController::class, "showResetForm"])->withoutMiddleware(['admin.login.guard', 'guest'])->name('password.reset');
+        Route::post('password/update', [ResetPasswordController::class, 'reset'])->withoutMiddleware(['admin.login.guard', 'guest'])->name('password.update');
+
+        Route::controller(AdminAuthorizationController::class)->prefix("authorize")->middleware(['auth:admin'])->withoutMiddleware(['admin.login.guard', 'guest'])->name('authorize.')->group(function () {
+            Route::get('google/2fa', 'showGoogle2FAForm')->name('google.2fa');
+            Route::post('google/2fa/submit', 'google2FASubmit')->name('google.2fa.submit');
+        });
     });
-    Route::get('login',[LoginController::class,"showLoginForm"])->name('login');
-    Route::post('login/submit',[LoginController::class,"login"])->name('login.submit');
-
-    Route::get('password/forgot',[ForgotPasswordController::class,"showLinkRequestForm"])->withoutMiddleware(['admin.login.guard','guest'])->name('password.forgot');
-    Route::post('password/forgot',[ForgotPasswordController::class,"sendResetLinkEmail"])->withoutMiddleware(['admin.login.guard','guest'])->name('password.forgot.request');
-
-    Route::get('password/reset/{token}',[ResetPasswordController::class,"showResetForm"])->withoutMiddleware(['admin.login.guard','guest'])->name('password.reset');
-    Route::post('password/update',[ResetPasswordController::class,'reset'])->withoutMiddleware(['admin.login.guard','guest'])->name('password.update');
-
-    Route::controller(AdminAuthorizationController::class)->prefix("authorize")->middleware(['auth:admin'])->withoutMiddleware(['admin.login.guard','guest'])->name('authorize.')->group(function(){
-        Route::get('google/2fa','showGoogle2FAForm')->name('google.2fa');
-        Route::post('google/2fa/submit','google2FASubmit')->name('google.2fa.submit');
-    });
-
-    });
-    Route::middleware(['web', 'auth:admin', 'app.mode', 'admin.role.guard','admin.google.two.factor'])->group(function(){
+    Route::middleware(['web', 'auth:admin', 'app.mode', 'admin.role.guard', 'admin.google.two.factor'])->group(function () {
         // Dashboard Section
         Route::controller(DashboardController::class)->group(function () {
             Route::get('dashboard', 'index')->name('dashboard');
             Route::post('logout', 'logout')->name('logout');
-            Route::post('notifications/clear','notificationsClear')->name('notifications.clear');
+            Route::post('notifications/clear', 'notificationsClear')->name('notifications.clear');
         });
 
         // Admin Profile
@@ -84,8 +84,8 @@ Route::name('admin.')->group(function () {
             Route::put('change-password', 'updatePassword')->name('change.password.update');
             Route::put('update', 'update')->name('update');
 
-            Route::get('google/2fa','google2FaView')->name('google.2fa.view');
-            Route::post('google/2fa','google2FAStatusUpdate')->name('google.2fa.status.update');
+            Route::get('google/2fa', 'google2FaView')->name('google.2fa.view');
+            Route::post('google/2fa', 'google2FAStatusUpdate')->name('google.2fa.status.update');
         });
 
         // Setup Currency Section
@@ -110,7 +110,7 @@ Route::name('admin.')->group(function () {
             Route::get('details/{id}', 'addMoneyDetails')->name('details');
             Route::put('approved', 'approved')->name('approved');
             Route::put('rejected', 'rejected')->name('rejected');
-            Route::post('search','search')->name("search");
+            Route::post('search', 'search')->name("search");
             Route::post('refund/status', 'updateStatus')->name('refund.status');
         });
 
@@ -152,15 +152,15 @@ Route::name('admin.')->group(function () {
             Route::get('login/logs/{username}', 'loginLogs')->name('login.logs');
             Route::get('mail/logs/{username}', 'mailLogs')->name('mail.logs');
             Route::post('send/mail/{username}', 'sendMail')->name('send.mail')->middleware("mail");
-            Route::post('login-as-member/{username?}','loginAsMember')->name('login.as.member');
-            Route::post('kyc/approve/{username}','kycApprove')->name('kyc.approve');
-            Route::post('kyc/reject/{username}','kycReject')->name('kyc.reject');
-            Route::post('search','search')->name('search');
+            Route::post('login-as-member/{username?}', 'loginAsMember')->name('login.as.member');
+            Route::post('kyc/approve/{username}', 'kycApprove')->name('kyc.approve');
+            Route::post('kyc/reject/{username}', 'kycReject')->name('kyc.reject');
+            Route::post('search', 'search')->name('search');
 
 
             // new user
-            Route::get('create','create')->name('create');
-            Route::post('store','store')->name('store');
+            Route::get('create', 'create')->name('create');
+            Route::post('store', 'store')->name('store');
         });
 
         // Vendor Care Section
@@ -179,15 +179,15 @@ Route::name('admin.')->group(function () {
             Route::get('login/logs/{username}', 'loginLogs')->name('login.logs');
             Route::get('mail/logs/{username}', 'mailLogs')->name('mail.logs');
             Route::post('send/mail/{username}', 'sendMail')->name('send.mail')->middleware("mail");
-            Route::post('login-as-member/{username?}','loginAsMember')->name('login.as.member');
-            Route::post('kyc/approve/{username}','kycApprove')->name('kyc.approve');
-            Route::post('kyc/reject/{username}','kycReject')->name('kyc.reject');
-            Route::post('search','search')->name('search');
-            Route::post('wallet/balance/update/{username}','walletBalanceUpdate')->name('wallet.balance.update');
+            Route::post('login-as-member/{username?}', 'loginAsMember')->name('login.as.member');
+            Route::post('kyc/approve/{username}', 'kycApprove')->name('kyc.approve');
+            Route::post('kyc/reject/{username}', 'kycReject')->name('kyc.reject');
+            Route::post('search', 'search')->name('search');
+            Route::post('wallet/balance/update/{username}', 'walletBalanceUpdate')->name('wallet.balance.update');
 
             // new Vendor
-            Route::get('create','create')->name('create');
-            Route::post('store','store')->name('store');
+            Route::get('create', 'create')->name('create');
+            Route::post('store', 'store')->name('store');
         });
 
 
@@ -195,36 +195,34 @@ Route::name('admin.')->group(function () {
         Route::controller(AdminCareController::class)->prefix('admins')->name('admins.')->group(function () {
             Route::get('index', 'index')->name('index');
             Route::get('email-admin', 'emailAllAdmins')->name('email.admins');
-            Route::delete('admin/delete','deleteAdmin')->name('admin.delete')->middleware('admin.delete.guard');
-            Route::post('send/email','sendEmail')->name('send.email')->middleware("mail");
-            Route::post('admin/search','adminSearch')->name('search');
+            Route::delete('admin/delete', 'deleteAdmin')->name('admin.delete')->middleware('admin.delete.guard');
+            Route::post('send/email', 'sendEmail')->name('send.email')->middleware("mail");
+            Route::post('admin/search', 'adminSearch')->name('search');
 
-            Route::post("store","store")->name("admin.store");
-            Route::put("update","update")->name("admin.update");
-            Route::put('status/update','statusUpdate')->name('admin.status.update');
+            Route::post("store", "store")->name("admin.store");
+            Route::put("update", "update")->name("admin.update");
+            Route::put('status/update', 'statusUpdate')->name('admin.status.update');
 
-            Route::get('role/index','roleIndex')->name('role.index');
-            Route::post('role/store','roleStore')->name('role.store');
-            Route::put('role/update','roleUpdate')->name('role.update');
-            Route::delete('role/remove','roleRemove')->name('role.delete')->middleware('admin.role.delete.guard');
+            Route::get('role/index', 'roleIndex')->name('role.index');
+            Route::post('role/store', 'roleStore')->name('role.store');
+            Route::put('role/update', 'roleUpdate')->name('role.update');
+            Route::delete('role/remove', 'roleRemove')->name('role.delete')->middleware('admin.role.delete.guard');
 
-            Route::get('role/permission/index','rolePermissionIndex')->name('role.permission.index');
-            Route::post('role/permission/store','rolePermissionStore')->name('role.permission.store');
-            Route::put('role/permission/update','rolePermissionUpdate')->name('role.permission.update');
-            Route::delete('role/permission/assign/delete/{slug}','rolePermissionAssignDelete')->name('role.permission.assign.delete');
+            Route::get('role/permission/index', 'rolePermissionIndex')->name('role.permission.index');
+            Route::post('role/permission/store', 'rolePermissionStore')->name('role.permission.store');
+            Route::put('role/permission/update', 'rolePermissionUpdate')->name('role.permission.update');
+            Route::delete('role/permission/assign/delete/{slug}', 'rolePermissionAssignDelete')->name('role.permission.assign.delete');
 
-            Route::get('role/permission/{slug}','viewRolePermission')->name('role.permission');
-            Route::post('role/permission/assign/{slug}','rolePermissionAssign')->name('role.permission.assign');
-
-
-            Route::get('role-permission-create','rolePermissionCreate')->name('role.permission.create');
-            Route::post('role/permission/store','rolePermissionStore')->name('role.permission.store');
-            Route::get('role-permission-edit/{slug}','rolePermissionEdit')->name('role.permission.edit');
-            Route::post('role/permission/update/{slug}','rolePermissionUpdate')->name('role.permission.update');
-            Route::delete('role/permission/delete','rolePermissionDelete')->name('role.permission.delete');
-            Route::get('role/permission/{slug}','viewRolePermission')->name('role.permission');
+            Route::get('role/permission/{slug}', 'viewRolePermission')->name('role.permission');
+            Route::post('role/permission/assign/{slug}', 'rolePermissionAssign')->name('role.permission.assign');
 
 
+            Route::get('role-permission-create', 'rolePermissionCreate')->name('role.permission.create');
+            Route::post('role/permission/store', 'rolePermissionStore')->name('role.permission.store');
+            Route::get('role-permission-edit/{slug}', 'rolePermissionEdit')->name('role.permission.edit');
+            Route::post('role/permission/update/{slug}', 'rolePermissionUpdate')->name('role.permission.update');
+            Route::delete('role/permission/delete', 'rolePermissionDelete')->name('role.permission.delete');
+            Route::get('role/permission/{slug}', 'viewRolePermission')->name('role.permission');
         });
 
         // Cars Section
@@ -233,40 +231,49 @@ Route::name('admin.')->group(function () {
         Route::controller(CarTypeController::class)->prefix('car-types')->name('car.types.')->group(function () {
             Route::get('index', 'index')->name('index');
             Route::post('store', 'store')->name('store');
-            Route::put('status/update','statusUpdate')->name('status.update');
-            Route::put('update','update')->name('update');
-            Route::delete('delete','delete')->name('delete');
+            Route::put('status/update', 'statusUpdate')->name('status.update');
+            Route::put('update', 'update')->name('update');
+            Route::delete('delete', 'delete')->name('delete');
+        });
+
+        // car models Section
+        Route::controller(CarModelController::class)->prefix('car-models')->name('car.model.')->group(function () {
+            Route::get('index', 'index')->name('index');
+            Route::post('store', 'store')->name('store');
+            Route::put('status/update', 'statusUpdate')->name('status.update');
+            Route::put('update', 'update')->name('update');
+            Route::delete('delete', 'delete')->name('delete');
         });
 
         //car area section
-        Route::controller(CarAreaController::class)->prefix('car-area')->name('car.area.')->group(function(){
+        Route::controller(CarAreaController::class)->prefix('car-area')->name('car.area.')->group(function () {
             Route::get('index', 'index')->name('index');
             Route::get('create', 'create')->name('create');
             Route::post('store', 'store')->name('store');
-            Route::get('edit/{id}','edit')->name('edit');
-            Route::put('update/{id}','update')->name('update');
-            Route::put('status/update','statusUpdate')->name('status.update');
-            Route::delete('delete','delete')->name('delete');
+            Route::get('edit/{id}', 'edit')->name('edit');
+            Route::put('update/{id}', 'update')->name('update');
+            Route::put('status/update', 'statusUpdate')->name('status.update');
+            Route::delete('delete', 'delete')->name('delete');
         });
 
         //car area section
-        Route::controller(CarController::class)->prefix('car')->name('car.')->group(function(){
+        Route::controller(CarController::class)->prefix('car')->name('car.')->group(function () {
             Route::get('index', 'index')->name('index');
-            Route::put('approval/update','statusUpdate')->name('approval.update');
+            Route::put('approval/update', 'statusUpdate')->name('approval.update');
         });
 
 
         // Web Settings Section
-        Route::controller(WebSettingsController::class)->prefix('web-settings')->name('web.settings.')->group(function(){
-            Route::get('basic-settings','basicSettings')->name('basic.settings');
-            Route::put('basic-settings/update','basicSettingsUpdate')->name('basic.settings.update');
-            Route::put('vendor/basic-settings/update','vendorBasicSettingsUpdate')->name('vendor.basic.settings.update');
-            Route::put('basic-settings/activation/update','basicSettingsActivationUpdate')->name('basic.settings.activation.update');
-            Route::get('image-assets','imageAssets')->name('image.assets');
+        Route::controller(WebSettingsController::class)->prefix('web-settings')->name('web.settings.')->group(function () {
+            Route::get('basic-settings', 'basicSettings')->name('basic.settings');
+            Route::put('basic-settings/update', 'basicSettingsUpdate')->name('basic.settings.update');
+            Route::put('vendor/basic-settings/update', 'vendorBasicSettingsUpdate')->name('vendor.basic.settings.update');
+            Route::put('basic-settings/activation/update', 'basicSettingsActivationUpdate')->name('basic.settings.activation.update');
+            Route::get('image-assets', 'imageAssets')->name('image.assets');
             Route::put('vendor/image-assets/update', 'vendorImageAssetsUpdate')->name('vendor.image.assets.update');
-            Route::put('image-assets/update','imageAssetsUpdate')->name('image.assets.update');
-            Route::get('setup-seo','setupSeo')->name('setup.seo');
-            Route::put('setup-seo/update','setupSeoUpdate')->name('setup.seo.update');
+            Route::put('image-assets/update', 'imageAssetsUpdate')->name('image.assets.update');
+            Route::get('setup-seo', 'setupSeo')->name('setup.seo');
+            Route::put('setup-seo/update', 'setupSeoUpdate')->name('setup.seo.update');
         });
 
 
@@ -288,12 +295,12 @@ Route::name('admin.')->group(function () {
                 Route::post('onboard-screens/store', 'onboardScreenStore')->name('screen.store');
                 Route::put('onboard-screen/update', 'onboardScreenUpdate')->name('screen.update');
                 Route::put('onboard-screen/status/update', 'onboardScreenStatusUpdate')->name('screen.status.update');
-                Route::delete('onboard-screen/delete','onboardScreenDelete')->name('screen.delete');
+                Route::delete('onboard-screen/delete', 'onboardScreenDelete')->name('screen.delete');
                 Route::get('vendor/onboard-screens', 'vendorOnboardScreens')->name('vendor.screens');
                 Route::post('vendor/onboard-screens/store', 'vendorOnboardScreenStore')->name('vendor.screen.store');
                 Route::put('vendor/onboard-screen/update', 'vendorOnboardScreenUpdate')->name('vendor.screen.update');
                 Route::put('vendor/onboard-screen/status/update', 'vendorOnboardScreenStatusUpdate')->name('vendor.screen.status.update');
-                Route::delete('vendor/onboard-screen/delete','vendorOnboardScreenDelete')->name('vendor.screen.delete');
+                Route::delete('vendor/onboard-screen/delete', 'vendorOnboardScreenDelete')->name('vendor.screen.delete');
             });
         });
 
@@ -301,14 +308,14 @@ Route::name('admin.')->group(function () {
         // Language Section
         Route::controller(LanguageController::class)->prefix('languages')->name('languages.')->group(function () {
             Route::get('index', 'index')->name('index');
-            Route::post('store','store')->name('store');
-            Route::put('update','update')->name('update');
-            Route::put('status/update','statusUpdate')->name('status.update');
-            Route::get('info/{code}','info')->name('info');
-            Route::post('import','import')->name('import');
-            Route::delete('delete','delete')->name('delete');
-            Route::post('switch','switch')->name('switch');
-            Route::get('download','download')->name('download');
+            Route::post('store', 'store')->name('store');
+            Route::put('update', 'update')->name('update');
+            Route::put('status/update', 'statusUpdate')->name('status.update');
+            Route::get('info/{code}', 'info')->name('info');
+            Route::post('import', 'import')->name('import');
+            Route::delete('delete', 'delete')->name('delete');
+            Route::post('switch', 'switch')->name('switch');
+            Route::get('download', 'download')->name('download');
         });
 
 
@@ -317,7 +324,7 @@ Route::name('admin.')->group(function () {
             Route::get('config', 'configuration')->name('config');
             // Route::get('template/default', 'defaultTemplate')->name('template.default');
             Route::put('config/update', 'update')->name('config.update');
-            Route::post('test-mail/send','sendTestMail')->name('test.mail.send')->middleware('mail');
+            Route::post('test-mail/send', 'sendTestMail')->name('test.mail.send')->middleware('mail');
         });
 
 
@@ -332,10 +339,10 @@ Route::name('admin.')->group(function () {
         // Setup Section
         Route::controller(SetupSectionsController::class)->prefix('setup-sections')->name('setup.sections.')->group(function () {
             Route::get('{slug}', 'sectionView')->name('section');
-            Route::post('update/{slug}','sectionUpdate')->name('section.update');
-            Route::post('item/store/{slug}','sectionItemStore')->name('section.item.store');
-            Route::post('item/update/{slug}','sectionItemUpdate')->name('section.item.update');
-            Route::delete('item/delete/{slug}','sectionItemDelete')->name('section.item.delete');
+            Route::post('update/{slug}', 'sectionUpdate')->name('section.update');
+            Route::post('item/store/{slug}', 'sectionItemStore')->name('section.item.store');
+            Route::post('item/update/{slug}', 'sectionItemUpdate')->name('section.item.update');
+            Route::delete('item/delete/{slug}', 'sectionItemDelete')->name('section.item.delete');
 
             // vendor requirements section
             Route::get('requirement/details/{id}', 'requirementsDetailsView')->name('requirements.details');
@@ -344,29 +351,29 @@ Route::name('admin.')->group(function () {
             Route::delete('requirement/item/delete/{parentId}/{id}', 'requirementsDetailsItemDelete')->name('requirements.delete');
 
             // Announcement Section
-            Route::controller(AnnouncementController::class)->prefix("announcement")->name('announcement.')->group(function(){
-                Route::get('categories','categoryIndex')->name('category.index');
-                Route::post('category/store','categoryStore')->name('category.store');
-                Route::post('category/update','categoryUpdate')->name('category.update');
-                Route::delete('category/delete','categoryDelete')->name('category.delete');
-                Route::put('category/status/update','categoryStatusUpdate')->name('category.status.update');
+            Route::controller(AnnouncementController::class)->prefix("announcement")->name('announcement.')->group(function () {
+                Route::get('categories', 'categoryIndex')->name('category.index');
+                Route::post('category/store', 'categoryStore')->name('category.store');
+                Route::post('category/update', 'categoryUpdate')->name('category.update');
+                Route::delete('category/delete', 'categoryDelete')->name('category.delete');
+                Route::put('category/status/update', 'categoryStatusUpdate')->name('category.status.update');
 
-                Route::get('index','announcementIndex')->name('index');
-                Route::get('create','announcementCreate')->name('create');
-                Route::post('store','announcementStore')->name('store');
-                Route::put('status/update','announcementStatusUpdate')->name('status.update');
-                Route::delete('delete','announcementDelete')->name('delete');
-                Route::get('edit/{id}','announcementEdit')->name('edit');
-                Route::post('update/{id}','announcementUpdate')->name('update');
+                Route::get('index', 'announcementIndex')->name('index');
+                Route::get('create', 'announcementCreate')->name('create');
+                Route::post('store', 'announcementStore')->name('store');
+                Route::put('status/update', 'announcementStatusUpdate')->name('status.update');
+                Route::delete('delete', 'announcementDelete')->name('delete');
+                Route::get('edit/{id}', 'announcementEdit')->name('edit');
+                Route::post('update/{id}', 'announcementUpdate')->name('update');
             });
         });
 
         // Setup Pages Controller
         Route::controller(SetupPagesController::class)->prefix('setup-pages')->name('setup.pages.')->group(function () {
             Route::get('index', 'index')->name('index');
-            Route::put('status/update','statusUpdate')->name('status.update');
-            Route::get('details/{slug}','details')->name('details');
-            Route::post('update-section/{slug}','updateSection')->name('update.section');
+            Route::put('status/update', 'statusUpdate')->name('status.update');
+            Route::get('details/{slug}', 'details')->name('details');
+            Route::post('update-section/{slug}', 'updateSection')->name('update.section');
         });
 
 
@@ -376,13 +383,13 @@ Route::name('admin.')->group(function () {
         });
 
         // Useful Links
-        Route::controller(UsefulLinkController::class)->prefix('useful-links')->name('useful.links.')->group(function(){
-            Route::get("index","index")->name("index");
-            Route::post("store","store")->name("store");
-            Route::put("status/update","statusUpdate")->name("status.update");
-            Route::get("edit/{slug}","edit")->name("edit");
-            Route::post("update/{slug}","update")->name("update");
-            Route::delete("delete","delete")->name("delete");
+        Route::controller(UsefulLinkController::class)->prefix('useful-links')->name('useful.links.')->group(function () {
+            Route::get("index", "index")->name("index");
+            Route::post("store", "store")->name("store");
+            Route::put("status/update", "statusUpdate")->name("status.update");
+            Route::get("edit/{slug}", "edit")->name("edit");
+            Route::post("update/{slug}", "update")->name("update");
+            Route::delete("delete", "delete")->name("delete");
         });
 
         // Payment Method Section
@@ -412,18 +419,18 @@ Route::name('admin.')->group(function () {
 
 
         // Push Notification Setup Section
-        Route::controller(PushNotificationController::class)->prefix('push-notification')->name('push.notification.')->group(function(){
-            Route::get('config','configuration')->name('config');
-            Route::put('update','update')->name('update');
+        Route::controller(PushNotificationController::class)->prefix('push-notification')->name('push.notification.')->group(function () {
+            Route::get('config', 'configuration')->name('config');
+            Route::put('update', 'update')->name('update');
 
-            Route::get('/','index')->name('index');
-            Route::post('send','send')->name('send');
+            Route::get('/', 'index')->name('index');
+            Route::post('send', 'send')->name('send');
         });
 
 
         // Broadcasting Setup Section
-        Route::controller(BroadcastingController::class)->prefix('broadcast')->name('broadcast.')->group(function(){
-            Route::put("config/update","configUpdate")->name('config.update');
+        Route::controller(BroadcastingController::class)->prefix('broadcast')->name('broadcast.')->group(function () {
+            Route::put("config/update", "configUpdate")->name('config.update');
         });
 
 
@@ -445,15 +452,15 @@ Route::name('admin.')->group(function () {
             Route::get('pending', 'pending')->name('pending');
             Route::get('solved', 'solved')->name('solved');
             Route::get('conversation/{ticket_id}', 'conversation')->name('conversation');
-            Route::post('message/reply','messageReply')->name('messaage.reply');
-            Route::post('solve','solve')->name('solve');
+            Route::post('message/reply', 'messageReply')->name('messaage.reply');
+            Route::post('solve', 'solve')->name('solve');
 
 
-            Route::get('create','create')->name('create');
-            Route::post('store','store')->name('store');
-            Route::post('check-user','checkUser')->name('check.user');
-            Route::post('bulk-delete','bulkDelete')->name('bulk.delete');
-            Route::delete('delete','delete')->name('delete');
+            Route::get('create', 'create')->name('create');
+            Route::post('store', 'store')->name('store');
+            Route::post('check-user', 'checkUser')->name('check.user');
+            Route::post('bulk-delete', 'bulkDelete')->name('bulk.delete');
+            Route::delete('delete', 'delete')->name('delete');
         });
 
         // Extension Section
@@ -472,65 +479,64 @@ Route::name('admin.')->group(function () {
             return redirect()->back()->with(['success' => ['Cache Clear Successfully!']]);
         })->name('cache.clear');
 
-        Route::controller(SubscriberController::class)->prefix("subscriber")->name("subscriber.")->group(function(){
-            Route::get('index','index')->name('index');
-            Route::post('send/mail','sendMail')->name('send.mail');
+        Route::controller(SubscriberController::class)->prefix("subscriber")->name("subscriber.")->group(function () {
+            Route::get('index', 'index')->name('index');
+            Route::post('send/mail', 'sendMail')->name('send.mail');
         });
 
-        Route::controller(ContactMessageController::class)->prefix('contact/message')->name('contact.messages.')->group(function(){
-            Route::get('index','index')->name('index');
-            Route::post('reply','reply')->name('reply');
+        Route::controller(ContactMessageController::class)->prefix('contact/message')->name('contact.messages.')->group(function () {
+            Route::get('index', 'index')->name('index');
+            Route::post('reply', 'reply')->name('reply');
             Route::get('export', 'export')->name('export');
             Route::delete('delete', 'delete')->name('delete');
             Route::post('delete-all', 'deleteAll')->name('delete.all');
         });
 
-        Route::controller(CryptoAssetController::class)->prefix('crypto/assets')->name('crypto.assets.')->group(function() {
-            Route::get('gateway/{alias}','gatewayAssets')->name('gateway.index');
-            Route::get('gateway/{alias}/generate/wallet','generateWallet')->name('generate.wallet');
+        Route::controller(CryptoAssetController::class)->prefix('crypto/assets')->name('crypto.assets.')->group(function () {
+            Route::get('gateway/{alias}', 'gatewayAssets')->name('gateway.index');
+            Route::get('gateway/{alias}/generate/wallet', 'generateWallet')->name('generate.wallet');
 
-            Route::get('wallet/balance/update/{crypto_asset_id}/{wallet_id}','walletBalanceUpdate')->name('wallet.balance.update');
-            Route::post('wallet/store','walletStore')->name("wallet.store");
-            Route::delete('wallet/delete','walletDelete')->name('wallet.delete');
-            Route::put('wallet/status/update','walletStatusUpdate')->name('wallet.status.update');
-            Route::get('wallet/transactions/{crypto_asset_id}/{wallet_id}','walletTransactions')->name('wallet.transactions');
-            Route::post('wallet/transactions/search/{crypto_asset_id}/{wallet_id}','walletTransactionSearch')->name('wallet.transaction.search');
+            Route::get('wallet/balance/update/{crypto_asset_id}/{wallet_id}', 'walletBalanceUpdate')->name('wallet.balance.update');
+            Route::post('wallet/store', 'walletStore')->name("wallet.store");
+            Route::delete('wallet/delete', 'walletDelete')->name('wallet.delete');
+            Route::put('wallet/status/update', 'walletStatusUpdate')->name('wallet.status.update');
+            Route::get('wallet/transactions/{crypto_asset_id}/{wallet_id}', 'walletTransactions')->name('wallet.transactions');
+            Route::post('wallet/transactions/search/{crypto_asset_id}/{wallet_id}', 'walletTransactionSearch')->name('wallet.transaction.search');
         });
 
         // error logs
-        Route::controller(ErrorLogsController::class)->prefix('error-logs')->name('error.logs.')->group(function(){
-            Route::get('/','index')->name('index');
-            Route::get('clear','clear')->name('clear');
+        Route::controller(ErrorLogsController::class)->prefix('error-logs')->name('error.logs.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('clear', 'clear')->name('clear');
         });
 
         //admin notification section
-        Route::controller(SetupNotificationController::class)->prefix('notification')->name('notification.')->group(function(){
+        Route::controller(SetupNotificationController::class)->prefix('notification')->name('notification.')->group(function () {
             Route::get('index', 'index')->name('index');
         });
     });
-
 });
 
 Route::get('admin/pusher/beams-auth', function (Request $request) {
-    if(Auth::check() == false) {
+    if (Auth::check() == false) {
         return response(['Inconsistent request'], 401);
     }
     $userID = Auth::user()->id;
 
     $basic_settings = BasicSettingsProvider::get();
-    if(!$basic_settings) {
+    if (!$basic_settings) {
         return response('Basic setting not found!', 404);
     }
 
     $notification_config = $basic_settings->push_notification_config;
 
-    if(!$notification_config) {
+    if (!$notification_config) {
         return response('Notification configuration not found!', 404);
     }
 
     $instance_id    = $notification_config->instance_id ?? null;
     $primary_key    = $notification_config->primary_key ?? null;
-    if($instance_id == null || $primary_key == null) {
+    if ($instance_id == null || $primary_key == null) {
         return response('Sorry! You have to configure first to send push notification.', 404);
     }
     $beamsClient = new PushNotifications(
@@ -540,9 +546,9 @@ Route::get('admin/pusher/beams-auth', function (Request $request) {
         )
     );
     $publisherUserId = make_user_id_for_pusher("admin", $userID);
-    try{
+    try {
         $beamsToken = $beamsClient->generateToken($publisherUserId);
-    }catch(Exception $e) {
+    } catch (Exception $e) {
         return response(['Server Error. Failed to generate beams token.'], 500);
     }
 

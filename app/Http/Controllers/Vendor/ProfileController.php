@@ -26,7 +26,7 @@ class ProfileController extends Controller
         $page_title = __("Vendor Profile");
         $breadcrumb = __("Profile Settings");
         $kyc_data = SetupKyc::vendorKyc()->first();
-        return view('vendor-end.sections.profile.index',compact("page_title","kyc_data","breadcrumb"));
+        return view('vendor-end.sections.profile.index', compact("page_title", "kyc_data", "breadcrumb"));
     }
 
     /**
@@ -37,7 +37,7 @@ class ProfileController extends Controller
      */
     public function update(Request $request)
     {
-        $validated = Validator::make($request->all(),[
+        $validated = Validator::make($request->all(), [
             'firstname'     => "required|string|max:60",
             'lastname'      => "required|string|max:60",
             'country'       => "required|string|max:50",
@@ -54,37 +54,38 @@ class ProfileController extends Controller
         $validated['mobile_code']   = remove_speacial_char($validated['phone_code']);
         $complete_phone             = $validated['mobile_code'] . $validated['mobile'];
         $validated['full_mobile']   = $complete_phone;
-        $validated                  = Arr::except($validated,['agree','phone_code','phone']);
+        $validated                  = Arr::except($validated, ['agree', 'phone_code', 'phone']);
         $validated['address']       = [
-            'country'   =>$validated['country'],
+            'country'   => $validated['country'],
             'state'     => $validated['state'] ?? "",
             'city'      => $validated['city'] ?? "",
             'zip'       => $validated['zip_code'] ?? "",
             'address'   => $validated['address'] ?? "",
         ];
 
-        if($request->hasFile("image")) {
-            $image = upload_file($validated['image'],'user-profile',auth()->user()->image);
-            $upload_image = upload_files_from_path_dynamic([$image['dev_path']],'user-profile');
+        if ($request->hasFile("image")) {
+            $image = upload_file($validated['image'], 'user-profile', auth()->user()->image);
+            $upload_image = upload_files_from_path_dynamic([$image['dev_path']], 'user-profile');
             delete_file($image['dev_path']);
             $validated['image']     = $upload_image;
         }
 
-        try{
+        try {
             auth()->guard('vendor')->user()->update($validated);
-        }catch(Exception $e) {
+        } catch (Exception $e) {
             return back()->with(['error' => [__('Something went wrong! Please try again')]]);
         }
 
         return back()->with(['success' => [__('Profile successfully updated!')]]);
     }
 
-    public function passwordUpdate(Request $request) {
+    public function passwordUpdate(Request $request)
+    {
 
         $basic_settings = BasicSettingsProvider::get();
         $password_rule = "required|string|min:6|confirmed";
-        if($basic_settings->vendor_secure_password) {
-            $password_rule = ["required",Password::min(8)->letters()->mixedCase()->numbers()->symbols()->uncompromised(),"confirmed"];
+        if ($basic_settings->vendor_secure_password) {
+            $password_rule = ["required", Password::min(8)->letters()->mixedCase()->numbers()->symbols()->uncompromised(), "confirmed"];
         }
 
         $request->validate([
@@ -92,34 +93,55 @@ class ProfileController extends Controller
             'password'              => $password_rule,
         ]);
 
-        if(!Hash::check($request->current_password,auth()->user()->password)) {
+        if (!Hash::check($request->current_password, auth()->user()->password)) {
             throw ValidationException::withMessages([
                 'current_password'      => __("Current password didn't match"),
             ]);
         }
 
-        try{
+        try {
             auth()->guard('vendor')->user()->update([
                 'password'  => Hash::make($request->password),
             ]);
-        }catch(Exception $e) {
+        } catch (Exception $e) {
             return back()->with(['error' => [__('Something went wrong! Please try again.')]]);
         }
 
         return back()->with(['success' => [__('Password successfully updated!')]]);
-
     }
 
-    public function deleteAccount($id){
+    public function deleteAccount($id)
+    {
         $user = auth()->guard('vendor')->user();
-        try{
+        try {
             $user->status = 0;
             $user->save();
             Auth::logout();
             return redirect()->route('frontend.index')->with(['success' => [__('Your account deleted successfully!')]]);
-        }catch(Exception $e) {
+        } catch (Exception $e) {
             return back()->with(['error' => [__('Something went wrong! Please try again.')]]);
         }
+    }
 
+    /**
+     * Switch language
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function languageSwitch(Request $request)
+    {
+        $request->validate([
+            'code' => 'required|string|max:10',
+            'dir' => 'required|string|in:ltr,rtl',
+        ]);
+
+        session()->put('local', $request->code);
+        session()->put('local_dir', $request->dir);
+
+        return response()->json([
+            'success' => true,
+            'message' => __('Language switched successfully!'),
+        ]);
     }
 }
