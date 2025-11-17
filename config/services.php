@@ -31,14 +31,23 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
     'google' => [
-        'client_id' => env('GOOGLE_CLIENT_ID',""),
-        'client_secret' => env('GOOGLE_CLIENT_SECRET',""),
-        'redirect' => env('GOOGLE_CALLBACK',""),
+        'client_id' => env('GOOGLE_CLIENT_ID', ""),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET', ""),
+        'redirect' => env('GOOGLE_CALLBACK', ""),
     ],
     'facebook' => [
-        'client_id' => env('FACEBOOK_CLIENT_ID',""),
-        'client_secret' => env('FACEBOOK_CLIENT_SECRET',""),
-        'redirect' => env('FACEBOOK_CALLBACK',""),
+        'client_id' => env('FACEBOOK_CLIENT_ID', ""),
+        'client_secret' => env('FACEBOOK_CLIENT_SECRET', ""),
+        'redirect' => env('FACEBOOK_CALLBACK', ""),
+    ],
+
+    'twilio' => [
+        'account_sid' => env('TWILIO_ACCOUNT_SID'),
+        'auth_token' => env('TWILIO_AUTH_TOKEN'),
+        'verify_sid' => env('TWILIO_VERIFY_SID'),
+        'from_number' => env('TWILIO_FROM_NUMBER'),
+        'whatsapp_from' => env('TWILIO_WHATSAPP_FROM', 'whatsapp:+14155238886'), // Twilio sandbox default
+        'use_direct_messaging' => env('TWILIO_USE_DIRECT_MESSAGING', false),
     ],
 
 ];

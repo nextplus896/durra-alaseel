@@ -583,6 +583,12 @@
                 ])
 
                 @include('admin.components.side-nav.link', [
+                    'route' => 'admin.twilio.usage.index',
+                    'title' => __('Twilio Usage'),
+                    'icon' => 'menu-icon las la-sms',
+                ])
+
+                @include('admin.components.side-nav.link', [
                     'route' => 'admin.cache.clear',
                     'title' => __('Clear Cache'),
                     'icon' => 'menu-icon las la-broom',

@@ -1002,6 +1002,15 @@ return [
                     ],
                 ],
             ],
+            [
+                'title' => 'Twilio Usage',
+                'routes' => [
+                    [
+                        'title' => 'View Usage',
+                        'route' => 'admin.twilio.usage.index',
+                    ],
+                ],
+            ],
         ],
     ],
 ];

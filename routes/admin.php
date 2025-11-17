@@ -48,6 +48,7 @@ use App\Http\Controllers\Admin\PaymentGatewayCurrencyController;
 use App\Http\Controllers\Admin\SetupNotificationController;
 use App\Http\Controllers\Admin\SystemMaintenanceController;
 use App\Http\Controllers\Admin\VendorCareController;
+use App\Http\Controllers\Admin\TwilioUsageController;
 
 // All Admin Route Is Here
 Route::name('admin.')->group(function () {
@@ -508,6 +509,11 @@ Route::name('admin.')->group(function () {
         Route::controller(ErrorLogsController::class)->prefix('error-logs')->name('error.logs.')->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('clear', 'clear')->name('clear');
+        });
+
+        // Twilio Usage
+        Route::controller(TwilioUsageController::class)->prefix('twilio-usage')->name('twilio.usage.')->group(function () {
+            Route::get('/', 'index')->name('index');
         });
 
         //admin notification section

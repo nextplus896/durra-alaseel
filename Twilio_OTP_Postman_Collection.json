@@ -1,0 +1,260 @@
+{
+    "info": {
+        "_postman_id": "twilio-otp-api-collection",
+        "name": "Twilio OTP Integration - Test Collection",
+        "description": "Complete Postman collection for testing Twilio SMS & WhatsApp OTP API endpoints",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "OTP Endpoints",
+            "item": [
+                {
+                    "name": "1. Request OTP via SMS",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.success) {",
+                                    "    pm.environment.set('verification_id', jsonData.data.verification_id);",
+                                    "    pm.environment.set('phone_tested', jsonData.data.to);",
+                                    "    console.log('Verification ID stored: ' + jsonData.data.verification_id);",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"phone\": \"+966555123456\",\n  \"channel\": \"sms\",\n  \"locale\": \"ar\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/otp/request",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "otp", "request"]
+                        },
+                        "description": "Send OTP code via SMS\n\nRequired fields:\n- phone: Phone number in E.164 format (e.g., +966555123456)\n- channel: 'sms' or 'whatsapp'\n- locale: (optional) 'en', 'ar', 'es', 'fr'\n\nResponse includes verification_id needed for verification step"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "2. Request OTP via WhatsApp",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.success) {",
+                                    "    pm.environment.set('verification_id_wa', jsonData.data.verification_id);",
+                                    "    console.log('WhatsApp Verification ID: ' + jsonData.data.verification_id);",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"phone\": \"+966555123456\",\n  \"channel\": \"whatsapp\",\n  \"locale\": \"ar\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/otp/request",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "otp", "request"]
+                        },
+                        "description": "Send OTP code via WhatsApp"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "3. Verify OTP Code",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"phone\": \"+966555123456\",\n  \"code\": \"123456\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/otp/verify",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "otp", "verify"]
+                        },
+                        "description": "Verify the OTP code sent to the phone number\n\nRequired fields:\n- phone: Same phone number used in request\n- code: 6-digit code received via SMS/WhatsApp\n\nNote: Replace code with actual code received from Twilio"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Admin Dashboard",
+            "item": [
+                {
+                    "name": "View Twilio Usage Dashboard",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/admin/twilio-usage",
+                            "host": ["{{base_url}}"],
+                            "path": ["admin", "twilio-usage"]
+                        },
+                        "description": "Access the admin Twilio usage dashboard\n\nNote: Requires admin authentication\n\nDisplays:\n- Current account balance\n- SMS statistics\n- WhatsApp statistics\n- Recent messages (last 50)\n- Delivery rates and costs"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Webhook Testing",
+            "item": [
+                {
+                    "name": "Simulate Status Callback",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/x-www-form-urlencoded"
+                            }
+                        ],
+                        "body": {
+                            "mode": "urlencoded",
+                            "urlencoded": [
+                                {
+                                    "key": "MessageSid",
+                                    "value": "SM1234567890abcdef1234567890abcdef"
+                                },
+                                {
+                                    "key": "AccountSid",
+                                    "value": "AC46cac1e17737ef6a1a33402b7ba83868"
+                                },
+                                {
+                                    "key": "To",
+                                    "value": "+966555123456"
+                                },
+                                {
+                                    "key": "From",
+                                    "value": "+1234567890"
+                                },
+                                {
+                                    "key": "MessageStatus",
+                                    "value": "delivered"
+                                },
+                                {
+                                    "key": "Body",
+                                    "value": "Your verification code is: 123456"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/webhooks/twilio/status",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "webhooks", "twilio", "status"]
+                        },
+                        "description": "Simulate Twilio status callback webhook\n\nTwilio sends this to track message delivery status:\n- queued\n- sent\n- delivered\n- failed\n- undelivered"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Simulate Pricing Callback",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/x-www-form-urlencoded"
+                            }
+                        ],
+                        "body": {
+                            "mode": "urlencoded",
+                            "urlencoded": [
+                                {
+                                    "key": "MessageSid",
+                                    "value": "SM1234567890abcdef1234567890abcdef"
+                                },
+                                {
+                                    "key": "Price",
+                                    "value": "-0.0075"
+                                },
+                                {
+                                    "key": "PriceUnit",
+                                    "value": "USD"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/webhooks/twilio/pricing",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "webhooks", "twilio", "pricing"]
+                        },
+                        "description": "Simulate Twilio pricing callback webhook\n\nTwilio sends pricing information for cost tracking"
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://192.168.1.211:8000",
+            "type": "string"
+        },
+        {
+            "key": "verification_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "verification_id_wa",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "phone_tested",
+            "value": "",
+            "type": "string"
+        }
+    ]
+}
