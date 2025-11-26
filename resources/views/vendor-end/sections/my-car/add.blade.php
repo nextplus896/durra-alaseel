@@ -96,7 +96,7 @@
                                 <label>{{ __('Car Model Image') }}</label>
                                 <div class="car-model-image-display">
                                     <img id="modelImage" src="" alt="Car Model Image"
-                                        style="max-width: 100%; height: auto; border-radius: 8px; display: none;">
+                                        style="max-width: 100%; max-height: 300px; height: auto; border-radius: 8px; display: none;">
                                     <p id="noImage" style="color: #999;">
                                         {{ __('Select a vehicle model to see the image') }}</p>
                                 </div>
@@ -124,6 +124,10 @@
                     return false;
                 }
 
+                // Clear current selection and image
+                $('#modelImage').hide();
+                $('#noImage').show();
+
                 $.post(getModelsURL, {
                     type_id: typeId,
                     _token: "{{ csrf_token() }}"
@@ -133,7 +137,7 @@
                     if (response.data.models.length > 0) {
                         $.each(response.data.models, function(index, item) {
                             option +=
-                                `<option value="${item.id}" data-image="${item.image}">${item.name}</option>`;
+                                `<option value="${item.id}" data-image-url="${item.image_url}">${item.name}</option>`;
                         });
 
                         $("select[name=car_model_id]").html(option);
@@ -148,25 +152,17 @@
             });
 
             // Load image when car model is selected
-            $('select[name="car_model_id"]').on('change', function() {
-                loadModelImage($(this).val());
+            $(document).on('change', 'select[name="car_model_id"]', function() {
+                loadModelImage();
             });
 
             // Function to load and display model image
-            function loadModelImage(modelId) {
-                if (!modelId) {
-                    $('#modelImage').hide();
-                    $('#noImage').show();
-                    return;
-                }
-
-                // Get model data from the select options
+            function loadModelImage() {
                 var selectedOption = $('#car_model option:selected');
-                var modelImage = selectedOption.data('image');
+                var modelImageUrl = selectedOption.data('image-url');
 
-                if (modelImage) {
-                    var imageUrl = "{{ files_asset_path('car-models') }}" + "/" + modelImage;
-                    $('#modelImage').attr('src', imageUrl).show();
+                if (modelImageUrl && selectedOption.val()) {
+                    $('#modelImage').attr('src', modelImageUrl).show();
                     $('#noImage').hide();
                 } else {
                     $('#modelImage').hide();

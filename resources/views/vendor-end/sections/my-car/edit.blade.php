@@ -100,12 +100,11 @@
                                 <label>{{ __('Car Model Image') }}</label>
                                 <div class="car-model-image-display">
                                     @if ($cars->carModel && $cars->carModel->image)
-                                        <img id="modelImage" src="{{ get_image($cars->carModel->image, 'car-models') }}"
-                                            alt="Car Model Image"
-                                            style="max-width: 100%; height: auto; border-radius: 8px;">
+                                        <img id="modelImage" src="{{ $cars->carModel->image_url }}" alt="Car Model Image"
+                                            style="max-width: 100%; max-height: 300px; height: auto; border-radius: 8px;">
                                     @else
                                         <img id="modelImage" src="" alt="Car Model Image"
-                                            style="max-width: 100%; height: auto; border-radius: 8px; display: none;">
+                                            style="max-width: 100%; max-height: 300px; height: auto; border-radius: 8px; display: none;">
                                     @endif
                                     <p id="noImage"
                                         style="color: #999; {{ $cars->carModel && $cars->carModel->image ? 'display: none;' : '' }}">
@@ -140,28 +139,23 @@
                 if (typeId == "" || typeId == null) {
                     return false;
                 }
+                // Clear image when type changes
+                $('#modelImage').hide();
+                $('#noImage').show();
                 loadModels(typeId, null);
             });
 
             // Load image when car model is selected
-            $('select[name="car_model_id"]').on('change', function() {
-                loadModelImage($(this).val());
+            $(document).on('change', 'select[name="car_model_id"]', function() {
+                loadModelImage();
             });
 
-            function loadModelImage(modelId) {
-                if (!modelId) {
-                    $('#modelImage').hide();
-                    $('#noImage').show();
-                    return;
-                }
-
-                // Get model data from the select options
+            function loadModelImage() {
                 var selectedOption = $('#car_model option:selected');
-                var modelImage = selectedOption.data('image');
+                var modelImageUrl = selectedOption.data('image-url');
 
-                if (modelImage) {
-                    var imageUrl = "{{ files_asset_path('car-models') }}" + "/" + modelImage;
-                    $('#modelImage').attr('src', imageUrl).show();
+                if (modelImageUrl && selectedOption.val()) {
+                    $('#modelImage').attr('src', modelImageUrl).show();
                     $('#noImage').hide();
                 } else {
                     $('#modelImage').hide();
@@ -179,13 +173,15 @@
                         $.each(response.data.models, function(index, item) {
                             var selected = (selectedId && selectedId == item.id) ? 'selected' : '';
                             option +=
-                                `<option value="${item.id}" ${selected} data-image="${item.image}">${item.name}</option>`;
+                                `<option value="${item.id}" ${selected} data-image-url="${item.image_url}">${item.name}</option>`;
                         });
 
                         $("select[name=car_model_id]").html(option);
                         $("select[name=car_model_id]").select2();
+
+                        // Load image for pre-selected model
                         if (selectedId) {
-                            loadModelImage(selectedId);
+                            loadModelImage();
                         }
                     } else {
                         $("select[name=car_model_id]").html(option);

@@ -28,9 +28,12 @@ class CarModelController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'car_type_id' => 'required|exists:car_types,id',
-            'name' => 'required|string|max:255',
-            'image' => 'nullable|image|mimes:png,jpg,jpeg,svg,webp',
+            'car_type_id' => 'required|integer|exists:car_types,id',
+            'name'        => 'required|string|max:255|unique:car_models,name,NULL,id,car_type_id,' . $request->car_type_id,
+            'image'       => 'required|image|mimes:png,jpg,jpeg,svg,webp|max:2048',
+        ], [
+            'image.required' => __('Car model image is required.'),
+            'name.unique'    => __('This model name already exists for the selected car type.'),
         ]);
 
         if ($validator->fails()) {
@@ -58,10 +61,10 @@ class CarModelController extends Controller
     public function update(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'target' => 'required|exists:car_models,id',
-            'car_type_id' => 'required|exists:car_types,id',
-            'name' => 'required|string|max:255',
-            'image' => 'nullable|image|mimes:png,jpg,jpeg,svg,webp',
+            'target'      => 'required|integer|exists:car_models,id',
+            'car_type_id' => 'required|integer|exists:car_types,id',
+            'name'        => 'required|string|max:255',
+            'image'       => 'nullable|image|mimes:png,jpg,jpeg,svg,webp|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -73,6 +76,16 @@ class CarModelController extends Controller
 
         if (!$carModel) {
             return back()->with(['error' => [__('Car Model not found!')]]);
+        }
+
+        // Check unique name within same car type (excluding current model)
+        $existingModel = CarModel::where('name', $validated['name'])
+            ->where('car_type_id', $validated['car_type_id'])
+            ->where('id', '!=', $carModel->id)
+            ->first();
+
+        if ($existingModel) {
+            return back()->withErrors(['name' => __('This model name already exists for the selected car type.')])->withInput()->with('modal', 'car-model-edit');
         }
 
         $data = [

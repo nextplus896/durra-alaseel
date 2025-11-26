@@ -34,7 +34,7 @@ class CarController extends Controller
      */
     public function create()
     {
-        $page_title = __("Car Create");
+        $page_title = __('Car Create');
         $car_type = CarType::orderBy('name', 'ASC')->get();
         $languages = Language::get();
         return view('vendor-end.sections.my-car.add', compact(
@@ -71,11 +71,10 @@ class CarController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'type'        => 'required',
-            'car_model_id' => 'required|exists:car_models,id',
-            'seat'        => 'required|numeric',
-            'fees'        => 'required|numeric',
-            'image'       => 'required|image|mimes:png,jpg,jpeg,svg,webp',
+            'type'         => 'required|integer|exists:car_types,id',
+            'car_model_id' => 'required|integer|exists:car_models,id',
+            'seat'         => 'required|numeric|min:1|max:100',
+            'fees'         => 'required|numeric|min:0',
         ]);
 
         $basic_field_name = [
@@ -89,23 +88,37 @@ class CarController extends Controller
         }
 
         $validated                   = $validator->validate();
+
+        // Validate that car_model belongs to selected car_type
+        $carModel = CarModel::where('id', $validated['car_model_id'])
+            ->where('car_type_id', $validated['type'])
+            ->where('status', true)
+            ->first();
+
+        if (!$carModel) {
+            return back()->withErrors(['car_model_id' => __('Selected car model does not belong to the selected vehicle type or is inactive.')])->withInput();
+        }
+
         $validated['vendor_id']      = auth()->guard('vendor')->user()->id;
         $validated['slug']           = Str::uuid();
         $validated['car_type_id']    = $validated['type'];
         $validated['car_title']      = $car_title;
 
-        if ($request->hasFile("image")) {
-            $image = get_files_from_fileholder($request, 'image');
-            $upload = upload_files_from_path_dynamic($image, 'site-section');
-            $validated['image'] = $upload;
-        }
+        // Use image from the selected CarModel instead of file upload
+        $validated['image'] = $carModel->image;
+
         $validated = Arr::except($validated, ['type']);
         try {
             $car = Car::create($validated);
         } catch (Exception $e) {
-            return back()->with(['error' => [__("Something went wrong! Please try again.")]]);
+            report($e);
+            if (config('app.debug')) {
+                return back()->with(['error' => [$e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine()]])->withInput();
+            } else {
+                return back()->with(['error' => [__('Something went wrong! Please try again.')]]);
+            }
         }
-        return redirect()->route('vendor.car.index')->with(['success' => [__("Car Created Successfully!")]]);
+        return redirect()->route('vendor.car.index')->with(['success' => [__('Car Created Successfully!')]]);
     }
     /**
      * Method for update car status
@@ -144,9 +157,9 @@ class CarController extends Controller
      */
     public function edit($id)
     {
-        $page_title = __("Car Edit");
+        $page_title = __('Car Edit');
         $cars  = Car::find($id);
-        if (!$cars) return back()->with(['error' => [__("Car Does not exists")]]);
+        if (!$cars) return back()->with(['error' => [__('Car Does not exists')]]);
 
         $car_type = CarType::where('status', true)->get();
         $languages = Language::get();
@@ -165,13 +178,19 @@ class CarController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $car = Car::find($id);
+        $car = Car::where('id', $id)
+            ->where('vendor_id', auth()->guard('vendor')->user()->id)
+            ->first();
+
+        if (!$car) {
+            return back()->with(['error' => [__('Car not found or access denied.')]]);
+        }
+
         $validator = Validator::make($request->all(), [
-            'type'        => 'required',
-            'car_model_id' => 'required|exists:car_models,id',
-            'seat'        => 'required|numeric',
-            'fees'        => 'required|numeric',
-            'image'       => 'nullable|image|mimes:png,jpg,jpeg,svg,webp',
+            'type'         => 'required|integer|exists:car_types,id',
+            'car_model_id' => 'required|integer|exists:car_models,id',
+            'seat'         => 'required|numeric|min:1|max:100',
+            'fees'         => 'required|numeric|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -185,21 +204,34 @@ class CarController extends Controller
         $car_title = $this->contentValidate($request, $basic_field_name);
 
         $validated                 = $validator->validate();
+
+        // Validate that car_model belongs to selected car_type
+        $carModel = CarModel::where('id', $validated['car_model_id'])
+            ->where('car_type_id', $validated['type'])
+            ->where('status', true)
+            ->first();
+
+        if (!$carModel) {
+            return back()->withErrors(['car_model_id' => __('Selected car model does not belong to the selected vehicle type or is inactive.')])->withInput();
+        }
+
         $validated['vendor_id']    = auth()->guard('vendor')->user()->id;
-        $validated['slug']         = Str::uuid();
         $validated['car_type_id']  = $validated['type'];
         $validated['car_title']    = $car_title;
 
-        if ($request->hasFile('image')) {
-            $image = get_files_from_fileholder($request, 'image');
-            $upload = upload_files_from_path_dynamic($image, 'site-section', $car->image);
-            $validated['image'] = $upload;
-        }
+        // Use image from the selected CarModel
+        $validated['image'] = $carModel->image;
+
         $validated = Arr::except($validated, ['type']);
         try {
             $car->update($validated);
         } catch (Exception $e) {
-            return back()->with(['error'  => [__('Something went wrong! Please try again.')]]);
+            report($e);
+            if (config('app.debug')) {
+                return back()->with(['error' => [$e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine()]])->withInput();
+            } else {
+                return back()->with(['error' => [__('Something went wrong! Please try again.')]]);
+            }
         }
         return redirect()->route('vendor.car.index')->with(['success' => [__('Car Updated Successfully!')]]);
     }
@@ -218,9 +250,14 @@ class CarController extends Controller
             delete_file(get_files_path('site-section') . '/' . $cars->image);
             $cars->delete();
         } catch (Exception $e) {
-            return back()->with(['error'  =>  [__("Something went wrong! Please try again.")]]);
+            report($e);
+            if (config('app.debug')) {
+                return back()->with(['error' => [$e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine()]])->withInput();
+            } else {
+                return back()->with(['error' => [__('Something went wrong! Please try again.')]]);
+            }
         }
-        return back()->with(['success'  => [__("Car Deleted Successfully!")]]);
+        return back()->with(['success'  => [__('Car Deleted Successfully!')]]);
     }
     /**
      * Method for image validate

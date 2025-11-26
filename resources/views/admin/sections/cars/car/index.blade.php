@@ -54,7 +54,7 @@
                             <tr data-item="{{ $car }}">
                                 <td>
                                     <ul class="user-list">
-                                        <li><img src="{{ get_image($car->image ?? null, 'site-section') }}" alt="image">
+                                        <li><img src="{{ $car->image_url }}" alt="image">
                                         </li>
                                     </ul>
                                 </td>

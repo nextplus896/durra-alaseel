@@ -19,6 +19,8 @@ class CarModel extends Model
         'status'      => 'integer',
     ];
 
+    protected $appends = ['image_url'];
+
     public function carType()
     {
         return $this->belongsTo(CarType::class, 'car_type_id');
@@ -27,5 +29,16 @@ class CarModel extends Model
     public function cars()
     {
         return $this->hasMany(\App\Models\Vendor\Cars\Car::class, 'car_model_id');
+    }
+
+    /**
+     * Get full URL for the car model image
+     */
+    public function getImageUrlAttribute()
+    {
+        if ($this->image) {
+            return files_asset_path('car-models') . '/' . $this->image;
+        }
+        return files_asset_path('default');
     }
 }

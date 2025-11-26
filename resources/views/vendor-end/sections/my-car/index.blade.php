@@ -13,7 +13,7 @@ $default_lng = 'en';
                 <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-20">
                     <div class="car-item">
                         <div class="car-img">
-                            <img src="{{ get_image($car->image ?? '', 'site-section') ?? '' }}" alt="img">
+                            <img src="{{ $car->image_url }}" alt="img">
                             @if ($car->approval === 0)
                                 <span class="booking-status bg-danger">{{ __('Not Approved') }}</span>
                             @else
@@ -34,7 +34,8 @@ $default_lng = 'en';
                                 </div>
                             </div>
                         </div>
-                        <div class="car-details" style="{{ $car->status ? 'pointerEvents: auto; opacity: 1;' : 'pointerEvents: none; opacity:0.3' }}">
+                        <div class="car-details"
+                            style="{{ $car->status ? 'pointerEvents: auto; opacity: 1;' : 'pointerEvents: none; opacity:0.3' }}">
                             <h3 class="title">{{ $car->car_model }}</h3>
                             <p>{{ $car->car_number }}</p>
                             <p>{{ __('Per km') }} {{ get_amount($car->fees) }} {{ get_default_currency_code() }}</p>
