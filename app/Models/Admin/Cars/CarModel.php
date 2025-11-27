@@ -4,6 +4,7 @@ namespace App\Models\Admin\Cars;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class CarModel extends Model
 {
@@ -36,9 +37,33 @@ class CarModel extends Model
      */
     public function getImageUrlAttribute()
     {
-        if ($this->image) {
-            return files_asset_path('car-models') . '/' . $this->image;
+        $image = $this->image;
+        if (!$image) return files_asset_path('default');
+
+        // Handle JSON encoded array or array values
+        if (is_string($image) && (Str::startsWith($image, "[") || Str::startsWith($image, '"'))) {
+            $decoded = json_decode($image, true);
+            if (is_array($decoded) && count($decoded) > 0) {
+                $image = $decoded[0];
+            }
         }
+
+        if (is_array($image)) {
+            $image = $image[0] ?? null;
+        }
+
+        if (!$image) return files_asset_path('default');
+
+        // If already a full URL or absolute path, return as-is
+        if (Str::startsWith($image, 'http') || Str::startsWith($image, '/')) {
+            return $image;
+        }
+
+        $relativePath = files_path('car-models')->path . '/' . $image;
+        if (file_exists(public_path($relativePath))) {
+            return asset('public/' . $relativePath);
+        }
+
         return files_asset_path('default');
     }
 }

@@ -87,6 +87,16 @@
                                     placeholder="Enter Number" value="{{ old('seat') }}">
                             </div>
                             <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
+                                <label>{{ __('Year') }}<span>*</span></label>
+                                <select class="select2 select2-basic" name="year" id="car_year">
+                                    <option disabled selected>{{ __('Select Year') }}</option>
+                                    @for ($y = date('Y') + 1; $y >= 1900; $y--)
+                                        <option value="{{ $y }}" {{ old('year') == $y ? 'selected' : '' }}>
+                                            {{ $y }}</option>
+                                    @endfor
+                                </select>
+                            </div>
+                            <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
                                 <label>{{ __('Rental Price Day') }}<span>*</span></label>
                                 <input type="text" class="form--control klm-charge" name="fees"
                                     placeholder="{{ __('Enter Rental Price') }}" value="{{ old('fees') }}">
@@ -116,9 +126,23 @@
     <script>
         $(document).ready(function() {
             var getModelsURL = "{{ setRoute('vendor.car.get.models') }}";
+            var selectedTypeName = '';
+            var selectedModelName = '';
+
+            // Function to update all car title inputs
+            function updateCarTitles() {
+                if (selectedTypeName && selectedModelName) {
+                    var combinedTitle = selectedTypeName + ' ' + selectedModelName;
+                    // Update all language tab title inputs
+                    $('input[name$="_car_title"]').each(function() {
+                        $(this).val(combinedTitle);
+                    });
+                }
+            }
 
             $('select[name="type"]').on('change', function() {
                 var typeId = $(this).val();
+                selectedTypeName = $(this).find('option:selected').text().trim();
 
                 if (typeId == "" || typeId == null) {
                     return false;
@@ -127,6 +151,7 @@
                 // Clear current selection and image
                 $('#modelImage').hide();
                 $('#noImage').show();
+                selectedModelName = '';
 
                 $.post(getModelsURL, {
                     type_id: typeId,
@@ -137,7 +162,7 @@
                     if (response.data.models.length > 0) {
                         $.each(response.data.models, function(index, item) {
                             option +=
-                                `<option value="${item.id}" data-image-url="${item.image_url}">${item.name}</option>`;
+                                `<option value="${item.id}" data-image-url="${item.image_url}" data-name="${item.name}">${item.name}</option>`;
                         });
 
                         $("select[name=car_model_id]").html(option);
@@ -151,9 +176,12 @@
                 });
             });
 
-            // Load image when car model is selected
+            // Load image and update title when car model is selected
             $(document).on('change', 'select[name="car_model_id"]', function() {
                 loadModelImage();
+                selectedModelName = $(this).find('option:selected').data('name') || $(this).find(
+                    'option:selected').text().trim();
+                updateCarTitles();
             });
 
             // Function to load and display model image

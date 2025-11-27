@@ -40,12 +40,13 @@ class CarBookingController extends Controller
 {
     use ControlDynamicInputFields, Authorize;
 
-    public function bookingHistory() {
+    public function bookingHistory()
+    {
         $user = Auth::guard('api')->user();
 
-        $bookings = CarBooking::where('user_id',$user->id)->with(['cars'])->get();
+        $bookings = CarBooking::where('user_id', $user->id)->with(['cars'])->get();
 
-        return Response::success([__('History fetched successfully!')],['history' => $bookings ],200);
+        return Response::success([__('History fetched successfully!')], ['history' => $bookings], 200);
     }
 
     public function carArea()
@@ -168,26 +169,51 @@ class CarBookingController extends Controller
 
     public function preview(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'token' => 'required',
-            'car_id' => 'required',
-        ]);
+        // token is optional: accept either an existing token or inline booking data
+        if ($request->filled('token')) {
+            $validator = Validator::make($request->all(), [
+                'token' => 'required',
+                'car_id' => 'required',
+            ]);
 
-        if ($validator->fails()) {
-            return Response::error($validator->errors()->all(), []);
+            if ($validator->fails()) {
+                return Response::error($validator->errors()->all(), []);
+            }
+
+            $validated = $validator->validate();
+
+            $booking_details = TemporaryData::where('identifier', $validated['token'])->first();
+
+            if (!$booking_details) {
+                return Response::error([__('Something Went Wrong! Please try again.')], [], 500);
+            }
+
+            $car = Car::where('id', $validated['car_id'])->first();
+
+            $validated_user = auth()->user();
+            $booking_data = $booking_details->data;
+            $tokenToReturn = $validated['token'];
+        } else {
+            $validator = Validator::make($request->all(), [
+                'car_id' => 'required',
+                'car_area' => 'required',
+                'car_type' => 'required',
+                'pickup_time' => 'required',
+                'pickup_date' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return Response::error($validator->errors()->all(), []);
+            }
+
+            $validated = $validator->validate();
+
+            $car = Car::where('id', $validated['car_id'])->first();
+            $validated_user = auth()->user();
+            // booking details come from request directly
+            $booking_data = (object) $validated;
+            $tokenToReturn = null;
         }
-
-        $validated = $validator->validate();
-
-        $booking_details = TemporaryData::where('identifier', $validated['token'])->first();
-
-        if (!$booking_details) {
-            return Response::error([__('Something Went Wrong! Please try again.')], [], 500);
-        }
-
-        $car = Car::where('id', $validated['car_id'])->first();
-
-        $validated_user = auth()->user();
         // $car = Car::where('id', $booking_details->data->car_id)->first();
 
         $payment_gateways = PaymentGateway::addMoney()->active()->with('currencies')->has('currencies')->get();
@@ -196,8 +222,8 @@ class CarBookingController extends Controller
         return Response::success(
             [__('Booking data stored in the temporary table')],
             [
-                'token' => $request->token,
-                'booking_details' => $booking_details->data,
+                'token' => $tokenToReturn,
+                'booking_details' => $booking_data,
                 'booking_currency' => get_default_currency_code(),
                 'car' => $car,
                 'user' => $validated_user,
@@ -225,7 +251,7 @@ class CarBookingController extends Controller
             'round_pickup_time' => 'nullable',
             'message' => 'nullable',
             'fees' => 'required',
-            'token' => 'required',
+            'token' => 'nullable',
             'payment' => 'required',
         ]);
 
@@ -235,6 +261,26 @@ class CarBookingController extends Controller
 
         $validated = $validator->validate();
         $validated['user_id'] = auth()->guard('api')->user()->id;
+
+        // If token not provided, create TemporaryData with booking info so downstream flows (payment)
+        // can still use a booking token. We create it before handling payment type.
+        if (!$request->filled('token')) {
+            try {
+                $payload = $request->only(['car_area', 'car_type', 'pickup_time', 'pickup_date', 'round_pickup_date', 'round_pickup_time', 'location', 'destination', 'distance', 'credentials', 'mobile', 'message', 'fees', 'payment', 'car_id', 'car_slug']);
+                $payload = array_filter($payload, function ($v) {
+                    return $v !== null && $v !== '';
+                });
+                $car_booking = TemporaryData::create([
+                    'identifier' => generate_unique_string('temporary_datas', 'identifier', 20),
+                    'type' => Str::slug(CarBookingConst::CAR_BOOKING),
+                    'data' => $payload,
+                ]);
+                $validated['token'] = $car_booking->identifier;
+                $request->merge(['token' => $car_booking->identifier]);
+            } catch (Exception $e) {
+                return Response::error([__('Something went wrong! Please try again')], [], 500);
+            }
+        }
 
         $payment = $request->payment;
 
@@ -305,7 +351,7 @@ class CarBookingController extends Controller
         $temp_data = json_decode(json_encode($temp_booking->data), true);
 
         if ($type === 'cash') {
-            $charges = TransactionSetting::where('slug','cash')->first();
+            $charges = TransactionSetting::where('slug', 'cash')->first();
             $amount = $data['fees'];
 
             $fixed_charge_calc = $charges->fixed_charge;
@@ -446,9 +492,9 @@ class CarBookingController extends Controller
             $booking_info = json_decode(json_encode($booking_info->data), true);
 
 
-            $car_booking = CarBooking::where('trx_id',$transaction_info->trx_id)->first();
-            if(!$car_booking){
-            $this->bookingConfirm($booking_info, 'online-payment', $transaction_info->trx_id);
+            $car_booking = CarBooking::where('trx_id', $transaction_info->trx_id)->first();
+            if (!$car_booking) {
+                $this->bookingConfirm($booking_info, 'online-payment', $transaction_info->trx_id);
             }
 
             // return $instance;
@@ -471,7 +517,7 @@ class CarBookingController extends Controller
         } catch (Exception $e) {
             // Handel error
         }
-        return Response::error([__('Payment process cancel successfully!')],[],400);
+        return Response::error([__('Payment process cancel successfully!')], [], 400);
     }
 
     public function postSuccess(Request $request, $gateway)
@@ -828,7 +874,7 @@ class CarBookingController extends Controller
 
         $validated = $validator->validate();
 
-        $transaction = Transaction::where('trx_id',$validated['trx_id'])->first();
+        $transaction = Transaction::where('trx_id', $validated['trx_id'])->first();
 
         $currency = $transaction->gateway_currency->alias;
 
@@ -870,21 +916,22 @@ class CarBookingController extends Controller
      * Method function authorize payment submit
      * @param Illuminate\Http\Request $request
      */
-    public function authorizePaymentSubmit(Request $request){
-        $validator          = Validator::make($request->all(),[
+    public function authorizePaymentSubmit(Request $request)
+    {
+        $validator          = Validator::make($request->all(), [
             'identifier'    => 'required',
             'card_number'   => 'required',
             'date'          => 'required',
             'code'          => 'required'
         ]);
 
-        if($validator->fails()){
-            return Response::error($validator->errors()->all(),[],400);
+        if ($validator->fails()) {
+            return Response::error($validator->errors()->all(), [], 400);
         }
         $validated          = $validator->validate();
-        $temp_data          = TemporaryData::where('identifier',$validated['identifier'])->first();
-        if(!$temp_data){
-            return Response::error([__('Sorry ! Data not found.')],[],400);
+        $temp_data          = TemporaryData::where('identifier', $validated['identifier'])->first();
+        if (!$temp_data) {
+            return Response::error([__('Sorry ! Data not found.')], [], 400);
         }
 
         $gateway_credentials          = $this->authorizeCredentials($temp_data);
@@ -970,9 +1017,9 @@ class CarBookingController extends Controller
         // Create the controller and get the response
         $controller = new AnetController\CreateTransactionController($request);
 
-        if($gateway_credentials->mode == GlobalConst::ENV_SANDBOX){
+        if ($gateway_credentials->mode == GlobalConst::ENV_SANDBOX) {
             $environment = \net\authorize\api\constants\ANetEnvironment::SANDBOX;
-        }else{
+        } else {
             $environment = \net\authorize\api\constants\ANetEnvironment::PRODUCTION;
         }
         $response   = $controller->executeWithApiResponse($environment);
@@ -984,35 +1031,34 @@ class CarBookingController extends Controller
                 $tresponse = $response->getTransactionResponse();
 
                 if ($tresponse != null && $tresponse->getMessages() != null) {
-                    $trx_id = generate_unique_string("transactions","trx_id",16);
+                    $trx_id = generate_unique_string("transactions", "trx_id", 16);
                     $status = PaymentGatewayConst::STATUSSUCCESS;
 
                     try {
-                        $this->createTransactionAuthorize($trx_id,$temp_data,$status);
+                        $this->createTransactionAuthorize($trx_id, $temp_data, $status);
                     } catch (Exception $e) {
-                        return Response::error([__('Booking Field Please Try Again')],[],400);
+                        return Response::error([__('Booking Field Please Try Again')], [], 400);
                     }
-                    return Response::success([__('Car Booked successfully!')],[],200);
-
-                }else {
-                    return Response::error([__('Transaction Failed')],[],400);
+                    return Response::success([__('Car Booked successfully!')], [], 200);
+                } else {
+                    return Response::error([__('Transaction Failed')], [], 400);
                     if ($tresponse->getErrors() != null) {
-                        return Response::error([__($tresponse->getErrors()[0]->getErrorText())],[],400);
+                        return Response::error([__($tresponse->getErrors()[0]->getErrorText())], [], 400);
                     }
                 }
-            }else {
-                return Response::error([__('Transaction Failed')],[],400);
+            } else {
+                return Response::error([__('Transaction Failed')], [], 400);
 
                 $tresponse = $response->getTransactionResponse();
 
                 if ($tresponse != null && $tresponse->getErrors() != null) {
-                    return Response::error([__($tresponse->getErrors()[0]->getErrorText())],[],400);
+                    return Response::error([__($tresponse->getErrors()[0]->getErrorText())], [], 400);
                 } else {
-                    return Response::error([__($response->getMessages()->getMessage()[0]->getText())],[],400);
+                    return Response::error([__($response->getMessages()->getMessage()[0]->getText())], [], 400);
                 }
             }
-        }else {
-            return Response::error([__('No response returned')],[],400);
+        } else {
+            return Response::error([__('No response returned')], [], 400);
         }
     }
 }

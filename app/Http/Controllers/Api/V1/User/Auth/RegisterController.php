@@ -40,8 +40,8 @@ class RegisterController extends Controller
     {
 
         $validator = $this->validator($request->all());
-        if($validator->fails()) {
-            return Response::error($validator->errors()->all(),[]);
+        if ($validator->fails()) {
+            return Response::error($validator->errors()->all(), []);
         }
 
         $validated = $validator->validate();
@@ -51,30 +51,30 @@ class RegisterController extends Controller
         $validated['sms_verified']      = ($basic_settings->sms_verification == true) ? false : true;
         $validated['kyc_verified']      = ($basic_settings->kyc_verification == true) ? false : true;
         $validated['password']          = Hash::make($validated['password']);
-        $validated['username']          = make_username(Str::slug($validated['firstname']),Str::slug($validated['lastname']));
-        $validated['address']['country']= $validated['country'];
+        $validated['username']          = make_username(Str::slug($validated['firstname']), Str::slug($validated['lastname']));
+        $validated['mobile']            = $validated['phone'];
         // $validated['referral_id']       = generate_unique_string('users','referral_id',8,'number');
 
-        if(User::where("username",$validated['username'])->exists()) return Response::error([__('User already exists!')],[],400);
+        if (User::where("username", $validated['username'])->exists()) return Response::error([__('User already exists!')], [], 400);
 
-        try{
+        try {
             event(new Registered($user = $this->create($validated)));
-        }catch(Exception $e) {
-            return Response::error([__('Registration failed! Please try again')],[],500);
+        } catch (Exception $e) {
+            return Response::error([__('Registration failed! Please try again')], [], 500);
         }
 
         // get user with all information
-        try{
+        try {
             $user = User::find($user->id);
-        }catch(Exception $e) {
-            return Response::error([__('Failed to fetch user information. Please try again')],[],500);
+        } catch (Exception $e) {
+            return Response::error([__('Failed to fetch user information. Please try again')], [], 500);
         }
 
-        try{
+        try {
 
             $token = $user->createToken("auth_token")->accessToken;
-        }catch(Exception $e) {
-            return Response::error([__('Failed to generate user token! Please try again')],[],500);
+        } catch (Exception $e) {
+            return Response::error([__('Failed to generate user token! Please try again')], [], 500);
         }
 
         return $this->registered($request, $user, $token);
@@ -86,26 +86,27 @@ class RegisterController extends Controller
      * @param  array  $data
      * @return \Illuminate\Contracts\Validation\Validator
      */
-    public function validator(array $data) {
+    public function validator(array $data)
+    {
 
         $basic_settings = $this->basic_settings;
         $password_rule = "required|string|min:6";
-        if($basic_settings->secure_password) {
-            $password_rule = ["required",Password::min(8)->letters()->mixedCase()->numbers()->symbols()->uncompromised()];
+        if ($basic_settings->secure_password) {
+            $password_rule = ["required", Password::min(8)->letters()->mixedCase()->numbers()->symbols()->uncompromised()];
         }
-        if($basic_settings->agree_policy){
+        if ($basic_settings->agree_policy) {
             $agree = 'required|in:on';
-        }else{
+        } else {
             $agree = 'nullable';
         }
 
-        return Validator::make($data,[
+        return Validator::make($data, [
             'firstname'     => 'required|string|max:60',
             'lastname'      => 'required|string|max:60',
             'email'         => 'required|string|email|max:150|unique:users,email',
             'password'      => $password_rule,
             'refer'         => 'sometimes|nullable|string|exists:users,referral_id',
-            'country'       => 'required|string',
+            'phone'         => 'required|string|max:20',
             'agree'         => $agree,
         ]);
     }
@@ -140,25 +141,25 @@ class RegisterController extends Controller
      */
     protected function registered(Request $request, $user, $token)
     {
-        try{
+        try {
             $mail_response = [];
-            if($user->email_verified == false) {
+            if ($user->email_verified == false) {
                 $mail_response = AuthorizationController::sendCodeToMail($user);
             }
-        }catch(Exception $e) {
+        } catch (Exception $e) {
             $user->delete();
-            return Response::error([$e->getMessage()],[],500);
+            return Response::error([$e->getMessage()], [], 500);
         }
 
-        try{
+        try {
             // $this->createUserWallets($user);
-        }catch(Exception $e) {
+        } catch (Exception $e) {
             $this->guard('api')->logout();
             $user->delete();
-            return Response::error([__('Registration Failed! Something went wrong! Please try again')],[],500);
+            return Response::error([__('Registration Failed! Something went wrong! Please try again')], [], 500);
         }
 
-        return Response::success([__('User successfully registered')],[
+        return Response::success([__('User successfully registered')], [
             'token'         => $token,
             'user_info'     => $user->only([
                 'id',
@@ -180,6 +181,6 @@ class RegisterController extends Controller
                 'status'    => count($mail_response) > 0 ? true : false,
                 'token'     => $mail_response['token'] ?? "",
             ],
-        ],200);
+        ], 200);
     }
 }

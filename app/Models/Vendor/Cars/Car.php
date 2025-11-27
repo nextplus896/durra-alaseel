@@ -28,6 +28,7 @@ class Car extends Model
         'car_model'    => 'string',
         'car_number'   => 'string',
         'seat'         => 'integer',
+        'year'         => 'integer',
         'experience'   => 'integer',
         'fees'         => 'decimal:8',
         'status'       => 'integer',

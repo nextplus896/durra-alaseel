@@ -74,6 +74,7 @@ class CarController extends Controller
             'type'         => 'required|integer|exists:car_types,id',
             'car_model_id' => 'required|integer|exists:car_models,id',
             'seat'         => 'required|numeric|min:1|max:100',
+            'year'         => 'required|integer|min:1900|max:' . (date('Y') + 1),
             'fees'         => 'required|numeric|min:0',
         ]);
 
@@ -103,6 +104,7 @@ class CarController extends Controller
         $validated['slug']           = Str::uuid();
         $validated['car_type_id']    = $validated['type'];
         $validated['car_title']      = $car_title;
+        $validated['approval']       = 1; // Auto-approve vendor cars
 
         // Use image from the selected CarModel instead of file upload
         $validated['image'] = $carModel->image;
@@ -190,6 +192,7 @@ class CarController extends Controller
             'type'         => 'required|integer|exists:car_types,id',
             'car_model_id' => 'required|integer|exists:car_models,id',
             'seat'         => 'required|numeric|min:1|max:100',
+            'year'         => 'required|integer|min:1900|max:' . (date('Y') + 1),
             'fees'         => 'required|numeric|min:0',
         ]);
 

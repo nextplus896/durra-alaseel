@@ -1668,7 +1668,6 @@
     "appLSuccessStatus": "Success",
     "appLAvaillableCars": "Available Cars",
     "appLViewAll": "View All",
-    "appLSeats": "seats",
     "appLKm": "KM",
     "appLEvidenceNote": "Evidence Note",
     "appLEnterYourCountry": "Enter Your Country",
@@ -1764,5 +1763,17 @@
     "appLCardNumber": "Card Number",
     "appLExpirationDate": "Expiration Date",
     "appLDebitCardPayment": "Debit Card Payment",
-    "appLPaymentSuccessful": "Payment Successful"
+    "appLPaymentSuccessful": "Payment Successful",
+    "appLAvailableCars": "Available Cars",
+    "appLPricePerDay": "Per Day",
+    "appLSortByPrice": "Sort by Price",
+    "appLPriceHighToLow": "Price: High to Low",
+    "appLPriceLowToHigh": "Price: Low to High",
+    "appLCarType": "Car Type",
+    "appLAllTypes": "All Types",
+    "appLAllModels": "All Models",
+    "appLNoCarsAvailable": "No Cars Available",
+    "appLFilterBy": "Filter By",
+    "appLClearFilters": "Clear Filters",
+    "appLSeats": "Seats"
 }

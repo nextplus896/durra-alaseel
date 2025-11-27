@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Helpers\Response;
 use App\Models\Admin\Cars\CarArea;
 use App\Models\Admin\Cars\CarType;
+use App\Models\Admin\Cars\CarModel;
 use App\Models\Admin\Language;
 use App\Models\Vendor\Cars\Car;
 use Exception;
@@ -18,6 +19,123 @@ use App\Http\Helpers\Api\helpers;
 
 class CarController extends Controller
 {
+    /**
+     * List vendor's own cars with sorting and filtering
+     *
+     * Query Parameters:
+     * - sort: price_asc, price_desc (default: price_desc)
+     * - car_type_id: Filter by car type ID
+     * - car_model_id: Filter by car model ID
+     * - per_page: Items per page (default: 15)
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function list(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'sort'         => 'nullable|string|in:price_asc,price_desc',
+            'car_type_id'  => 'nullable|integer|exists:car_types,id',
+            'car_model_id' => 'nullable|integer|exists:car_models,id',
+            'per_page'     => 'nullable|integer|min:1|max:100',
+        ]);
+
+        if ($validator->fails()) {
+            return Response::error($validator->errors()->all(), [], 422);
+        }
+
+        $vendorId = auth()->guard('vendor_api')->user()->id;
+
+        $query = Car::query()
+            ->where('vendor_id', $vendorId)
+            ->with(['type', 'carModel', 'area']);
+
+        // Filter by car type
+        if ($request->filled('car_type_id')) {
+            $query->where('car_type_id', $request->car_type_id);
+        }
+
+        // Filter by car model
+        if ($request->filled('car_model_id')) {
+            $query->where('car_model_id', $request->car_model_id);
+        }
+
+        // Build available filters based on current query (before sorting and pagination)
+        $filtersForTypes = (clone $query);
+        $typeIds = $filtersForTypes->select('car_type_id')->distinct()->pluck('car_type_id')->filter()->toArray();
+
+        $filtersForModels = (clone $query);
+        $modelIds = $filtersForModels->select('car_model_id')->distinct()->pluck('car_model_id')->filter()->toArray();
+
+        // Sorting by price
+        $sort = $request->input('sort', 'price_desc');
+        if ($sort === 'price_asc') {
+            $query->orderBy('fees', 'asc');
+        } else {
+            $query->orderBy('fees', 'desc');
+        }
+
+        // Pagination
+        $perPage = $request->input('per_page', 15);
+        $cars = $query->paginate($perPage);
+
+        // Transform data for response
+        $data = [
+            'available_filters' => [
+                'car_types' => CarType::whereIn('id', $typeIds)->select('id', 'name', 'slug')->get(),
+                'car_models' => CarModel::whereIn('id', $modelIds)->select('id', 'name', 'car_type_id')->get(),
+            ],
+            'cars' => $cars->getCollection()->map(function ($car) {
+                $feesRaw = (float) $car->fees;
+                $formattedFees = ((int) $feesRaw == $feesRaw) ? (string) ((int) $feesRaw) : number_format($feesRaw, 2, '.', '');
+                return [
+                    'id'           => $car->id,
+                    'vendor_id'    => $car->vendor_id,
+                    'car_title'    => $car->car_title,
+                    'car_model'    => $car->car_model,
+                    'car_number'   => $car->car_number,
+                    'seat'         => $car->seat,
+                    'year'         => $car->year,
+                    'fees'         => $formattedFees,
+                    'price'        => $formattedFees,
+                    'image'        => $car->image,
+                    'image_url'    => $car->image_url,
+                    'status'       => $car->status,
+                    'approval'     => $car->approval,
+                    'car_type' => $car->type ? [
+                        'id'   => $car->type->id,
+                        'name' => $car->type->name,
+                        'slug' => $car->type->slug,
+                    ] : null,
+                    'car_model_info' => $car->carModel ? [
+                        'id'        => $car->carModel->id,
+                        'name'      => $car->carModel->name,
+                        'image_url' => $car->carModel->image_url,
+                    ] : null,
+                    'area' => $car->area ? [
+                        'id'   => $car->area->id,
+                        'name' => $car->area->name,
+                    ] : null,
+                    'created_at' => $car->created_at?->toIso8601String(),
+                ];
+            }),
+            'pagination' => [
+                'total'        => $cars->total(),
+                'per_page'     => $cars->perPage(),
+                'current_page' => $cars->currentPage(),
+                'last_page'    => $cars->lastPage(),
+                'from'         => $cars->firstItem(),
+                'to'           => $cars->lastItem(),
+            ],
+            'data_path' => [
+                'base_url'   => url('/'),
+                'image_path' => files_asset_path_basename('site-section'),
+            ],
+        ];
+
+        return Response::success([__('Cars fetched successfully!')], $data, 200);
+    }
+
     public function carArea()
     {
         $car_area = CarArea::all();
@@ -60,10 +178,11 @@ class CarController extends Controller
         $validator = Validator::make($request->all(), [
             'area'        => 'required',
             'type'        => 'required',
-            'car_model'   => 'required|string',
-            'car_number'  => 'required|string|max:100',
+            'car_model'   => 'nullable|string',
+            'car_number'  => 'nullable|string|max:100',
             'seat'        => 'required|numeric',
-            'experience'  => 'required|numeric',
+            'year'        => 'required|integer|min:1900|max:' . (date('Y') + 1),
+            'experience'  => 'nullable|numeric',
             'fees'        => 'required|numeric',
             'image'       => 'required|image|mimes:png,jpg,jpeg,svg,webp',
         ]);
@@ -75,7 +194,7 @@ class CarController extends Controller
         $car_title = $this->contentValidate($request, $basic_field_name);
 
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             return Helpers::onlyValidation($validator->errors()->all());
         }
 
@@ -85,6 +204,7 @@ class CarController extends Controller
         $validated['car_area_id']    = $validated['area'];
         $validated['car_type_id']    = $validated['type'];
         $validated['car_title']      = $car_title;
+        $validated['approval']       = 1; // Auto-approve vendor cars
 
         if (Car::where('car_number', $validated['car_number'])->exists()) {
             return Response::error([__("Car already exists!")]);
@@ -92,17 +212,17 @@ class CarController extends Controller
 
         if ($request->hasFile("image")) {
 
-            $image = upload_file($validated['image'],'junk-files',$request->image);
-            $upload_image = upload_files_from_path_dynamic([$image['dev_path']],'site-section');
+            $image = upload_file($validated['image'], 'junk-files', $request->image);
+            $upload_image = upload_files_from_path_dynamic([$image['dev_path']], 'site-section');
             $validated['image'] = $upload_image;
         }
         $validated = Arr::except($validated, ['area', 'type']);
         try {
             $car = Car::create($validated);
         } catch (Exception $e) {
-            return Response::error([__("Something went wrong! Please try again.")],[]);
+            return Response::error([__("Something went wrong! Please try again.")], []);
         }
-        return Response::success([__("Car Created Successfully!")],[]);
+        return Response::success([__("Car Created Successfully!")], []);
     }
     /**
      * Method for update car status
@@ -144,8 +264,7 @@ class CarController extends Controller
 
         if (!$cars) return Response::error([__("Car Does not exists")], null, 500);
 
-        return Response::success([__("Car Fetch Successfully!")],[$cars]);
-
+        return Response::success([__("Car Fetch Successfully!")], [$cars]);
     }
     /**
      * Method for update car
@@ -158,10 +277,11 @@ class CarController extends Controller
         $validator = Validator::make($request->all(), [
             'area'        => 'required',
             'type'        => 'required',
-            'car_model'   => 'required|string',
-            'car_number'  => 'required|string|max:100',
+            'car_model'   => 'nullable|string',
+            'car_number'  => 'nullable|string|max:100',
             'seat'        => 'required|numeric',
-            'experience'  => 'required|numeric',
+            'year'        => 'required|integer|min:1900|max:' . (date('Y') + 1),
+            'experience'  => 'nullable|numeric',
             'fees'        => 'required|numeric',
             'image'       => 'nullable|image|mimes:png,jpg,jpeg,svg,webp',
         ]);
@@ -185,8 +305,8 @@ class CarController extends Controller
         $validated['car_title']    = $car_title;
 
         if ($request->hasFile('image')) {
-            $image = upload_file($validated['image'],'junk-files',$request->image);
-            $upload_image = upload_files_from_path_dynamic([$image['dev_path']],'site-section');
+            $image = upload_file($validated['image'], 'junk-files', $request->image);
+            $upload_image = upload_files_from_path_dynamic([$image['dev_path']], 'site-section');
             $validated['image'] = $upload_image;
         }
 
@@ -213,7 +333,7 @@ class CarController extends Controller
         ]);
         $cars = Car::find($request->target);
         try {
-            delete_file(get_files_path('site-section').'/'. $cars->image);
+            delete_file(get_files_path('site-section') . '/' . $cars->image);
             $cars->delete();
         } catch (Exception $e) {
             $errors = [__('Something went wrong! Please try again.')];
