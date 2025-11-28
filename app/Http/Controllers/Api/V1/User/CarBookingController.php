@@ -2,39 +2,40 @@
 
 namespace App\Http\Controllers\Api\V1\User;
 
-use App\Constants\CarBookingConst;
+use Exception;
+use Carbon\Carbon;
+use App\Models\CarBooking;
+use App\Models\Transaction;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use App\Models\TemporaryData;
 use App\Constants\GlobalConst;
-use App\Constants\PaymentGatewayConst;
-use App\Http\Controllers\Controller;
-use App\Http\Helpers\PushNotificationHelper;
 use App\Http\Helpers\Response;
-use App\Models\Admin\BasicSettings;
+use App\Models\Vendor\Cars\Car;
+use App\Constants\CarBookingConst;
 use App\Models\Admin\Cars\CarArea;
 use App\Models\Admin\Cars\CarType;
+use Illuminate\Support\Facades\DB;
+use App\Models\Admin\BasicSettings;
+use App\Traits\PaymentGateway\Gpay;
+use App\Http\Controllers\Controller;
 use App\Models\Admin\PaymentGateway;
-use App\Models\CarBooking;
-use App\Models\TemporaryData;
-use App\Models\Vendor\Cars\Car;
-use App\Models\Vendor\VendorNotification;
-use App\Notifications\User\carBookingNotification;
-use App\Traits\ControlDynamicInputFields;
-use Carbon\Carbon;
-use Exception;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Validator;
-use App\Models\Admin\PaymentGatewayCurrency;
-use App\Http\Helpers\PaymentGateway as PaymentGatewayHelper;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\RedirectResponse;
+use App\Constants\PaymentGatewayConst;
 use App\Models\Admin\CryptoTransaction;
 use App\Models\Admin\TransactionSetting;
-use App\Models\Transaction;
 use App\Traits\PaymentGateway\Authorize;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use App\Models\Vendor\VendorNotification;
+use App\Traits\ControlDynamicInputFields;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Helpers\PushNotificationHelper;
+use App\Models\Admin\PaymentGatewayCurrency;
+use Illuminate\Support\Facades\Notification;
 use net\authorize\api\contract\v1 as AnetAPI;
+use App\Notifications\User\carBookingNotification;
 use net\authorize\api\controller as AnetController;
+use App\Http\Helpers\PaymentGateway as PaymentGatewayHelper;
 
 class CarBookingController extends Controller
 {
