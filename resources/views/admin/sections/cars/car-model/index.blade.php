@@ -107,12 +107,12 @@
                         <tr class="filter-row">
                             <th></th>
                             <th>
-                                <input type="text" class="form-control form-control-sm filter-input" 
-                                       id="filter-car-type" placeholder="{{ __('Search car type...') }}">
+                                <input type="text" class="form-control form-control-sm filter-input" id="filter-car-type"
+                                    placeholder="{{ __('Search car type...') }}">
                             </th>
                             <th>
-                                <input type="text" class="form-control form-control-sm filter-input" 
-                                       id="filter-model-name" placeholder="{{ __('Search model...') }}">
+                                <input type="text" class="form-control form-control-sm filter-input"
+                                    id="filter-model-name" placeholder="{{ __('Search model...') }}">
                             </th>
                             <th></th>
                             <th></th>
@@ -199,10 +199,11 @@
             $('.sortable').on('click', function() {
                 const column = $(this).data('column');
                 const $icon = $(this).find('.sort-icon');
-                
+
                 // Reset other column icons
-                $('.sortable').not(this).find('.sort-icon').removeClass('la-sort-up la-sort-down').addClass('la-sort');
-                
+                $('.sortable').not(this).find('.sort-icon').removeClass('la-sort-up la-sort-down').addClass(
+                    'la-sort');
+
                 // Toggle sort direction
                 if (!sortDirection[column] || sortDirection[column] === 'desc') {
                     sortDirection[column] = 'asc';
@@ -211,7 +212,7 @@
                     sortDirection[column] = 'desc';
                     $icon.removeClass('la-sort la-sort-up').addClass('la-sort-down');
                 }
-                
+
                 sortTable(column, sortDirection[column]);
             });
 
