@@ -16,6 +16,7 @@ use App\Http\Controllers\Vendor\SecurityController;
 use App\Http\Controllers\Vendor\SupportTicketController;
 use App\Http\Controllers\Vendor\WalletController;
 use App\Http\Controllers\Vendor\WithdrawalController;
+use App\Http\Controllers\Vendor\BranchDeliverySettingController;
 
 Route::prefix("vendor")->name("vendor.")->middleware("auth:vendor")->group(function () {
     Route::controller(DashboardController::class)->group(function () {
@@ -86,6 +87,13 @@ Route::prefix("vendor")->name("vendor.")->middleware("auth:vendor")->group(funct
         Route::get('/', 'index')->name('index');
         Route::get('/re-submit', 'reSubmit')->name('re-submit');
         Route::post('submit', 'store')->name('submit');
+    });
+
+    // Branch Delivery Settings
+    Route::controller(BranchDeliverySettingController::class)->prefix('branch-settings')->name('branch.settings.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('store', 'store')->name('store');
+        Route::post('update', 'update')->name('update');
     });
 });
 

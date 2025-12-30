@@ -49,6 +49,9 @@ use App\Http\Controllers\Admin\SetupNotificationController;
 use App\Http\Controllers\Admin\SystemMaintenanceController;
 use App\Http\Controllers\Admin\VendorCareController;
 use App\Http\Controllers\Admin\TwilioUsageController;
+use App\Http\Controllers\Admin\BranchController;
+use App\Http\Controllers\Admin\TaxSettingController;
+use App\Http\Controllers\Admin\BalanceTransactionController;
 
 // All Admin Route Is Here
 Route::name('admin.')->group(function () {
@@ -261,6 +264,35 @@ Route::name('admin.')->group(function () {
         Route::controller(CarController::class)->prefix('car')->name('car.')->group(function () {
             Route::get('index', 'index')->name('index');
             Route::put('approval/update', 'statusUpdate')->name('approval.update');
+        });
+
+        // Branch Management Section
+        Route::controller(BranchController::class)->prefix('branch')->name('branch.')->group(function () {
+            Route::get('index', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('store', 'store')->name('store');
+            Route::get('edit/{id}', 'edit')->name('edit');
+            Route::put('update/{id}', 'update')->name('update');
+            Route::put('status/update', 'statusUpdate')->name('status.update');
+            Route::delete('delete', 'delete')->name('delete');
+            Route::get('delivery-settings/{id}', 'deliverySettings')->name('delivery.settings');
+        });
+
+        // Tax Settings Section
+        Route::controller(TaxSettingController::class)->prefix('tax-settings')->name('tax.settings.')->group(function () {
+            Route::get('index', 'index')->name('index');
+            Route::put('update', 'update')->name('update');
+            Route::put('status/update', 'statusUpdate')->name('status.update');
+        });
+
+        // Balance Transaction Logs Section
+        Route::controller(BalanceTransactionController::class)->prefix('balance-transactions')->name('balance.transactions.')->group(function () {
+            Route::get('index', 'index')->name('index');
+            Route::get('recharges', 'recharges')->name('recharges');
+            Route::get('deductions', 'deductions')->name('deductions');
+            Route::get('refunds', 'refunds')->name('refunds');
+            Route::post('search', 'search')->name('search');
+            Route::get('details/{id}', 'details')->name('details');
         });
 
 

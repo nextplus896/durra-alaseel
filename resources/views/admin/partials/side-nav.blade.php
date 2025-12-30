@@ -84,6 +84,23 @@
                     ],
                 ])
 
+                {{-- Branch Management Section --}}
+                @include('admin.components.side-nav.link-group', [
+                    'group_title' => __('BRANCH & SETTINGS'),
+                    'group_links' => [
+                        [
+                            'title' => __('Branch Management'),
+                            'route' => 'admin.branch.index',
+                            'icon' => 'menu-icon las la-map-marker-alt',
+                        ],
+                        [
+                            'title' => __('Tax Settings'),
+                            'route' => 'admin.tax.settings.index',
+                            'icon' => 'menu-icon las la-percent',
+                        ],
+                    ],
+                ])
+
                 {{-- Section Transaction & Logs --}}
                 @include('admin.components.side-nav.link-group', [
                     'group_title' => __('Transactions & Logs'),
@@ -156,6 +173,28 @@
                                     [
                                         'title' => __('All Logs'),
                                         'route' => 'admin.booking.index',
+                                    ],
+                                ],
+                            ],
+                            [
+                                'title' => __('Balance Transactions'),
+                                'icon' => 'menu-icon las la-wallet',
+                                'links' => [
+                                    [
+                                        'title' => __('All Transactions'),
+                                        'route' => 'admin.balance.transactions.index',
+                                    ],
+                                    [
+                                        'title' => __('Recharge Logs'),
+                                        'route' => 'admin.balance.transactions.recharges',
+                                    ],
+                                    [
+                                        'title' => __('Deduction Logs'),
+                                        'route' => 'admin.balance.transactions.deductions',
+                                    ],
+                                    [
+                                        'title' => __('Refund Logs'),
+                                        'route' => 'admin.balance.transactions.refunds',
                                     ],
                                 ],
                             ],

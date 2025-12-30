@@ -5,6 +5,8 @@ namespace App\Models\Vendor\Cars;
 use App\Models\Admin\Cars\CarArea;
 use App\Models\Admin\Cars\CarType;
 use App\Models\Admin\Cars\CarModel;
+use App\Models\Admin\Branch;
+use App\Models\BranchDeliverySetting;
 use App\Models\CarBooking;
 use App\Models\Vendor\Vendor;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -22,6 +24,7 @@ class Car extends Model
         'car_area_id'  => 'integer',
         'car_type_id'  => 'integer',
         'car_model_id' => 'integer',
+        'branch_id'    => 'integer',
         'car_title'    => 'object',
         'slug'         => 'string',
         'image'        => 'string',
@@ -51,7 +54,7 @@ class Car extends Model
     }
     public function branch()
     {
-        return $this->belongsTo(CarArea::class, 'car_area_id');
+        return $this->belongsTo(Branch::class, 'branch_id');
     }
     public function bookings()
     {
@@ -71,5 +74,36 @@ class Car extends Model
             return files_asset_path('car-models') . '/' . $this->image;
         }
         return files_asset_path('default');
+    }
+
+    /**
+     * Get delivery settings for this car's branch and vendor
+     */
+    public function getDeliverySettingAttribute()
+    {
+        if (!$this->branch_id || !$this->vendor_id) {
+            return null;
+        }
+        return BranchDeliverySetting::where('branch_id', $this->branch_id)
+            ->where('vendor_id', $this->vendor_id)
+            ->first();
+    }
+
+    /**
+     * Check if delivery is available for this car
+     */
+    public function isDeliveryAvailable()
+    {
+        $setting = $this->delivery_setting;
+        return $setting && $setting->delivery_available;
+    }
+
+    /**
+     * Get delivery price for this car
+     */
+    public function getDeliveryPrice()
+    {
+        $setting = $this->delivery_setting;
+        return $setting ? $setting->delivery_price : 0;
     }
 }

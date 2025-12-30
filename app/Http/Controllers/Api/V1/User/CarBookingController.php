@@ -36,6 +36,8 @@ use net\authorize\api\contract\v1 as AnetAPI;
 use App\Notifications\User\carBookingNotification;
 use net\authorize\api\controller as AnetController;
 use App\Http\Helpers\PaymentGateway as PaymentGatewayHelper;
+use App\Services\BookingBalanceService;
+use App\Models\BranchDeliverySetting;
 
 class CarBookingController extends Controller
 {
@@ -189,7 +191,7 @@ class CarBookingController extends Controller
                 return Response::error([__('Something Went Wrong! Please try again.')], [], 500);
             }
 
-            $car = Car::where('id', $validated['car_id'])->first();
+            $car = Car::where('id', $validated['car_id'])->with(['branch', 'vendor'])->first();
 
             $validated_user = auth()->user();
             $booking_data = $booking_details->data;
@@ -209,13 +211,36 @@ class CarBookingController extends Controller
 
             $validated = $validator->validate();
 
-            $car = Car::where('id', $validated['car_id'])->first();
+            $car = Car::where('id', $validated['car_id'])->with(['branch', 'vendor'])->first();
             $validated_user = auth()->user();
             // booking details come from request directly
             $booking_data = (object) $validated;
             $tokenToReturn = null;
         }
-        // $car = Car::where('id', $booking_details->data->car_id)->first();
+
+        // Get delivery settings for this car
+        $deliveryInfo = null;
+        if ($car && $car->branch_id && $car->vendor_id) {
+            $deliverySetting = BranchDeliverySetting::where('branch_id', $car->branch_id)
+                ->where('vendor_id', $car->vendor_id)
+                ->first();
+
+            if ($deliverySetting) {
+                $deliveryInfo = [
+                    'available' => $deliverySetting->delivery_available,
+                    'price' => $deliverySetting->delivery_price,
+                ];
+            }
+        }
+
+        // Calculate pricing with tax
+        $balanceService = new BookingBalanceService();
+        $rentalFees = $car ? floatval($car->fees) : 0;
+        $deliveryPrice = ($request->include_delivery && $deliveryInfo && $deliveryInfo['available'])
+            ? floatval($deliveryInfo['price'])
+            : 0;
+
+        $pricingBreakdown = $balanceService->calculateBookingTotal($rentalFees, $deliveryPrice);
 
         $payment_gateways = PaymentGateway::addMoney()->active()->with('currencies')->has('currencies')->get();
         $payment_gateways->makeHidden(['credentials', 'created_at', 'input_fields', 'last_edit_by', 'updated_at', 'supported_currencies', 'image', 'env', 'slug', 'title', 'alias', 'code']);
@@ -228,9 +253,16 @@ class CarBookingController extends Controller
                 'booking_currency' => get_default_currency_code(),
                 'car' => $car,
                 'user' => $validated_user,
+                'user_balance' => [
+                    'balance' => number_format($validated_user->balance ?? 0, 2),
+                    'has_sufficient_balance' => ($validated_user->balance ?? 0) >= $pricingBreakdown['total'],
+                ],
+                'delivery_info' => $deliveryInfo,
+                'pricing_breakdown' => $pricingBreakdown,
                 'payment-type' => [
                     'online-payment' => Str::Slug(PaymentGatewayConst::ONLINEPAYMENT),
                     'cash' => Str::Slug(PaymentGatewayConst::CASH),
+                    'balance' => 'balance',
                 ],
                 'payment_gateways' => $payment_gateways,
             ],
@@ -254,6 +286,8 @@ class CarBookingController extends Controller
             'fees' => 'required',
             'token' => 'nullable',
             'payment' => 'required',
+            'include_delivery' => 'nullable|boolean',
+            'delivery_price' => 'nullable|numeric|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -267,7 +301,7 @@ class CarBookingController extends Controller
         // can still use a booking token. We create it before handling payment type.
         if (!$request->filled('token')) {
             try {
-                $payload = $request->only(['car_area', 'car_type', 'pickup_time', 'pickup_date', 'round_pickup_date', 'round_pickup_time', 'location', 'destination', 'distance', 'credentials', 'mobile', 'message', 'fees', 'payment', 'car_id', 'car_slug']);
+                $payload = $request->only(['car_area', 'car_type', 'pickup_time', 'pickup_date', 'round_pickup_date', 'round_pickup_time', 'location', 'destination', 'distance', 'credentials', 'mobile', 'message', 'fees', 'payment', 'car_id', 'car_slug', 'include_delivery', 'delivery_price']);
                 $payload = array_filter($payload, function ($v) {
                     return $v !== null && $v !== '';
                 });
@@ -285,9 +319,15 @@ class CarBookingController extends Controller
 
         $payment = $request->payment;
 
+        // Handle balance payment
+        if ($payment === 'balance') {
+            $trx_id = generate_unique_string('car_bookings', 'trx_id', 16);
+            return $this->bookingConfirmWithBalance($validated, $trx_id, $request);
+        }
+
         if ($payment == Str::slug(PaymentGatewayConst::CASH)) {
             $trx_id = generate_unique_string('car_bookings', 'trx_id', 16);
-            return $this->bookingConfirm($validated, 'cash', $trx_id);
+            return $this->bookingConfirm($validated, 'cash', $trx_id, $request);
         } else {
             $validator = Validator::make($request->all(), [
                 'gateway_currency' => 'required',
@@ -342,7 +382,7 @@ class CarBookingController extends Controller
         }
     }
 
-    public function bookingConfirm($data, $type, $trx_id)
+    public function bookingConfirm($data, $type, $trx_id, $request = null)
     {
         $temp_booking = TemporaryData::where('identifier', $data['token'])->first();
         $basic_setting = BasicSettings::first();
@@ -351,15 +391,22 @@ class CarBookingController extends Controller
         }
         $temp_data = json_decode(json_encode($temp_booking->data), true);
 
+        // Calculate charges and tax
+        $balanceService = new BookingBalanceService();
+        $rentalFees = floatval($data['fees']);
+        $deliveryPrice = ($request && $request->include_delivery) ? floatval($request->delivery_price ?? 0) : 0;
+
+        $charges = 0;
         if ($type === 'cash') {
-            $charges = TransactionSetting::where('slug', 'cash')->first();
-            $amount = $data['fees'];
-
-            $fixed_charge_calc = $charges->fixed_charge;
-            $percent_charge_calc = (($amount / 100) * $charges->percent_charge);
-
-            $total_charge = $fixed_charge_calc + $percent_charge_calc;
+            $chargesSetting = TransactionSetting::where('slug', 'cash')->first();
+            if ($chargesSetting) {
+                $fixed_charge_calc = $chargesSetting->fixed_charge;
+                $percent_charge_calc = (($rentalFees / 100) * $chargesSetting->percent_charge);
+                $charges = $fixed_charge_calc + $percent_charge_calc;
+            }
         }
+
+        $pricingBreakdown = $balanceService->calculateBookingTotal($rentalFees, $deliveryPrice, $charges);
 
         try {
             $booking_data = CarBooking::create([
@@ -378,8 +425,13 @@ class CarBookingController extends Controller
                 'round_pickup_time' => $data['round_pickup_time'],
                 'round_pickup_date' => $data['round_pickup_date'],
                 'distance' => $data['distance'],
-                'amount' => $data['fees'],
-                'charges' => $total_charge ?? 0,
+                'amount' => $rentalFees,
+                'charges' => $charges,
+                'delivery_price' => $deliveryPrice,
+                'subtotal' => $pricingBreakdown['subtotal'],
+                'tax_percentage' => $pricingBreakdown['tax_percentage'],
+                'tax_amount' => $pricingBreakdown['tax_amount'],
+                'total_amount' => $pricingBreakdown['total'],
                 'message' => $data['message'] ?? '',
                 'status' => 1,
             ]);
@@ -391,9 +443,104 @@ class CarBookingController extends Controller
 
             $this->bookingNotification($confirm_booking, $basic_setting);
 
-            return Response::success([__('Booking Successful!')], [], 200);
+            return Response::success([__('Booking Successful!')], [
+                'booking_id' => $booking_data->id,
+                'trx_id' => $trx_id,
+                'total_amount' => $pricingBreakdown['total'],
+            ], 200);
         } catch (Exception $e) {
             return Response::error([__('Something went wrong! Please try again')], [], 400);
+        }
+    }
+
+    /**
+     * Confirm booking with balance payment
+     */
+    public function bookingConfirmWithBalance($data, $trx_id, $request)
+    {
+        $temp_booking = TemporaryData::where('identifier', $data['token'])->first();
+        $basic_setting = BasicSettings::first();
+        $user = Auth::guard('api')->user();
+
+        if (!$temp_booking) {
+            return Response::error([__('Something went wrong! Please try again')], [], 400);
+        }
+        $temp_data = json_decode(json_encode($temp_booking->data), true);
+
+        // Calculate total amount with tax and delivery
+        $balanceService = new BookingBalanceService();
+        $rentalFees = floatval($data['fees']);
+        $deliveryPrice = $request->include_delivery ? floatval($request->delivery_price ?? 0) : 0;
+
+        $pricingBreakdown = $balanceService->calculateBookingTotal($rentalFees, $deliveryPrice);
+        $totalAmount = $pricingBreakdown['total'];
+
+        // Check if user has sufficient balance
+        if (!$balanceService->hasSufficientBalance($user, $totalAmount)) {
+            return Response::error([
+                __('Insufficient balance. Your balance is :balance, required amount is :required', [
+                    'balance' => number_format($user->balance, 2),
+                    'required' => number_format($totalAmount, 2),
+                ])
+            ], [
+                'current_balance' => $user->balance,
+                'required_amount' => $totalAmount,
+                'shortfall' => $totalAmount - $user->balance,
+            ], 400);
+        }
+
+        DB::beginTransaction();
+        try {
+            // Create booking
+            $booking_data = CarBooking::create([
+                'car_id' => $data['car_id'],
+                'user_id' => $data['user_id'],
+                'slug' => $data['car_slug'],
+                'trx_id' => $trx_id,
+                'payment_type' => 'balance',
+                'phone' => $data['mobile'],
+                'email' => $data['credentials'],
+                'location' => $data['location'],
+                'destination' => $data['destination'],
+                'trip_id' => generate_unique_code(),
+                'pickup_time' => $temp_data['pickup_time'],
+                'pickup_date' => $temp_data['pickup_date'],
+                'round_pickup_time' => $data['round_pickup_time'],
+                'round_pickup_date' => $data['round_pickup_date'],
+                'distance' => $data['distance'],
+                'amount' => $rentalFees,
+                'charges' => 0,
+                'delivery_price' => $deliveryPrice,
+                'subtotal' => $pricingBreakdown['subtotal'],
+                'tax_percentage' => $pricingBreakdown['tax_percentage'],
+                'tax_amount' => $pricingBreakdown['tax_amount'],
+                'total_amount' => $totalAmount,
+                'paid_from_balance' => true,
+                'balance_deducted' => $totalAmount,
+                'message' => $data['message'] ?? '',
+                'status' => 1,
+            ]);
+
+            // Deduct balance
+            $balanceService->deductBalanceForBooking($user, $booking_data, $totalAmount);
+
+            DB::commit();
+
+            $confirm_booking = CarBooking::with('cars')
+                ->where('slug', $booking_data->slug)
+                ->first();
+
+            $this->bookingNotification($confirm_booking, $basic_setting);
+
+            return Response::success([__('Booking Successful! Amount deducted from your balance.')], [
+                'booking_id' => $booking_data->id,
+                'trx_id' => $trx_id,
+                'amount_deducted' => $totalAmount,
+                'new_balance' => $user->fresh()->balance,
+            ], 200);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return Response::error([$e->getMessage()], [], 400);
         }
     }
 

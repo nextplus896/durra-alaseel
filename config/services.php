@@ -50,4 +50,10 @@ return [
         'use_direct_messaging' => env('TWILIO_USE_DIRECT_MESSAGING', false),
     ],
 
+    'paytabs' => [
+        'server_key' => env('PAYTABS_SERVER_KEY', ''),
+        'profile_id' => env('PAYTABS_PROFILE_ID', ''),
+        'base_url' => env('PAYTABS_BASE_URL', 'https://secure.paytabs.sa'),
+    ],
+
 ];

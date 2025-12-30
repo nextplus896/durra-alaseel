@@ -102,6 +102,47 @@
                                     placeholder="{{ __('Enter Rental Price') }}" value="{{ old('fees') }}">
                                 <span class="charge-currency">{{ get_default_currency_code() }}</span>
                             </div>
+                            <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
+                                <div class="vehicle-type">
+                                    <label>{{ __('Branch') }}<span>*</span></label>
+                                    <select class="select2 select2-basic" name="branch_id" id="branch_id">
+                                        <option disabled selected>{{ __('Select Branch') }}</option>
+                                        @forelse ($branches ?? [] as $branch)
+                                            <option value="{{ $branch->id }}"
+                                                {{ old('branch_id') == $branch->id ? 'selected' : '' }}>
+                                                {{ $branch->name }}
+                                            </option>
+                                        @empty
+                                            <option disabled>{{ __('No branches available') }}</option>
+                                        @endforelse
+                                    </select>
+                                </div>
+                            </div>
+
+                            {{-- Delivery Settings Section --}}
+                            <div class="col-xl-12 col-lg-12 mb-10">
+                                <div class="dashboard-header-wrapper mt-3 mb-2">
+                                    <h5 class="title">{{ __('Delivery Settings') }}</h5>
+                                </div>
+                            </div>
+                            <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
+                                <label>{{ __('Delivery Available') }}</label>
+                                <div class="switch-wrapper">
+                                    <label class="switch">
+                                        <input type="checkbox" name="delivery_available" value="1"
+                                            {{ old('delivery_available') ? 'checked' : '' }}>
+                                        <span class="slider round"></span>
+                                    </label>
+                                    <span class="ms-2">{{ __('Enable delivery for this branch') }}</span>
+                                </div>
+                            </div>
+                            <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
+                                <label>{{ __('Delivery Price') }}</label>
+                                <input type="text" class="form--control klm-charge" name="delivery_price"
+                                    placeholder="{{ __('Enter Delivery Price') }}" value="{{ old('delivery_price', 0) }}">
+                                <span class="charge-currency">{{ get_default_currency_code() }}</span>
+                            </div>
+
                             <div class="col-xl-12 col-lg-12 mb-10 form-group">
                                 <label>{{ __('Car Model Image') }}</label>
                                 <div class="car-model-image-display">

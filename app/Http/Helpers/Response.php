@@ -1,9 +1,12 @@
 <?php
+
 namespace App\Http\Helpers;
 
-class Response {
+class Response
+{
 
-    public static function error($errors,$data = null, $status = 400) {
+    public static function error($errors, $data = null, $status = 400)
+    {
         $responseData = [
             'message'   => [
                 'error'    => $errors,
@@ -11,11 +14,12 @@ class Response {
             'data'      => $data,
             'type'          => "error",
         ];
-        
-        return response()->json($responseData,$status);
+
+        return response()->json($responseData, $status, [], JSON_UNESCAPED_UNICODE);
     }
 
-    public static function success($success,$data = null,$status = 200) {
+    public static function success($success, $data = null, $status = 200)
+    {
         $responseData = [
             'message'       => [
                 'success'   => $success,
@@ -24,10 +28,11 @@ class Response {
             'type'          => "success",
         ];
 
-        return response()->json($responseData,$status);
+        return response()->json($responseData, $status, [], JSON_UNESCAPED_UNICODE);
     }
 
-    public static function warning($warning,$data = null,$status = 400) {
+    public static function warning($warning, $data = null, $status = 400)
+    {
         $responseData = [
             'message'       => [
                 'error'     => $warning,
@@ -36,6 +41,6 @@ class Response {
             'type'          => "warning",
         ];
 
-        return response()->json($responseData,$status);
+        return response()->json($responseData, $status, [], JSON_UNESCAPED_UNICODE);
     }
 }

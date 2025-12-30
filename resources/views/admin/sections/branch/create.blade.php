@@ -1,0 +1,192 @@
+@extends('admin.layouts.master')
+
+@push('css')
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .map-search-wrapper {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .map-search-wrapper input {
+            padding-right: 40px;
+        }
+
+        .map-search-wrapper .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+    </style>
+@endpush
+
+@section('page-title')
+    @include('admin.components.page-title', ['title' => __($page_title)])
+@endsection
+
+@section('breadcrumb')
+    @include('admin.components.breadcrumb', [
+        'breadcrumbs' => [
+            [
+                'name' => __('Dashboard'),
+                'url' => setRoute('admin.dashboard'),
+            ],
+            [
+                'name' => __('Branch Management'),
+                'url' => setRoute('admin.branch.index'),
+            ],
+        ],
+        'active' => __('Create Branch'),
+    ])
+@endsection
+
+@section('content')
+    <div class="custom-card">
+        <div class="card-header">
+            <h6 class="title">{{ __('Create New Branch') }}</h6>
+        </div>
+        <div class="card-body">
+            <form action="{{ setRoute('admin.branch.store') }}" method="POST">
+                @csrf
+                <div class="row mb-10-none">
+                    <div class="col-xl-6 col-lg-6 form-group">
+                        <label>{{ __('Branch Name') }}<span>*</span></label>
+                        <input type="text" name="name" class="form--control" placeholder="{{ __('Enter branch name') }}"
+                            value="{{ old('name') }}" required>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 form-group">
+                        <label>{{ __('Service Radius (km)') }}<span>*</span></label>
+                        <input type="number" name="service_radius_km" class="form--control"
+                            placeholder="{{ __('Enter service radius in km') }}" value="{{ old('service_radius_km', 10) }}"
+                            step="0.1" min="0.1" max="500" required>
+                    </div>
+                    <div class="col-xl-12 col-lg-12 form-group">
+                        <label>{{ __('Address') }}</label>
+                        <textarea name="address" class="form--control" rows="2" placeholder="{{ __('Enter branch address') }}">{{ old('address') }}</textarea>
+                    </div>
+                    <div class="col-xl-12 col-lg-12 form-group">
+                        <label>{{ __('Select Location on Map') }}<span>*</span></label>
+                        <div class="map-search-wrapper">
+                            <input type="text" id="map-search" class="form--control"
+                                placeholder="{{ __('Search for a location...') }}">
+                            <i class="las la-search search-icon"></i>
+                        </div>
+                        <div id="map"></div>
+                        <small
+                            class="text-muted">{{ __('Click on the map to select location or search for an address') }}</small>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 form-group">
+                        <label>{{ __('Latitude') }}<span>*</span></label>
+                        <input type="text" name="latitude" id="latitude" class="form--control"
+                            placeholder="{{ __('Latitude') }}" value="{{ old('latitude') }}" readonly required>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 form-group">
+                        <label>{{ __('Longitude') }}<span>*</span></label>
+                        <input type="text" name="longitude" id="longitude" class="form--control"
+                            placeholder="{{ __('Longitude') }}" value="{{ old('longitude') }}" readonly required>
+                    </div>
+                    <div class="col-xl-12 col-lg-12 form-group">
+                        @include('admin.components.button.form-btn', [
+                            'class' => 'w-100 btn-loading',
+                            'permission' => 'admin.branch.store',
+                            'text' => __('Create Branch'),
+                        ])
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+@endsection
+
+@push('script')
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY', '') }}&libraries=places&callback=initMap"
+        async defer></script>
+    <script>
+        let map;
+        let marker;
+        let searchBox;
+
+        function initMap() {
+            // Default location (Riyadh, Saudi Arabia)
+            const defaultLocation = {
+                lat: 24.7136,
+                lng: 46.6753
+            };
+
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: defaultLocation,
+                zoom: 12,
+            });
+
+            marker = new google.maps.Marker({
+                position: defaultLocation,
+                map: map,
+                draggable: true,
+            });
+
+            // Update coordinates when marker is dragged
+            marker.addListener('dragend', function(event) {
+                updateCoordinates(event.latLng.lat(), event.latLng.lng());
+            });
+
+            // Update coordinates when map is clicked
+            map.addListener('click', function(event) {
+                marker.setPosition(event.latLng);
+                updateCoordinates(event.latLng.lat(), event.latLng.lng());
+            });
+
+            // Initialize search box
+            const input = document.getElementById('map-search');
+            searchBox = new google.maps.places.SearchBox(input);
+
+            // Listen for the event when user selects a prediction
+            searchBox.addListener('places_changed', function() {
+                const places = searchBox.getPlaces();
+
+                if (places.length === 0) {
+                    return;
+                }
+
+                const place = places[0];
+
+                if (!place.geometry || !place.geometry.location) {
+                    console.log("Returned place contains no geometry");
+                    return;
+                }
+
+                // Set the marker position
+                marker.setPosition(place.geometry.location);
+
+                // Center map on the selected place
+                map.setCenter(place.geometry.location);
+                map.setZoom(15);
+
+                // Update coordinates
+                updateCoordinates(
+                    place.geometry.location.lat(),
+                    place.geometry.location.lng()
+                );
+
+                // Update address field if empty
+                const addressField = document.querySelector('textarea[name="address"]');
+                if (addressField && !addressField.value) {
+                    addressField.value = place.formatted_address || '';
+                }
+            });
+        }
+
+        function updateCoordinates(lat, lng) {
+            document.getElementById('latitude').value = lat.toFixed(8);
+            document.getElementById('longitude').value = lng.toFixed(8);
+        }
+    </script>
+@endpush

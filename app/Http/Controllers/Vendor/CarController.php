@@ -11,6 +11,8 @@ use App\Models\Vendor\Cars\Car;
 use App\Models\Admin\Cars\CarArea;
 use App\Models\Admin\Cars\CarType;
 use App\Models\Admin\Cars\CarModel;
+use App\Models\Admin\Branch;
+use App\Models\BranchDeliverySetting;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\Admin\Language;
@@ -36,10 +38,12 @@ class CarController extends Controller
     {
         $page_title = __('Car Create');
         $car_type = CarType::orderBy('name', 'ASC')->get();
+        $branches = Branch::where('status', true)->orderBy('name', 'ASC')->get();
         $languages = Language::get();
         return view('vendor-end.sections.my-car.add', compact(
             'page_title',
             'car_type',
+            'branches',
             'languages',
         ));
     }
@@ -73,9 +77,12 @@ class CarController extends Controller
         $validator = Validator::make($request->all(), [
             'type'         => 'required|integer|exists:car_types,id',
             'car_model_id' => 'required|integer|exists:car_models,id',
+            'branch_id'    => 'required|integer|exists:branches,id',
             'seat'         => 'required|numeric|min:1|max:100',
             'year'         => 'required|integer|min:1900|max:' . (date('Y') + 1),
             'fees'         => 'required|numeric|min:0',
+            'delivery_available' => 'nullable|boolean',
+            'delivery_price'     => 'nullable|numeric|min:0',
         ]);
 
         $basic_field_name = [
@@ -109,10 +116,28 @@ class CarController extends Controller
         // Use image from the selected CarModel instead of file upload
         $validated['image'] = $carModel->image;
 
-        $validated = Arr::except($validated, ['type']);
+        $validated = Arr::except($validated, ['type', 'delivery_available', 'delivery_price']);
+
+        DB::beginTransaction();
         try {
             $car = Car::create($validated);
+
+            // Create or update delivery settings for this branch-vendor combination
+            BranchDeliverySetting::updateOrCreate(
+                [
+                    'branch_id' => $request->branch_id,
+                    'vendor_id' => auth()->guard('vendor')->user()->id,
+                ],
+                [
+                    'delivery_available' => $request->delivery_available ?? false,
+                    'delivery_price' => $request->delivery_price ?? 0,
+                    'vendor_price' => $request->vendor_price ?? 0,
+                ]
+            );
+
+            DB::commit();
         } catch (Exception $e) {
+            DB::rollBack();
             report($e);
             if (config('app.debug')) {
                 return back()->with(['error' => [$e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine()]])->withInput();
@@ -164,13 +189,24 @@ class CarController extends Controller
         if (!$cars) return back()->with(['error' => [__('Car Does not exists')]]);
 
         $car_type = CarType::where('status', true)->get();
+        $branches = Branch::where('status', true)->orderBy('name', 'ASC')->get();
         $languages = Language::get();
+
+        // Get existing delivery settings for this branch-vendor combination
+        $delivery_setting = null;
+        if ($cars->branch_id) {
+            $delivery_setting = BranchDeliverySetting::where('branch_id', $cars->branch_id)
+                ->where('vendor_id', auth()->guard('vendor')->user()->id)
+                ->first();
+        }
 
         return view('vendor-end.sections.my-car.edit', compact(
             'page_title',
             'cars',
             'car_type',
+            'branches',
             'languages',
+            'delivery_setting',
         ));
     }
     /**
@@ -191,9 +227,12 @@ class CarController extends Controller
         $validator = Validator::make($request->all(), [
             'type'         => 'required|integer|exists:car_types,id',
             'car_model_id' => 'required|integer|exists:car_models,id',
+            'branch_id'    => 'required|integer|exists:branches,id',
             'seat'         => 'required|numeric|min:1|max:100',
             'year'         => 'required|integer|min:1900|max:' . (date('Y') + 1),
             'fees'         => 'required|numeric|min:0',
+            'delivery_available' => 'nullable|boolean',
+            'delivery_price'     => 'nullable|numeric|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -225,10 +264,28 @@ class CarController extends Controller
         // Use image from the selected CarModel
         $validated['image'] = $carModel->image;
 
-        $validated = Arr::except($validated, ['type']);
+        $validated = Arr::except($validated, ['type', 'delivery_available', 'delivery_price']);
+
+        DB::beginTransaction();
         try {
             $car->update($validated);
+
+            // Create or update delivery settings for this branch-vendor combination
+            BranchDeliverySetting::updateOrCreate(
+                [
+                    'branch_id' => $request->branch_id,
+                    'vendor_id' => auth()->guard('vendor')->user()->id,
+                ],
+                [
+                    'delivery_available' => $request->delivery_available ?? false,
+                    'delivery_price' => $request->delivery_price ?? 0,
+                    'vendor_price' => $request->vendor_price ?? 0,
+                ]
+            );
+
+            DB::commit();
         } catch (Exception $e) {
+            DB::rollBack();
             report($e);
             if (config('app.debug')) {
                 return back()->with(['error' => [$e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine()]])->withInput();

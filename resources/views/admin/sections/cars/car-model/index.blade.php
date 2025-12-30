@@ -10,6 +10,53 @@
         .fileholder-files-view-wrp.fileholder-perview-single .fileholder-single-file-view {
             height: 200px !important;
         }
+
+        /* Sortable column styles */
+        .sortable {
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s;
+        }
+
+        .sortable:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .sort-icon {
+            font-size: 14px;
+            margin-left: 5px;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+
+        .sortable:hover .sort-icon {
+            opacity: 1;
+        }
+
+        .sortable .la-sort-up,
+        .sortable .la-sort-down {
+            opacity: 1;
+        }
+
+        /* Filter row styles */
+        .filter-row th {
+            padding: 8px;
+            background-color: #f8f9fa;
+        }
+
+        .filter-input {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
     </style>
 @endpush
 
@@ -44,13 +91,30 @@
                 </div>
             </div>
             <div class="table-responsive">
-                <table class="custom-table">
+                <table class="custom-table" id="car-models-table">
                     <thead>
                         <tr>
                             <th>{{ __('Image') }}</th>
-                            <th>{{ __('Car Type') }}</th>
-                            <th>{{ __('Model Name') }}</th>
+                            <th class="sortable" data-column="car-type">
+                                {{ __('Car Type') }} <i class="las la-sort sort-icon"></i>
+                            </th>
+                            <th class="sortable" data-column="model-name">
+                                {{ __('Model Name') }} <i class="las la-sort sort-icon"></i>
+                            </th>
                             <th>{{ __('Status') }}</th>
+                            <th></th>
+                        </tr>
+                        <tr class="filter-row">
+                            <th></th>
+                            <th>
+                                <input type="text" class="form-control form-control-sm filter-input" 
+                                       id="filter-car-type" placeholder="{{ __('Search car type...') }}">
+                            </th>
+                            <th>
+                                <input type="text" class="form-control form-control-sm filter-input" 
+                                       id="filter-model-name" placeholder="{{ __('Search model...') }}">
+                            </th>
+                            <th></th>
                             <th></th>
                         </tr>
                     </thead>
@@ -124,6 +188,76 @@
 
         $(document).ready(function() {
             switcherAjax("{{ setRoute('admin.car.model.status.update') }}");
+
+            // Filter functionality
+            $('.filter-input').on('keyup', function() {
+                filterTable();
+            });
+
+            // Sorting functionality
+            let sortDirection = {};
+            $('.sortable').on('click', function() {
+                const column = $(this).data('column');
+                const $icon = $(this).find('.sort-icon');
+                
+                // Reset other column icons
+                $('.sortable').not(this).find('.sort-icon').removeClass('la-sort-up la-sort-down').addClass('la-sort');
+                
+                // Toggle sort direction
+                if (!sortDirection[column] || sortDirection[column] === 'desc') {
+                    sortDirection[column] = 'asc';
+                    $icon.removeClass('la-sort la-sort-down').addClass('la-sort-up');
+                } else {
+                    sortDirection[column] = 'desc';
+                    $icon.removeClass('la-sort la-sort-up').addClass('la-sort-down');
+                }
+                
+                sortTable(column, sortDirection[column]);
+            });
+
+            function filterTable() {
+                const carTypeFilter = $('#filter-car-type').val().toLowerCase();
+                const modelNameFilter = $('#filter-model-name').val().toLowerCase();
+
+                $('#car-models-table tbody tr').each(function() {
+                    const carType = $(this).find('td:eq(1)').text().toLowerCase();
+                    const modelName = $(this).find('td:eq(2)').text().toLowerCase();
+
+                    const carTypeMatch = carType.includes(carTypeFilter);
+                    const modelNameMatch = modelName.includes(modelNameFilter);
+
+                    if (carTypeMatch && modelNameMatch) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            }
+
+            function sortTable(column, direction) {
+                const tbody = $('#car-models-table tbody');
+                const rows = tbody.find('tr').get();
+
+                rows.sort(function(a, b) {
+                    let aVal, bVal;
+
+                    if (column === 'car-type') {
+                        aVal = $(a).find('td:eq(1)').text().trim();
+                        bVal = $(b).find('td:eq(1)').text().trim();
+                    } else if (column === 'model-name') {
+                        aVal = $(a).find('td:eq(2)').text().trim();
+                        bVal = $(b).find('td:eq(2)').text().trim();
+                    }
+
+                    if (direction === 'asc') {
+                        return aVal.localeCompare(bVal);
+                    } else {
+                        return bVal.localeCompare(aVal);
+                    }
+                });
+
+                tbody.empty().append(rows);
+            }
         })
     </script>
 @endpush

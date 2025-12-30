@@ -229,12 +229,8 @@ class LanguageController extends Controller
 
         $filter_with_database_lang = array_intersect_key($sheets,[$validated['language'] => "value"]);
 
-        $get_predefine_keys = LanguageImport::getKeys();
-
         foreach($filter_with_database_lang as $code => $item) {
-
-            $item = array_intersect_key($item,array_flip($get_predefine_keys));
-
+            // Do not restrict to predefined keys: write all keys from uploaded file
             $json_format = json_encode($item);
 
             $file = lang_path($code.".json");

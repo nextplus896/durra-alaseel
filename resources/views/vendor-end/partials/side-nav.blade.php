@@ -25,6 +25,12 @@
                 </a>
             </li>
             <li class="sidebar-menu-item">
+                <a href="{{ setRoute('vendor.branch.settings.index') }}" class="sidebar-link">
+                    <i class="las la-cog"></i>
+                    <span>{{ __('Branch Settings') }}</span>
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
                 <a href="{{ setRoute('vendor.withdraw.money.index') }}" class="sidebar-link">
                     <i class="las la-wallet"></i>
                     <span>{{ __('Withdraw Money') }}</span>
