@@ -75,14 +75,18 @@ class CarController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'type'         => 'required|integer|exists:car_types,id',
-            'car_model_id' => 'required|integer|exists:car_models,id',
-            'branch_id'    => 'required|integer|exists:branches,id',
-            'seat'         => 'required|numeric|min:1|max:100',
-            'year'         => 'required|integer|min:1900|max:' . (date('Y') + 1),
-            'fees'         => 'required|numeric|min:0',
+            'type'            => 'required|integer|exists:car_types,id',
+            'car_model_id'    => 'required|integer|exists:car_models,id',
+            'branch_id'       => 'required|integer|exists:branches,id',
+            'seat'            => 'required|numeric|min:1|max:100',
+            'year'            => 'required|integer|min:1900|max:' . (date('Y') + 1),
+            'fees'            => 'required|numeric|min:0', // Keep fees for backward compatibility
+            'price_per_day'   => 'required|numeric|min:0',
+            'price_per_week'  => 'required|numeric|min:0',
+            'price_per_month' => 'required|numeric|min:0',
             'delivery_available' => 'nullable|boolean',
-            'delivery_price'     => 'nullable|numeric|min:0',
+            'allowance_km'    => 'nullable|numeric|min:0',
+            'allowance_price_per_km' => 'nullable|numeric|min:0',
         ]);
 
         $basic_field_name = [
@@ -116,7 +120,7 @@ class CarController extends Controller
         // Use image from the selected CarModel instead of file upload
         $validated['image'] = $carModel->image;
 
-        $validated = Arr::except($validated, ['type', 'delivery_available', 'delivery_price']);
+        $validated = Arr::except($validated, ['type', 'delivery_available']);
 
         DB::beginTransaction();
         try {
@@ -130,7 +134,7 @@ class CarController extends Controller
                 ],
                 [
                     'delivery_available' => $request->delivery_available ?? false,
-                    'delivery_price' => $request->delivery_price ?? 0,
+                    // delivery_price is managed in settings, not here
                     'vendor_price' => $request->vendor_price ?? 0,
                 ]
             );
@@ -225,14 +229,18 @@ class CarController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'type'         => 'required|integer|exists:car_types,id',
-            'car_model_id' => 'required|integer|exists:car_models,id',
-            'branch_id'    => 'required|integer|exists:branches,id',
-            'seat'         => 'required|numeric|min:1|max:100',
-            'year'         => 'required|integer|min:1900|max:' . (date('Y') + 1),
-            'fees'         => 'required|numeric|min:0',
+            'type'            => 'required|integer|exists:car_types,id',
+            'car_model_id'    => 'required|integer|exists:car_models,id',
+            'branch_id'       => 'required|integer|exists:branches,id',
+            'seat'            => 'required|numeric|min:1|max:100',
+            'year'            => 'required|integer|min:1900|max:' . (date('Y') + 1),
+            'fees'            => 'required|numeric|min:0', // Keep fees for backward compatibility
+            'price_per_day'   => 'required|numeric|min:0',
+            'price_per_week'  => 'required|numeric|min:0',
+            'price_per_month' => 'required|numeric|min:0',
             'delivery_available' => 'nullable|boolean',
-            'delivery_price'     => 'nullable|numeric|min:0',
+            'allowance_km'    => 'nullable|numeric|min:0',
+            'allowance_price_per_km' => 'nullable|numeric|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -264,7 +272,7 @@ class CarController extends Controller
         // Use image from the selected CarModel
         $validated['image'] = $carModel->image;
 
-        $validated = Arr::except($validated, ['type', 'delivery_available', 'delivery_price']);
+        $validated = Arr::except($validated, ['type', 'delivery_available']);
 
         DB::beginTransaction();
         try {
@@ -278,7 +286,7 @@ class CarController extends Controller
                 ],
                 [
                     'delivery_available' => $request->delivery_available ?? false,
-                    'delivery_price' => $request->delivery_price ?? 0,
+                    // delivery_price is managed in settings, not here
                     'vendor_price' => $request->vendor_price ?? 0,
                 ]
             );

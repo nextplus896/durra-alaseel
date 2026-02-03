@@ -23,9 +23,10 @@ use Illuminate\Support\Str;
 class BookingController extends Controller
 {
 
-    public function bookings(){
+    public function bookings()
+    {
 
-        $bookings =  CarBooking::with(['cars'])
+        $bookings =  CarBooking::with(['cars', 'user'])
             ->where('status', '!=', 3)
             ->Where('status', '!=', 4)
             ->where(function ($query) {
@@ -36,17 +37,52 @@ class BookingController extends Controller
             ->orderByDesc('id')
             ->get();
 
-            if(!$bookings){
-                return Response::error([__('Oops! Something went wrong! Please try again')]);
+        if (!$bookings) {
+            return Response::error([__('Oops! Something went wrong! Please try again')]);
+        }
+
+        // Transform bookings to include user information
+        $bookings_data = $bookings->map(function ($booking) {
+            $booking_array = $booking->toArray();
+
+            // Add user information if user exists
+            if ($booking->user) {
+                $booking_array['user_info'] = [
+                    'name' => $booking->user->fullname,
+                    'firstname' => $booking->user->firstname,
+                    'lastname' => $booking->user->lastname,
+                    'email' => $booking->user->email,
+                    'phone' => $booking->user->full_mobile ?? $booking->user->mobile,
+                    'mobile_code' => $booking->user->mobile_code,
+                    'driving_license' => $booking->user->driving_license,
+                    'kyc_status' => $booking->user->kyc_verified,
+                    'kyc_status_string' => $booking->user->kycStringStatus,
+                ];
+            } else {
+                // Guest booking - use data from booking record
+                $booking_array['user_info'] = [
+                    'name' => 'Guest',
+                    'firstname' => 'Guest',
+                    'lastname' => null,
+                    'email' => $booking->email,
+                    'phone' => $booking->phone,
+                    'mobile_code' => null,
+                    'driving_license' => null,
+                    'kyc_status' => 0,
+                    'kyc_status_string' => 'Unverified',
+                ];
             }
 
-            $car_image_path = [
-                'base_url' => url('/'),
-                'image_path' => files_asset_path_basename('site-section'),
-            ];
+            return $booking_array;
+        });
 
-        return Response::success([__('Requests fetch successfully')],[
-            'bookings' => $bookings,
+        $car_image_path = [
+            'base_url' => url('/'),
+            'image_path' => files_asset_path_basename('site-section'),
+        ];
+
+        return Response::success([__('Requests fetch successfully')], [
+            'bookings' => $bookings_data,
             'image-path' => $car_image_path
         ]);
     }
@@ -54,11 +90,11 @@ class BookingController extends Controller
     public function accept(Request $request)
     {
 
-        $charges = TransactionSetting::where('slug','cash')->first();
+        $charges = TransactionSetting::where('slug', 'cash')->first();
         $max_limit = $charges->max_limit;
 
         $info = CarBooking::where('id', $request->id)->first();
-        if($max_limit <= $info->cars->vendor->wallets->due_payment){
+        if ($max_limit <= $info->cars->vendor->wallets->due_payment) {
             return  Response::error([__('Please pay your due amount')]);
         }
 
@@ -160,38 +196,30 @@ class BookingController extends Controller
                     return Response::error([__("Vendor wallet couldn't found")]);
                 }
 
-                if($wallet->due_payment != 0 && $wallet->due_payment == $info->transaction->receive_amount)
-                {
+                if ($wallet->due_payment != 0 && $wallet->due_payment == $info->transaction->receive_amount) {
                     $charge = $wallet->due_payment;
                     $this->insertProfit($charge);
                     $wallet->update([
                         'due_payment' => 0,
                     ]);
-                }
-                elseif($wallet->due_payment != 0 && $wallet->due_payment < $info->transaction->receive_amount)
-                {
+                } elseif ($wallet->due_payment != 0 && $wallet->due_payment < $info->transaction->receive_amount) {
                     $charge = $wallet->due_payment;
                     $this->insertProfit($charge);
                     $wallet->update([
                         'balance' => $wallet->balance + ($info->transaction->receive_amount - $wallet->due_payment),
                         'due_payment' => 0,
                     ]);
-                }
-                elseif($wallet->due_payment != 0 && $wallet->due_payment > $info->transaction->receive_amount)
-                {
+                } elseif ($wallet->due_payment != 0 && $wallet->due_payment > $info->transaction->receive_amount) {
                     $charge = $info->transaction->receive_amount;
                     $this->insertProfit($charge);
                     $wallet->update([
                         'due_payment' => $wallet->due_payment - $info->transaction->receive_amount,
                     ]);
-                }
-                elseif($wallet->due_payment == 0)
-                {
+                } elseif ($wallet->due_payment == 0) {
                     $wallet->update([
                         'balance' => $wallet->balance + $info->transaction->receive_amount,
                     ]);
                 }
-
             }
 
             if ($info->payment_type == Str::slug(CarBookingConst::CASH)) {
@@ -234,18 +262,18 @@ class BookingController extends Controller
                 if ($basic_setting->email_notification) {
                     Notification::route('mail', $info->email)->notify(new rideComplete($info));
                 }
-
             } catch (Exception $e) {
             }
-        }catch (Exception $e) {
+        } catch (Exception $e) {
             return Response::error([__('Oops! Something went wrong! Please try again')]);
         }
         return Response::success([__('Tour Complete')]);
     }
 
-    public function insertProfit($charge) {
+    public function insertProfit($charge)
+    {
         DB::beginTransaction();
-        try{
+        try {
             DB::table('admin_profits')->insert([
                 'percent_charge'    => 0,
                 'fixed_charge'      => 0,
@@ -253,7 +281,7 @@ class BookingController extends Controller
                 'created_at'        => now(),
             ]);
             DB::commit();
-        }catch(Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             throw new Exception($e->getMessage());
         }

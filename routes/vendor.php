@@ -56,6 +56,7 @@ Route::prefix("vendor")->name("vendor.")->middleware("auth:vendor")->group(funct
     //Booking section
     Route::controller(BookingRequestController::class)->middleware(['kyc.verification.guard'])->prefix('booking')->name('booking.')->group(function () {
         Route::get('/', 'index')->name('index');
+        Route::get('details/{id}', 'details')->name('details');
         Route::get('status/accept/{id}', 'accept')->name('accept');
         Route::get('status/reject/{id}', 'reject')->name('reject');
         Route::get('status/complete/{id}', 'complete')->name('complete');

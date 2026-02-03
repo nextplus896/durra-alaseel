@@ -1,0 +1,190 @@
+openapi: 3.0.0
+info:
+  title: Twilio OTP Integration - Test Collection
+  description: >-
+    Complete Postman collection for testing Twilio SMS & WhatsApp OTP API
+    endpoints
+  version: 1.0.0
+servers:
+  - url: '{{base_url}}'
+tags:
+  - name: OTP Endpoints
+  - name: Admin Dashboard
+  - name: Webhook Testing
+paths:
+  /api/v1/otp/request:
+    post:
+      tags:
+        - OTP Endpoints
+      summary: 2. Request OTP via WhatsApp
+      description: Send OTP code via WhatsApp
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: >-
+                "{\n  \"phone\": \"+966555123456\",\n  \"channel\":
+                \"whatsapp\",\n  \"locale\": \"ar\"\n}"
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/otp/verify:
+    post:
+      tags:
+        - OTP Endpoints
+      summary: 3. Verify OTP Code
+      description: |-
+        Verify the OTP code sent to the phone number
+
+        Required fields:
+        - phone: Same phone number used in request
+        - code: 6-digit code received via SMS/WhatsApp
+
+        Note: Replace code with actual code received from Twilio
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: '"{\n  \"phone\": \"+966555123456\",\n  \"code\": \"123456\"\n}"'
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /admin/twilio-usage:
+    get:
+      tags:
+        - Admin Dashboard
+      summary: View Twilio Usage Dashboard
+      description: |-
+        Access the admin Twilio usage dashboard
+
+        Note: Requires admin authentication
+
+        Displays:
+        - Current account balance
+        - SMS statistics
+        - WhatsApp statistics
+        - Recent messages (last 50)
+        - Delivery rates and costs
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/webhooks/twilio/status:
+    post:
+      tags:
+        - Webhook Testing
+      summary: Simulate Status Callback
+      description: |-
+        Simulate Twilio status callback webhook
+
+        Twilio sends this to track message delivery status:
+        - queued
+        - sent
+        - delivered
+        - failed
+        - undelivered
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                MessageSid:
+                  type: string
+                  example: SM1234567890abcdef1234567890abcdef
+                AccountSid:
+                  type: string
+                  example: AC46cac1e17737ef6a1a33402b7ba83868
+                To:
+                  type: number
+                  example: '+966555123456'
+                From:
+                  type: number
+                  example: '+1234567890'
+                MessageStatus:
+                  type: string
+                  example: delivered
+                Body:
+                  type: string
+                  example: 'Your verification code is: 123456'
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/x-www-form-urlencoded
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/webhooks/twilio/pricing:
+    post:
+      tags:
+        - Webhook Testing
+      summary: Simulate Pricing Callback
+      description: |-
+        Simulate Twilio pricing callback webhook
+
+        Twilio sends pricing information for cost tracking
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                MessageSid:
+                  type: string
+                  example: SM1234567890abcdef1234567890abcdef
+                Price:
+                  type: number
+                  example: '-0.0075'
+                PriceUnit:
+                  type: string
+                  example: USD
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/x-www-form-urlencoded
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}

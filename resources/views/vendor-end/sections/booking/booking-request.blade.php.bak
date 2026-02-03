@@ -1,0 +1,278 @@
+@extends('vendor-end.layouts.master')
+@section('content')
+    <div class="booking-request pt-40">
+        {{-- Header & Toolbar --}}
+        <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 border-bottom pb-4">
+            <h3 class="title mb-3 mb-md-0">{{ __('Booking Request') }}</h3>
+
+            <form action="" method="GET" class="d-flex flex-wrap gap-2">
+                <div class="input-group" style="width: 280px;">
+                    <span class="input-group-text bg-white border-end-0"><i class="las la-search text-muted"></i></span>
+                    <input type="text" name="search" value="{{ request('search') }}"
+                        class="form-control border-start-0 ps-0" placeholder="{{ __('Search by ID, Name...') }}">
+                </div>
+
+                <select name="status" class="form-select w-auto" onchange="this.form.submit()">
+                    <option value="">{{ __('All Status') }}</option>
+                    <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>{{ __('Pending') }}</option>
+                    <option value="2" {{ request('status') == '2' ? 'selected' : '' }}>{{ __('Ongoing') }}</option>
+                </select>
+            </form>
+        </div>
+
+        <div class="dashboard-list-wrapper">
+            @forelse ($car_bookings ?? [] as $value)
+                <div
+                    class="dashboard-list-item-wrapper mb-4 bg-white rounded-3 shadow-sm border overflow-hidden position-relative hover-shadow transition-all">
+                    {{-- Status Tab Line --}}
+                    <div class="position-absolute top-0 start-0 h-100"
+                        style="width: 4px; background: {{ $value->status === 1 ? '#ffc107' : ($value->status === 2 ? '#28a745' : '#6c757d') }};">
+                    </div>
+
+                    {{-- Header Section --}}
+                    <div
+                        class="d-flex flex-wrap align-items-center justify-content-between p-3 border-bottom bg-light bg-opacity-50">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="badge bg-white text-dark border fw-medium px-3 rounded-pill">
+                                <i class="las la-hashtag text-primary me-1"></i>{{ $value->trx_id ?? $value->id }}
+                            </span>
+                            <span class="small text-muted"><i
+                                    class="las la-clock me-1"></i>{{ $value->created_at->diffForHumans() }}</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span
+                                class="badge {{ $value->status === 1 ? 'bg-warning text-dark' : ($value->status === 2 ? 'bg-success' : 'bg-secondary') }} rounded-pill px-3">
+                                {{ $value->status === 1 ? __('Pending') : ($value->status === 2 ? __('Ongoing') : __('Completed')) }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="p-0">
+                        <div class="row g-0">
+                            {{-- Car & Customer Column --}}
+                            <div class="col-lg-4 border-end-lg p-4 bg-light bg-opacity-10">
+                                {{-- Car Info --}}
+                                <div class="d-flex align-items-center gap-3 mb-4">
+                                    <div class="rounded-3 overflow-hidden shadow-sm flex-shrink-0"
+                                        style="width: 80px; height: 80px;">
+                                        <img src="{{ get_image($value->cars->image ?? '', 'site-section') ?? '' }}"
+                                            alt="car" class="w-100 h-100 object-fit-cover">
+                                    </div>
+                                    <div>
+                                        <h5 class="fw-bold mb-1 text-dark">{{ $value->cars->car_model }}</h5>
+                                        <div
+                                            class="d-inline-block bg-white border rounded px-2 py-1 small text-muted font-monospace">
+                                            {{ $value->cars->car_number }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr class="border-secondary opacity-10 my-4">
+
+                                {{-- Customer Info --}}
+                                <h6 class="text-uppercase text-muted fw-bold small mb-3 letter-spacing-1">
+                                    {{ __('Customer') }}</h6>
+                                @if ($value->user)
+                                    <div class="d-flex align-items-start gap-3">
+                                        <div class="rounded-circle bg-white border flex-shrink-0 d-flex align-items-center justify-content-center fw-bold text-primary"
+                                            style="width: 40px; height: 40px; font-size: 16px;">
+                                            @if ($value->user->image)
+                                                <img src="{{ get_image($value->user->image, 'user-profile') }}"
+                                                    class="w-100 h-100 rounded-circle object-fit-cover">
+                                            @else
+                                                {{ substr($value->user->firstname ?? 'U', 0, 1) }}
+                                            @endif
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-center gap-2 mb-1">
+                                                <h6 class="mb-0 fw-bold">{{ $value->user->fullname }}</h6>
+                                                @php
+                                                    $kycStatus = $value->user->kyc_verified;
+                                                    $kycObject = $value->user->kycStringStatus;
+                                                    $kycLabel = is_object($kycObject)
+                                                        ? $kycObject->value ?? 'Unverified'
+                                                        : $kycObject ?? 'Unverified';
+                                                @endphp
+                                                @if ($kycStatus == 1)
+                                                    <i class="las la-check-circle text-success"
+                                                        title="{{ $kycLabel }}"></i>
+                                                @endif
+                                            </div>
+
+                                            <div class="d-flex flex-wrap gap-2 mt-2">
+                                                @if ($value->user->full_mobile || $value->user->mobile)
+                                                    <a href="tel:{{ $value->user->full_mobile ?? $value->user->mobile }}"
+                                                        class="btn btn-sm btn-light border btn-icon" title="Call">
+                                                        <i class="las la-phone text-primary"></i>
+                                                    </a>
+                                                @endif
+                                                <a href="mailto:{{ $value->user->email }}"
+                                                    class="btn btn-sm btn-light border btn-icon" title="Email">
+                                                    <i class="las la-envelope text-primary"></i>
+                                                </a>
+                                                @if ($value->user->driving_license)
+                                                    <button class="btn btn-sm btn-light border btn-icon"
+                                                        title="License: {{ $value->user->driving_license }}">
+                                                        <i class="las la-id-card text-primary"></i>
+                                                    </button>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                @else
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center"
+                                            style="width: 40px; height: 40px;">
+                                            <i class="las la-user-secret text-muted"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">{{ __('Guest User') }}</h6>
+                                            <small class="text-muted d-block">{{ $value->email }}</small>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+
+                            {{-- Trip Details Column --}}
+                            <div class="col-lg-5 p-4 border-end-lg">
+                                <h6 class="text-uppercase text-muted fw-bold small mb-4 letter-spacing-1">
+                                    {{ __('Trip Journey') }}</h6>
+
+                                <div class="position-relative ps-4 border-start border-2 ms-2">
+                                    {{-- Pickup Dot --}}
+                                    <div class="position-absolute bg-success rounded-circle border border-white top-0 start-0 translate-middle ms-0"
+                                        style="width: 12px; height: 12px;"></div>
+
+                                    <div class="mb-4">
+                                        <label class="small text-muted d-block mb-1">{{ __('Pick-up') }}</label>
+                                        <a href="https://maps.google.com/?q={{ urlencode($value->location) }}"
+                                            target="_blank" class="fw-medium text-dark text-decoration-none hover-primary">
+                                            {{ $value->location }} <i
+                                                class="las la-external-link-alt small ms-1 text-muted"></i>
+                                        </a>
+                                        <div
+                                            class="d-flex align-items-center gap-2 mt-1 small bg-light d-inline-block px-2 py-1 rounded">
+                                            <i class="las la-calendar text-primary"></i> {{ $value->pickup_date }}
+                                            <span class="text-muted">|</span>
+                                            <i class="las la-clock text-primary"></i> {{ $value->pickup_time }}
+                                        </div>
+                                    </div>
+
+                                    {{-- Dropoff Dot --}}
+                                    <div class="position-absolute bg-danger rounded-circle border border-white top-100 start-0 translate-middle ms-0"
+                                        style="width: 12px; height: 12px;"></div>
+
+                                    <div class="mb-0">
+                                        <label class="small text-muted d-block mb-1">{{ __('Destination') }}</label>
+                                        <a href="https://maps.google.com/?q={{ urlencode($value->destination) }}"
+                                            target="_blank" class="fw-medium text-dark text-decoration-none hover-primary">
+                                            {{ $value->destination }} <i
+                                                class="las la-external-link-alt small ms-1 text-muted"></i>
+                                        </a>
+                                        @if ($value->round_pickup_date)
+                                            <div
+                                                class="d-flex align-items-center gap-2 mt-1 small bg-light d-inline-block px-2 py-1 rounded">
+                                                <i class="las la-undo text-warning"></i> Return:
+                                                {{ $value->round_pickup_date }}
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                @if ($value->message)
+                                    <div
+                                        class="mt-4 p-3 bg-warning bg-opacity-10 rounded border border-warning border-opacity-25">
+                                        <div class="d-flex gap-2">
+                                            <i class="las la-info-circle text-warning mt-1"></i>
+                                            <p class="mb-0 small text-dark fst-italic">"{{ $value->message }}"</p>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+
+                            {{-- Payment & Actions Column --}}
+                            <div class="col-lg-3 p-4 bg-light bg-opacity-25 d-flex flex-column justify-content-between">
+                                <div>
+                                    <h6 class="text-uppercase text-muted fw-bold small mb-3 letter-spacing-1">
+                                        {{ __('Payment') }}</h6>
+                                    <div class="mb-3">
+                                        <label class="small text-muted d-block">{{ __('Method') }}</label>
+                                        <span
+                                            class="badge badge--info">{{ $value->payment_type == Str::slug(car_booking_const()::ONLINE_PAYMENT) ? __('Online') : __('Cash') }}</span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="small text-muted d-block">{{ __('Total Amount') }}</label>
+                                        <h4 class="text-primary fw-bold mb-0">{{ get_amount($value->amount) }} <small
+                                                class="fs-6 text-muted">{{ get_default_currency_code() }}</small></h4>
+                                    </div>
+                                    <div class="row g-2 small text-muted">
+                                        <div class="col-6">Rate: {{ get_amount($value->cars->fees) }}/km</div>
+                                        <div class="col-6">Dist: {{ $value->distance }}km</div>
+                                    </div>
+                                </div>
+
+                                <div class="d-grid gap-2 mt-4">
+                                    @if ($value->status === 1)
+                                        <a href="{{ setRoute('vendor.booking.accept', $value->id) }}"
+                                            class="btn btn-primary fw-medium shadow-sm">
+                                            <i class="las la-check me-2"></i>{{ __('Accept Request') }}
+                                        </a>
+                                        <a href="{{ setRoute('vendor.booking.reject', $value->id) }}"
+                                            class="btn btn-outline-danger fw-medium">
+                                            <i class="las la-times me-2"></i>{{ __('Reject') }}
+                                        </a>
+                                    @else
+                                        <a href="{{ setRoute('vendor.booking.complete', $value->id) }}"
+                                            class="btn btn-success fw-medium shadow-sm text-white">
+                                            <i class="las la-flag-checkered me-2"></i>{{ __('Complete Trip') }}
+                                        </a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="dashboard-list-item-wrapper bg-white rounded-3 p-5 text-center shadow-sm border border-dashed">
+                    <div class="mb-3">
+                        <i class="las la-inbox display-1 text-muted opacity-25"></i>
+                    </div>
+                    <h4 class="title text-muted fw-normal">{{ __('No Booking Requests Found') }}</h4>
+                    <p class="text-muted mb-0">{{ __('New requests will appear here automatically.') }}</p>
+                </div>
+            @endforelse
+        </div>
+    </div>
+    {{ $car_bookings->links() }}
+
+    <style>
+        .hover-primary:hover {
+            color: var(--primary-color) !important;
+            text-decoration: underline !important;
+        }
+
+        .hover-shadow:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .1) !important;
+        }
+
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+
+        .letter-spacing-1 {
+            letter-spacing: 1px;
+        }
+
+        .border-end-lg {
+            border-right: 1px solid #dee2e6;
+        }
+
+        @media (max-width: 991.98px) {
+            .border-end-lg {
+                border-right: none;
+                border-bottom: 1px solid #dee2e6;
+            }
+        }
+    </style>
+@endsection

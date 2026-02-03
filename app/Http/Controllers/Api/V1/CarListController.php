@@ -37,6 +37,7 @@ class CarListController extends Controller
             'car_type_id'  => 'nullable|integer|exists:car_types,id',
             'car_model_id' => 'nullable|integer|exists:car_models,id',
             'vendor_id'    => 'nullable|integer|exists:vendors,id',
+            'branch_id'    => 'nullable|integer|exists:branches,id',
             'per_page'     => 'nullable|integer|min:1|max:100',
         ]);
 
@@ -64,12 +65,20 @@ class CarListController extends Controller
             $query->where('vendor_id', $request->vendor_id);
         }
 
+        // Filter by branch
+        if ($request->filled('branch_id')) {
+            $query->where('branch_id', $request->branch_id);
+        }
+
         // Build available filters based on current query (before sorting and pagination)
         $filtersQueryForTypes = (clone $query);
         $typeIds = $filtersQueryForTypes->select('car_type_id')->distinct()->pluck('car_type_id')->filter()->toArray();
 
         $filtersQueryForModels = (clone $query);
         $modelIds = $filtersQueryForModels->select('car_model_id')->distinct()->pluck('car_model_id')->filter()->toArray();
+
+        $filtersQueryForBranches = (clone $query);
+        $branchIds = $filtersQueryForBranches->select('branch_id')->distinct()->pluck('branch_id')->filter()->toArray();
 
         // Sorting by price
         $sort = $request->input('sort', 'price_desc');
@@ -115,6 +124,7 @@ class CarListController extends Controller
             'available_filters' => [
                 'car_types' => CarType::whereIn('id', $typeIds)->select('id', 'name', 'slug')->get(),
                 'car_models' => CarModel::whereIn('id', $modelIds)->select('id', 'name', 'car_type_id')->get(),
+                'branches' => \App\Models\Admin\Branch::whereIn('id', $branchIds)->where('status', true)->select('id', 'name', 'slug', 'address')->get(),
             ],
             'cars' => $cars->getCollection()->map(function ($car) {
                 $feesRaw = (float) $car->fees;
@@ -145,6 +155,12 @@ class CarListController extends Controller
                     'area' => $car->area ? [
                         'id'   => $car->area->id,
                         'name' => $car->area->name,
+                    ] : null,
+                    'branch' => $car->branch ? [
+                        'id'      => $car->branch->id,
+                        'name'    => $car->branch->name,
+                        'slug'    => $car->branch->slug,
+                        'address' => $car->branch->address,
                     ] : null,
                     'vendor' => $car->vendor ? [
                         'id'       => $car->vendor->id,
@@ -229,6 +245,21 @@ class CarListController extends Controller
     }
 
     /**
+     * Get all branches for filter dropdown
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function branches()
+    {
+        $branches = \App\Models\Admin\Branch::where('status', true)
+            ->select('id', 'name', 'slug', 'address')
+            ->orderBy('name', 'asc')
+            ->get();
+
+        return Response::success([__('Branches fetched successfully!')], ['branches' => $branches], 200);
+    }
+
+    /**
      * Get single car details
      *
      * @param int $id
@@ -310,6 +341,12 @@ class CarListController extends Controller
                 'area' => $car->area ? [
                     'id'   => $car->area->id,
                     'name' => $car->area->name,
+                ] : null,
+                'branch' => $car->branch ? [
+                    'id'      => $car->branch->id,
+                    'name'    => $car->branch->name,
+                    'slug'    => $car->branch->slug,
+                    'address' => $car->branch->address,
                 ] : null,
                 'vendor' => $car->vendor ? [
                     'id'       => $car->vendor->id,

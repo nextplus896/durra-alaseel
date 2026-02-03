@@ -1,0 +1,70 @@
+:root {
+    --base-font-size: 1rem;
+    --scale-ratio: 1.2; /* Minor Third Scale */
+}
+
+/* Headings */
+h1,
+.h1 {
+    font-size: calc(
+        var(--base-font-size) * var(--scale-ratio) * var(--scale-ratio) *
+            var(--scale-ratio) * var(--scale-ratio) * var(--scale-ratio)
+    ); /* ~2.48rem */
+}
+
+h2,
+.h2 {
+    font-size: calc(
+        var(--base-font-size) * var(--scale-ratio) * var(--scale-ratio) *
+            var(--scale-ratio) * var(--scale-ratio)
+    ); /* ~2.07rem */
+}
+
+h3,
+.h3 {
+    font-size: calc(
+        var(--base-font-size) * var(--scale-ratio) * var(--scale-ratio) *
+            var(--scale-ratio)
+    ); /* ~1.72rem */
+}
+
+h4,
+.h4 {
+    font-size: calc(
+        var(--base-font-size) * var(--scale-ratio) * var(--scale-ratio)
+    ); /* ~1.44rem */
+}
+
+h5,
+.h5 {
+    font-size: calc(var(--base-font-size) * var(--scale-ratio)); /* ~1.2rem */
+}
+
+h6,
+.h6 {
+    font-size: var(--base-font-size); /* 1rem */
+}
+
+/* Body Text & Elements */
+p,
+a,
+li,
+button,
+input,
+label,
+select,
+textarea,
+.form-control {
+    font-size: var(--base-font-size);
+}
+
+/* Spans (Warning globally setting span size can affect icons, but requested by user) */
+span {
+    font-size: inherit; /* Safer to inherit, but effectively normalized if parent is normalized */
+}
+
+/* Small text helper */
+small,
+.small {
+    font-size: calc(var(--base-font-size) / var(--scale-ratio)); /* ~0.83rem */
+}

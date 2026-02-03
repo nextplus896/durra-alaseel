@@ -1,0 +1,1902 @@
+openapi: 3.0.0
+info:
+  title: Dorra Alaseel - Complete API v1 Collection
+  description: >-
+    Complete API v1 endpoints for Dorra Alaseel Car Rental System - All /api/v1/
+    routes
+  version: 1.0.0
+servers:
+  - url: '{{base_url}}'
+tags:
+  - name: Authentication
+  - name: Authentication > User Auth
+  - name: Authentication > Vendor Auth
+  - name: Authentication > User Authorization
+  - name: Authentication > Vendor Authorization
+  - name: User - Profile
+  - name: User - Dashboard
+  - name: User - Transactions
+  - name: User - Balance Management
+  - name: User - Branches & Delivery
+  - name: User - Car Booking
+  - name: Vendor - Profile
+  - name: Vendor - Dashboard
+  - name: Vendor - Cars Management
+  - name: Vendor - Bookings
+  - name: Vendor - Withdraw
+  - name: Vendor - Transactions
+  - name: Settings & Global
+  - name: Cars (Public)
+  - name: OTP Verification
+  - name: Webhooks
+paths:
+  /api/v1/register:
+    post:
+      tags:
+        - Authentication > User Auth
+      summary: User Register
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: >-
+                "{\n  \"firstname\": \"John\",\n  \"lastname\": \"Doe\",\n 
+                \"email\": \"user@example.com\",\n  \"password\":
+                \"password123\",\n  \"password_confirmation\":
+                \"password123\",\n  \"mobile\": \"+966555123456\",\n 
+                \"country\": \"Saudi Arabia\"\n}"
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/login:
+    post:
+      tags:
+        - Authentication > User Auth
+      summary: User Login
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: >-
+                "{\n  \"email\": \"user@example.com\",\n  \"password\":
+                \"password123\"\n}"
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/password/forgot/find/user:
+    post:
+      tags:
+        - Authentication > User Auth
+      summary: User Forgot Password - Find User
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: '"{\n  \"email\": \"user@example.com\"\n}"'
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/password/forgot/verify/code:
+    post:
+      tags:
+        - Authentication > User Auth
+      summary: User Forgot Password - Verify Code
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: '"{\n  \"code\": \"123456\"\n}"'
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/password/forgot/reset:
+    post:
+      tags:
+        - Authentication > User Auth
+      summary: User Forgot Password - Reset
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: >-
+                "{\n  \"password\": \"newpassword123\",\n 
+                \"password_confirmation\": \"newpassword123\"\n}"
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/register:
+    post:
+      tags:
+        - Authentication > Vendor Auth
+      summary: Vendor Register
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: >-
+                "{\n  \"firstname\": \"Vendor\",\n  \"lastname\": \"Name\",\n 
+                \"email\": \"vendor@example.com\",\n  \"password\":
+                \"password123\",\n  \"password_confirmation\":
+                \"password123\",\n  \"mobile\": \"+966555123456\"\n}"
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/login:
+    post:
+      tags:
+        - Authentication > Vendor Auth
+      summary: Vendor Login
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: >-
+                "{\n  \"email\": \"vendor@example.com\",\n  \"password\":
+                \"password123\"\n}"
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/authorize/mail/send/code:
+    get:
+      tags:
+        - Authentication > User Authorization
+      summary: Send Mail Verification Code
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/authorize/mail/verify/code:
+    post:
+      tags:
+        - Authentication > User Authorization
+      summary: Verify Mail Code
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: '"{\n  \"code\": \"123456\"\n}"'
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor-authorize/kyc/input-fields:
+    get:
+      tags:
+        - Authentication > Vendor Authorization
+      summary: Get KYC Input Fields
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor-authorize/kyc/submit:
+    post:
+      tags:
+        - Authentication > Vendor Authorization
+      summary: Submit KYC
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: '"{\n  \"kyc_data\": {}\n}"'
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor-authorize/google/2fa/status:
+    get:
+      tags:
+        - Authentication > Vendor Authorization
+      summary: Get 2FA Status
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor-authorize/google/2fa/status-update:
+    post:
+      tags:
+        - Authentication > Vendor Authorization
+      summary: Update 2FA Status
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: '"{\n  \"status\": true\n}"'
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor-authorize/google/2fa/verify:
+    post:
+      tags:
+        - Authentication > Vendor Authorization
+      summary: Verify 2FA
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: '"{\n  \"code\": \"123456\"\n}"'
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/profile/info:
+    get:
+      tags:
+        - User - Profile
+      summary: Get Profile Info
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/profile/info/update:
+    post:
+      tags:
+        - User - Profile
+      summary: Update Profile Info
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: >-
+                "{\n  \"firstname\": \"John\",\n  \"lastname\": \"Doe\",\n 
+                \"mobile\": \"+966555123456\",\n  \"address\": \"Riyadh, Saudi
+                Arabia\"\n}"
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/profile/password/update:
+    post:
+      tags:
+        - User - Profile
+      summary: Update Password
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: >-
+                "{\n  \"current_password\": \"oldpassword123\",\n  \"password\":
+                \"newpassword123\",\n  \"password_confirmation\":
+                \"newpassword123\"\n}"
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/profile/delete-account:
+    post:
+      tags:
+        - User - Profile
+      summary: Delete Account
+      requestBody:
+        content: {}
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/logout:
+    post:
+      tags:
+        - User - Profile
+      summary: Logout
+      requestBody:
+        content: {}
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/dashboard:
+    get:
+      tags:
+        - User - Dashboard
+      summary: Get Dashboard
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/notifications:
+    get:
+      tags:
+        - User - Dashboard
+      summary: Get Notifications
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/transaction/log:
+    get:
+      tags:
+        - User - Transactions
+      summary: Transaction Log
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/balance:
+    get:
+      tags:
+        - User - Balance Management
+      summary: Get Balance
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/balance/history:
+    get:
+      tags:
+        - User - Balance Management
+      summary: Get Transaction History
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/balance/recharge:
+    post:
+      tags:
+        - User - Balance Management
+      summary: Initiate Recharge
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: '"{\n  \"amount\": 500,\n  \"gateway\": \"stripe\"\n}"'
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/balance/tax-settings:
+    get:
+      tags:
+        - User - Balance Management
+      summary: Get Tax Settings
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/balance/calculate-tax:
+    post:
+      tags:
+        - User - Balance Management
+      summary: Calculate Tax
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: '"{\n  \"amount\": 500\n}"'
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/balance/check:
+    post:
+      tags:
+        - User - Balance Management
+      summary: Check Balance
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: '"{\n  \"amount\": 500\n}"'
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/branches:
+    get:
+      tags:
+        - User - Branches & Delivery
+      summary: List Branches
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/branches/{id}:
+    get:
+      tags:
+        - User - Branches & Delivery
+      summary: Get Branch Details
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+        - name: id
+          in: path
+          schema:
+            type: integer
+          required: true
+          example: '1'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/branches/check-service-area:
+    post:
+      tags:
+        - User - Branches & Delivery
+      summary: Check Service Area
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: '"{\n  \"latitude\": 24.7136,\n  \"longitude\": 46.6753\n}"'
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/branches/cars-with-delivery:
+    post:
+      tags:
+        - User - Branches & Delivery
+      summary: Get Cars with Delivery
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: '"{\n  \"latitude\": 24.7136,\n  \"longitude\": 46.6753\n}"'
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/branches/delivery-price:
+    post:
+      tags:
+        - User - Branches & Delivery
+      summary: Get Delivery Price
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: >-
+                "{\n  \"latitude\": 24.7136,\n  \"longitude\": 46.6753,\n 
+                \"car_id\": 1\n}"
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/car-booking/booking/history:
+    get:
+      tags:
+        - User - Car Booking
+      summary: Booking History
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/car-booking/area:
+    get:
+      tags:
+        - User - Car Booking
+      summary: Get Car Areas
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/car-booking/type:
+    get:
+      tags:
+        - User - Car Booking
+      summary: Get Car Types
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/car-booking/area/types:
+    post:
+      tags:
+        - User - Car Booking
+      summary: Get Types by Area
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: '"{\n  \"car_area_id\": 1\n}"'
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/car-booking/search/car:
+    post:
+      tags:
+        - User - Car Booking
+      summary: Search Car
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: >-
+                "{\n  \"car_area_id\": 1,\n  \"car_type_id\": 2,\n 
+                \"start_date\": \"2026-02-01\",\n  \"end_date\":
+                \"2026-02-05\"\n}"
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/car-booking/car/details:
+    get:
+      tags:
+        - User - Car Booking
+      summary: View Car Details
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+        - name: car_id
+          in: query
+          schema:
+            type: integer
+          example: '1'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/car-booking/temp/store:
+    post:
+      tags:
+        - User - Car Booking
+      summary: Create Temporary Booking
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: >-
+                "{\n  \"car_id\": 1,\n  \"start_date\": \"2026-02-01\",\n 
+                \"end_date\": \"2026-02-05\",\n  \"pickup_location\": \"Riyadh
+                Airport\",\n  \"dropoff_location\": \"Riyadh City Center\"\n}"
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/car-booking/preview:
+    get:
+      tags:
+        - User - Car Booking
+      summary: Preview Booking
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+        - name: booking_id
+          in: query
+          schema:
+            type: string
+          example: '{{booking_id}}'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/car-booking/confirm:
+    post:
+      tags:
+        - User - Car Booking
+      summary: Confirm Booking
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: >-
+                "{\n  \"booking_id\": {{booking_id}},\n  \"payment_gateway\":
+                \"stripe\"\n}"
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/car-booking/manual/input-fields:
+    get:
+      tags:
+        - User - Car Booking
+      summary: Get Manual Input Fields
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/car-booking/manual/submit:
+    post:
+      tags:
+        - User - Car Booking
+      summary: Submit Manual Payment
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: >-
+                "{\n  \"booking_id\": {{booking_id}},\n  \"payment_data\":
+                {}\n}"
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/user/car-booking/payment-gateway/additional-fields:
+    get:
+      tags:
+        - User - Car Booking
+      summary: Get Gateway Additional Fields
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{user_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/profile/info:
+    get:
+      tags:
+        - Vendor - Profile
+      summary: Get Profile Info
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/profile/info/update:
+    post:
+      tags:
+        - Vendor - Profile
+      summary: Update Profile Info
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: >-
+                "{\n  \"firstname\": \"Vendor\",\n  \"lastname\": \"Name\",\n 
+                \"mobile\": \"+966555123456\"\n}"
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/profile/password/update:
+    post:
+      tags:
+        - Vendor - Profile
+      summary: Update Password
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: >-
+                "{\n  \"current_password\": \"oldpassword\",\n  \"password\":
+                \"newpassword\",\n  \"password_confirmation\":
+                \"newpassword\"\n}"
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/logout:
+    post:
+      tags:
+        - Vendor - Profile
+      summary: Logout
+      requestBody:
+        content: {}
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/dashboard:
+    get:
+      tags:
+        - Vendor - Dashboard
+      summary: Get Dashboard
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/notifications:
+    get:
+      tags:
+        - Vendor - Dashboard
+      summary: Get Notifications
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/due/pay:
+    post:
+      tags:
+        - Vendor - Dashboard
+      summary: Pay Due Amount
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: '"{\n  \"amount\": 1000\n}"'
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/car/list:
+    get:
+      tags:
+        - Vendor - Cars Management
+      summary: List My Cars
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/car/area:
+    get:
+      tags:
+        - Vendor - Cars Management
+      summary: Get Car Areas
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/car/type:
+    get:
+      tags:
+        - Vendor - Cars Management
+      summary: Get Car Types
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/car/area/types:
+    post:
+      tags:
+        - Vendor - Cars Management
+      summary: Get Types by Area
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: '"{\n  \"car_area_id\": 1\n}"'
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/car/store:
+    post:
+      tags:
+        - Vendor - Cars Management
+      summary: Add Car
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: >-
+                "{\n  \"car_area_id\": 1,\n  \"car_type_id\": 2,\n 
+                \"car_model_id\": 3,\n  \"car_number\": \"ABC-1234\",\n 
+                \"fees\": 150,\n  \"seat\": 5,\n  \"doors\": 4\n}"
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/car/status:
+    post:
+      tags:
+        - Vendor - Cars Management
+      summary: Update Car Status
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: '"{\n  \"car_id\": 1,\n  \"status\": 1\n}"'
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/car/details:
+    post:
+      tags:
+        - Vendor - Cars Management
+      summary: Get Car Details
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: '"{\n  \"car_id\": 1\n}"'
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/car/update:
+    post:
+      tags:
+        - Vendor - Cars Management
+      summary: Update Car
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: '"{\n  \"car_id\": 1,\n  \"fees\": 200,\n  \"seat\": 5\n}"'
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/car/delete:
+    post:
+      tags:
+        - Vendor - Cars Management
+      summary: Delete Car
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: '"{\n  \"car_id\": 1\n}"'
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/booking/requests:
+    get:
+      tags:
+        - Vendor - Bookings
+      summary: Get Booking Requests
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/booking/accept:
+    get:
+      tags:
+        - Vendor - Bookings
+      summary: Accept Booking
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+        - name: booking_id
+          in: query
+          schema:
+            type: integer
+          example: '1'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/booking/reject:
+    get:
+      tags:
+        - Vendor - Bookings
+      summary: Reject Booking
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+        - name: booking_id
+          in: query
+          schema:
+            type: integer
+          example: '1'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/booking/complete:
+    get:
+      tags:
+        - Vendor - Bookings
+      summary: Complete Booking
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+        - name: booking_id
+          in: query
+          schema:
+            type: integer
+          example: '1'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/history/view:
+    get:
+      tags:
+        - Vendor - Bookings
+      summary: View Booking History
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/withdraw/wallet-gateways:
+    get:
+      tags:
+        - Vendor - Withdraw
+      summary: Get Wallet Gateways
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/withdraw/gateway/input-fields:
+    get:
+      tags:
+        - Vendor - Withdraw
+      summary: Get Gateway Input Fields
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+        - name: gateway
+          in: query
+          schema:
+            type: string
+          example: bank_transfer
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/withdraw/submit:
+    post:
+      tags:
+        - Vendor - Withdraw
+      summary: Submit Withdraw Request
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: >-
+                "{\n  \"gateway\": \"bank_transfer\",\n  \"amount\": 5000,\n 
+                \"bank_details\": {}\n}"
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vendor/transaction/log:
+    get:
+      tags:
+        - Vendor - Transactions
+      summary: Transaction Log
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{vendor_token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/settings/basic-settings:
+    get:
+      tags:
+        - Settings & Global
+      summary: Get Basic Settings
+      description: Get basic app settings
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/settings/splash-screen:
+    get:
+      tags:
+        - Settings & Global
+      summary: Get Splash Screen
+      description: Get splash screen configuration
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/settings/onboard-screens:
+    get:
+      tags:
+        - Settings & Global
+      summary: Get Onboard Screens
+      description: Get onboarding screens
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/settings/languages:
+    get:
+      tags:
+        - Settings & Global
+      summary: Get Languages
+      description: Get available languages
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/settings/countries:
+    get:
+      tags:
+        - Settings & Global
+      summary: Get Countries
+      description: Get available countries
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/cars:
+    get:
+      tags:
+        - Cars (Public)
+      summary: List All Cars
+      description: Get all available cars with filtering and sorting
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+        - name: sort
+          in: query
+          schema:
+            type: string
+          description: price_asc, price_desc, name_asc, name_desc
+          example: price_asc
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+          example: '15'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/cars/types:
+    get:
+      tags:
+        - Cars (Public)
+      summary: Get Car Types
+      description: Get all car types
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/cars/models:
+    get:
+      tags:
+        - Cars (Public)
+      summary: Get Car Models
+      description: Get car models, optionally filtered by car type
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+        - name: car_type_id
+          in: query
+          schema:
+            type: integer
+          example: '1'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/cars/vendor/{vendorId}:
+    get:
+      tags:
+        - Cars (Public)
+      summary: Get Cars by Vendor
+      description: Get all cars from a specific vendor
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+        - name: sort
+          in: query
+          schema:
+            type: string
+          example: price_desc
+        - name: vendorId
+          in: path
+          schema:
+            type: integer
+          required: true
+          example: '5'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/cars/{carId}:
+    get:
+      tags:
+        - Cars (Public)
+      summary: Get Car Details
+      description: Get details of a specific car
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+        - name: carId
+          in: path
+          schema:
+            type: integer
+          required: true
+          example: '123'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/otp/request:
+    post:
+      tags:
+        - OTP Verification
+      summary: Request OTP via WhatsApp
+      description: Send OTP code via WhatsApp to the provided phone number
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: >-
+                "{\n  \"phone\": \"+966555123456\",\n  \"channel\":
+                \"whatsapp\",\n  \"locale\": \"ar\"\n}"
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/otp/verify:
+    post:
+      tags:
+        - OTP Verification
+      summary: Verify OTP Code
+      description: Verify the OTP code sent to the phone number
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: '"{\n  \"phone\": \"+966555123456\",\n  \"code\": \"123456\"\n}"'
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/webhooks/twilio/status:
+    post:
+      tags:
+        - Webhooks
+      summary: Twilio Status Callback
+      description: Twilio webhook for message status updates
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                MessageSid:
+                  type: string
+                  example: SM1234567890abcdef1234567890abcdef
+                AccountSid:
+                  type: string
+                  example: AC46cac1e17737ef6a1a33402b7ba83868
+                To:
+                  type: number
+                  example: '+966555123456'
+                From:
+                  type: number
+                  example: '+1234567890'
+                MessageStatus:
+                  type: string
+                  example: delivered
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/x-www-form-urlencoded
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/webhooks/twilio/pricing:
+    post:
+      tags:
+        - Webhooks
+      summary: Twilio Pricing Callback
+      description: Twilio webhook for pricing information
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                MessageSid:
+                  type: string
+                  example: SM1234567890abcdef1234567890abcdef
+                Price:
+                  type: number
+                  example: '-0.0075'
+                PriceUnit:
+                  type: string
+                  example: USD
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/x-www-form-urlencoded
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}

@@ -1,311 +1,125 @@
 @extends('vendor-end.layouts.master')
+
 @section('content')
     <div class="booking-request pt-40">
-        <div class="title-header pb-20">
-            <h3 class="title">{{ __('Booking Request') }}</h3>
+        {{-- Header & Toolbar --}}
+        <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 border-bottom pb-4">
+            <h3 class="title mb-3 mb-md-0">{{ __('Booking Request') }}</h3>
+
+            <form action="" method="GET" class="d-flex flex-wrap gap-2">
+                <div class="input-group" style="width: 280px;">
+                    <span class="input-group-text bg-white border-end-0"><i class="las la-search text-muted"></i></span>
+                    <input type="text" name="search" value="{{ request('search') }}"
+                        class="form-control border-start-0 ps-0" placeholder="{{ __('Search by ID, Name...') }}">
+                </div>
+
+                <select name="status" class="form-select w-auto" onchange="this.form.submit()">
+                    <option value="">{{ __('All Status') }}</option>
+                    <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>{{ __('Pending') }}</option>
+                    <option value="2" {{ request('status') == '2' ? 'selected' : '' }}>{{ __('Ongoing') }}</option>
+                </select>
+            </form>
         </div>
-        <div class="dashboard-list-wrapper">
-            @forelse ($car_bookings ?? [] as $value)
-                <div class="dashboard-list-item-wrapper">
-                    <div class="dashboard-list-item sent">
-                        <div class="dashboard-list-left">
-                            <div class="dashboard-list-user-wrapper">
-                                <div class="dashboard-list-user-icon">
-                                    <img src="{{ get_image($value->cars->image ?? '', 'site-section') ?? '' }}"
-                                        alt="user">
-                                </div>
-                                <div class="dashboard-list-user-content">
-                                    <h4 class="title">{{ $value->cars->car_model }}</h4>
-                                    <span class="sub-title text--danger">
-                                        @if ($value->status === 1)
-                                            <span class="badge badge--warning ms-2">{{ __('Pending') }}</span>
-                                        @elseif ($value->status === 2)
-                                            <span class="badge badge--success ms-2">{{ __('On Going') }}</span>
-                                        @endif
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="dashboard-list-right">
-                            <h4 class="main-money text--base">{{ $value->pickup_date }}</h4>
-                        </div>
-                    </div>
-                    <div class="preview-list-wrapper">
-                        <div class="preview-list-item">
-                            <div class="preview-list-left">
-                                <div class="preview-list-user-wrapper">
-                                    <div class="preview-list-user-icon">
-                                        <i class="las la-user"></i>
-                                    </div>
-                                    <div class="preview-list-user-content">
-                                        <span>{{ __('Pick-up location') }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="preview-list-right">
-                                <span>{{ $value->location }}</span>
-                            </div>
-                        </div>
-                        <div class="preview-list-item">
-                            <div class="preview-list-left">
-                                <div class="preview-list-user-wrapper">
-                                    <div class="preview-list-user-icon">
-                                        <i class="las la-envelope"></i>
-                                    </div>
-                                    <div class="preview-list-user-content">
-                                        <span>{{ __('Destination') }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="preview-list-right">
-                                <span>{{ $value->destination }}</span>
-                            </div>
-                        </div>
-                        <div class="preview-list-item">
-                            <div class="preview-list-left">
-                                <div class="preview-list-user-wrapper">
-                                    <div class="preview-list-user-icon">
-                                        <i class="las la-calendar"></i>
-                                    </div>
-                                    <div class="preview-list-user-content">
-                                        <span>{{ __('Pick-up date') }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="preview-list-right">
-                                <span>{{ $value->pickup_date }}</span>
-                            </div>
-                        </div>
-                        <div class="preview-list-item">
-                            <div class="preview-list-left">
-                                <div class="preview-list-user-wrapper">
-                                    <div class="preview-list-user-icon">
-                                        <i class="las la-history"></i>
-                                    </div>
-                                    <div class="preview-list-user-content">
-                                        <span>{{ __('Pick-up time') }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="preview-list-right">
-                                <span>{{ $value->pickup_time }}</span>
-                            </div>
-                        </div>
-                        @if ($value->round_pickup_date)
-                            <div class="preview-list-item">
-                                <div class="preview-list-left">
-                                    <div class="preview-list-user-wrapper">
-                                        <div class="preview-list-user-icon">
-                                            <i class="las la-calendar"></i>
+
+        <div class="table-area">
+            <div class="table-responsive">
+                <table class="custom-table table">
+                    <thead>
+                        <tr>
+                            <th>{{ __('Trx ID') }}</th>
+                            <th>{{ __('Customer') }}</th>
+                            <th>{{ __('Car Model') }}</th>
+                            <th>{{ __('Status') }}</th>
+                            <th>{{ __('Date') }}</th>
+                            <th>{{ __('Action') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($car_bookings ?? [] as $item)
+                            <tr>
+                                <td data-label="{{ __('Trx ID') }}">
+                                    <span class="text-primary fw-bold">#{{ $item->trx_id ?? $item->id }}</span>
+                                </td>
+                                <td data-label="{{ __('Customer') }}">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="rounded-circle overflow-hidden border flex-shrink-0"
+                                            style="width: 35px; height: 35px;">
+                                            @if ($item->user && $item->user->image)
+                                                <img src="{{ get_image($item->user->image, 'user-profile') }}"
+                                                    class="w-100 h-100 object-fit-cover">
+                                            @else
+                                                <div
+                                                    class="w-100 h-100 bg-light d-flex align-items-center justify-content-center fw-bold text-muted small">
+                                                    {{ substr($item->user->firstname ?? 'U', 0, 1) }}
+                                                </div>
+                                            @endif
                                         </div>
-                                        <div class="preview-list-user-content">
-                                            <span>{{ __('Round Pick-up date') }}</span>
+                                        <div>
+                                            <span
+                                                class="d-block fw-medium small text-dark">{{ $item->user->fullname ?? 'Guest' }}</span>
+                                            <span class="d-block small text-muted"
+                                                style="font-size: 11px;">{{ $item->user->email ?? $item->email }}</span>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="preview-list-right">
-                                    <span>{{ $value->round_pickup_date }}</span>
-                                </div>
-                            </div>
-                        @endif
-                        @if ($value->round_pickup_time)
-                            <div class="preview-list-item">
-                                <div class="preview-list-left">
-                                    <div class="preview-list-user-wrapper">
-                                        <div class="preview-list-user-icon">
-                                            <i class="las la-history"></i>
+                                </td>
+                                <td data-label="{{ __('Car Model') }}">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="rounded-1 overflow-hidden border flex-shrink-0"
+                                            style="width: 40px; height: 30px;">
+                                            <img src="{{ get_image($item->cars->image ?? '', 'site-section') ?? '' }}"
+                                                class="w-100 h-100 object-fit-cover">
                                         </div>
-                                        <div class="preview-list-user-content">
-                                            <span>{{ __('Round Pick-up time') }}</span>
-                                        </div>
+                                        <span class="fw-medium small text-dark">{{ $item->cars->car_model }}</span>
                                     </div>
-                                </div>
-                                <div class="preview-list-right">
-                                    <span>{{ $value->round_pickup_time }}</span>
-                                </div>
-                            </div>
-                        @endif
-                        <div class="preview-list-item">
-                            <div class="preview-list-left">
-                                <div class="preview-list-user-wrapper">
-                                    <div class="preview-list-user-icon">
-                                        <i class="las la-car-side"></i>
-                                    </div>
-                                    <div class="preview-list-user-content">
-                                        <span>{{ __('Car Model') }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="preview-list-right">
-                                <span">{{ $value->cars->car_model }}</span>
-                            </div>
-                        </div>
-                        <div class="preview-list-item">
-                            <div class="preview-list-left">
-                                <div class="preview-list-user-wrapper">
-                                    <div class="preview-list-user-icon">
-                                        <i class="las la-car"></i>
-                                    </div>
-                                    <div class="preview-list-user-content">
-                                        <span>{{ __('Car Number') }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="preview-list-right">
-                                <span">{{ $value->cars->car_number }}</span>
-                            </div>
-                        </div>
-                        <div class="preview-list-item">
-                            <div class="preview-list-left">
-                                <div class="preview-list-user-wrapper">
-                                    <div class="preview-list-user-icon">
-                                        <i class="las la-battery-full"></i>
-                                    </div>
-                                    <div class="preview-list-user-content">
-                                        <span>{{ __('Rate') }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="preview-list-right">
-                                <span">{{ get_amount($value->cars->fees) }} {{ get_default_currency_code() }} / 1
-                                    {{ __('km') }}</span>
-                            </div>
-                        </div>
-                        <div class="preview-list-item">
-                            <div class="preview-list-left">
-                                <div class="preview-list-user-wrapper">
-                                    <div class="preview-list-user-icon">
-                                        <i class="las la-envelope"></i>
-                                    </div>
-                                    <div class="preview-list-user-content">
-                                        <span>{{ __('Distance') }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="preview-list-right">
-                                <span>{{ $value->distance }} {{ __('km') }}</span>
-                            </div>
-                        </div>
-                        <div class="preview-list-item">
-                            <div class="preview-list-left">
-                                <div class="preview-list-user-wrapper">
-                                    <div class="preview-list-user-icon">
-                                        <i class="las la-edit"></i>
-                                    </div>
-                                    <div class="preview-list-user-content">
-                                        <span>{{ __('Total Amount') }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="preview-list-right">
-                                <span">{{ get_amount($value->amount) }} {{ get_default_currency_code() }}</span>
-                            </div>
-                        </div>
-                        @if (Str::slug(car_booking_const()::CASH) == $value->payment_type)
-                        <div class="preview-list-item">
-                            <div class="preview-list-left">
-                                <div class="preview-list-user-wrapper">
-                                    <div class="preview-list-user-icon">
-                                        <i class="las la-edit"></i>
-                                    </div>
-                                    <div class="preview-list-user-content">
-                                        <span>{{ __('Charge') }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="preview-list-right">
-                                <span">{{ get_amount($value->charges) }} {{ get_default_currency_code() }}</span>
-                            </div>
-                        </div>
-                        @endif
-                        @if ($value->message)
-                            <div class="preview-list-item">
-                                <div class="preview-list-left">
-                                    <div class="preview-list-user-wrapper">
-                                        <div class="preview-list-user-icon">
-                                            <i class="las la-pen"></i>
-                                        </div>
-                                        <div class="preview-list-user-content">
-                                            <span>{{ __('Note') }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="preview-list-right">
-                                    <span">{{ $value->message }}</span>
-                                </div>
-                            </div>
-                        @endif
-                        <div class="preview-list-item">
-                            <div class="preview-list-left">
-                                <div class="preview-list-user-wrapper">
-                                    <div class="preview-list-user-icon">
-                                        <i class="las la-edit"></i>
-                                    </div>
-                                    <div class="preview-list-user-content">
-                                        <span>{{ __('Payment Type') }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="preview-list-right">
-                                <span">{{ $value->payment_type == Str::slug(car_booking_const()::ONLINE_PAYMENT) ? __('Online Payment') : __('Cash') }}</span>
-                            </div>
-                        </div>
-                        <div class="preview-list-item">
-                            <div class="preview-list-left">
-                                <div class="preview-list-user-wrapper">
-                                    <div class="preview-list-user-icon">
-                                        <i class="las la-smoking"></i>
-                                    </div>
-                                    <div class="preview-list-user-content">
-                                        <span>{{ __('Status') }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="preview-list-right text-center">
-                                @if ($value->status === 1)
-                                    <span class="base--text text--warning">{{ __('Pending') }}</span>
-                                    @else
-                                    <span class="base--text text--success">{{ __('On Going') }}</span>
-                                @endif
-                            </div>
-                        </div>
-                        <div class="preview-list-item">
-                            <div class="preview-list-left">
-                                <div class="preview-list-user-wrapper">
-                                    <div class="preview-list-user-icon">
-                                        <i class="las fa-edit"></i>
-                                    </div>
-                                    <div class="preview-list-user-content">
-                                        <span>{{ __('Action') }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="preview-list-right text-center">
-                                @if ($value->status === 1)
-                                    <a href="{{ setRoute('vendor.booking.reject', $value->id) }}"
-                                        class="service-btn-1">{{ __('Reject') }}</a>
-                                    <a href="{{ setRoute('vendor.booking.accept', $value->id) }}"
-                                        class="service-btn">{{ __('Accept') }}</a>
-                                @else
-                                    <a href="{{ setRoute('vendor.booking.complete', $value->id) }}"
-                                        class="service-btn">{{ __('Complete') }}</a>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            @empty
-                <div class="dashboard-list-item-wrapper">
-                    <div class="dashboard-list-item sent justify-content-center">
-                        <div class="dashboard-list-left">
-                            <div class="dashboard-list-user-content">
-                                <h4 class="title text-primary">{{ __('Nothing to show yet') }}</h4>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            @endforelse
+                                </td>
+                                <td data-label="{{ __('Status') }}">
+                                    @php
+                                        $statusClass = '';
+                                        $statusText = '';
+                                        if ($item->status == 1) {
+                                            $statusClass = 'badge bg-warning text-dark';
+                                            $statusText = __('Pending');
+                                        } elseif ($item->status == 2) {
+                                            $statusClass = 'badge bg-success';
+                                            $statusText = __('Ongoing');
+                                        } elseif ($item->status == 3) {
+                                            $statusClass = 'badge bg-primary';
+                                            $statusText = __('Completed');
+                                        } elseif ($item->status == 4) {
+                                            $statusClass = 'badge bg-danger';
+                                            $statusText = __('Rejected');
+                                        } else {
+                                            $statusClass = 'badge bg-secondary';
+                                            $statusText = __('Unknown');
+                                        }
+                                    @endphp
+                                    <span class="{{ $statusClass }} rounded-pill px-3 py-1">{{ $statusText }}</span>
+                                </td>
+                                <td data-label="{{ __('Date') }}">
+                                    <span class="text-muted small">{{ $item->created_at->format('d M Y') }}</span>
+                                    <br>
+                                    <span class="text-muted small"
+                                        style="font-size: 10px;">{{ $item->created_at->format('h:i A') }}</span>
+                                </td>
+                                <td data-label="{{ __('Action') }}">
+                                    <a href="{{ route('vendor.booking.details', $item->id) }}"
+                                        class="btn btn--base btn-sm btn-icon" title="{{ __('View Details') }}">
+                                        <i class="las la-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="100%" class="text-center">{{ __('No booking requests found!') }}</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-4">
+                {{ $car_bookings->links() }}
+            </div>
         </div>
     </div>
-    {{ $car_bookings->links() }}
 @endsection

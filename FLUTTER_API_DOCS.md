@@ -65,6 +65,37 @@ Registers a new user account.
 
 ---
 
+## Push Notifications (Mobile)
+
+This project sends mobile push notifications using **Pusher Beams** (provider: `pusher`).
+
+### How it works
+
+- The backend publishes a push message to a **Pusher Beams User ID**.
+- The mobile app logs in (gets a Passport token), then calls a **Beams auth** endpoint to obtain a Beams token.
+- The Pusher Beams SDK uses that token to associate the device with the same User ID.
+
+### Beams Auth (User)
+
+**GET** `/user/pusher/beams-auth`
+
+- **Auth:** `Authorization: Bearer <USER_TOKEN>`
+- **Response:** Beams token JSON (must be used as-is by the Pusher Beams SDK)
+
+### Beams Auth (Vendor)
+
+**GET** `/vendor/pusher/beams-auth`
+
+- **Auth:** `Authorization: Bearer <VENDOR_TOKEN>`
+- **Response:** Beams token JSON
+
+### Notes
+
+- Push credentials are configured from the Admin panel (Push Notification setup): `instance_id` + `primary_key`.
+- Server-side push sends use `App\Http\Helpers\PushNotificationHelper`.
+
+---
+
 ## Cars API (Public - No Auth Required)
 
 ### List All Cars
@@ -462,9 +493,9 @@ All endpoints return errors in this format:
 
 Common HTTP Status Codes:
 
--   `200` - Success
--   `400` - Bad Request (validation errors)
--   `401` - Unauthorized
--   `404` - Not Found
--   `422` - Unprocessable Entity
--   `500` - Server Error
+- `200` - Success
+- `400` - Bad Request (validation errors)
+- `401` - Unauthorized
+- `404` - Not Found
+- `422` - Unprocessable Entity
+- `500` - Server Error

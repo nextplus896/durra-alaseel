@@ -8,8 +8,8 @@
 <link rel="stylesheet" href="{{ asset('public/frontend/css/swiper.css ') }}">
 <!-- lightcase css links -->
 <link rel="stylesheet" href="{{ asset('public/frontend/css/lightcase.css') }}">
- <!-- AOS css link -->
- <link rel="stylesheet" href="{{ asset('public/frontend/css/aos.css') }}">
+<!-- AOS css link -->
+<link rel="stylesheet" href="{{ asset('public/frontend/css/aos.css') }}">
 <!-- odometer css link -->
 <link rel="stylesheet" href="{{ asset('public/frontend/css/odometer.css') }}">
 <!-- animate.css -->
@@ -22,6 +22,8 @@
 <link rel="stylesheet" href="{{ asset('public/frontend/css/select2.css') }}">
 <!-- main style css link -->
 <link rel="stylesheet" href="{{ asset('public/frontend/css/style.css') }}">
+<!-- Typography Normalization -->
+<link rel="stylesheet" href="{{ asset('public/frontend/css/typography.css') }}">
 <!-- Popup  -->
 <link rel="stylesheet" href="{{ asset('public/backend/library/popup/magnific-popup.css') }}">
 <!-- file holder css -->

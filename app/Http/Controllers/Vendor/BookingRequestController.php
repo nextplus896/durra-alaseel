@@ -22,30 +22,59 @@ use Illuminate\Support\Str;
 
 class BookingRequestController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $page_title = __('Booking Request');
-        $car_bookings = CarBooking::with(['cars'])
+        $query = CarBooking::with(['cars', 'user'])
             ->where('status', '!=', 3)
             ->Where('status', '!=', 4)
-            ->where(function ($query) {
-                $query->whereHas('cars', function ($subquery) {
+            ->where(function ($q) {
+                $q->whereHas('cars', function ($subquery) {
                     $subquery->where('vendor_id', '=', auth()->guard('vendor')->user()->id);
                 });
-            })
-            ->orderByDesc('id')
-            ->paginate(7);
+            });
+
+        // Search Filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('trx_id', 'like', "%$search%")
+                    ->orWhere('email', 'like', "%$search%")
+                    ->orWhere('phone', 'like', "%$search%")
+                    ->orWhereHas('user', function ($uq) use ($search) {
+                        $uq->where('firstname', 'like', "%$search%")
+                            ->orWhere('lastname', 'like', "%$search%");
+                    });
+            });
+        }
+
+        // Status Filter
+        if ($request->filled('status') && in_array($request->status, [CarBookingConst::STATUSPENDING, CarBookingConst::STATUSSUCCESS, CarBookingConst::STATUONGOING])) {
+            $query->where('status', $request->status);
+        }
+
+        $car_bookings = $query->orderByDesc('id')->paginate(7);
 
         return view('vendor-end.sections.booking.booking-request', compact('car_bookings', 'page_title'));
     }
 
+    public function details($id)
+    {
+        $page_title = __('Booking Details');
+        $booking = CarBooking::with(['cars', 'user'])->where('id', $id)->whereHas('cars', function ($subquery) {
+            $subquery->where('vendor_id', '=', auth()->guard('vendor')->user()->id);
+        })->firstOrFail();
+
+        return view('vendor-end.sections.booking.details', compact('booking', 'page_title'));
+    }
+
     public function accept($id)
     {
-        $charges = TransactionSetting::where('slug','cash')->first();
+        $charges = TransactionSetting::where('slug', 'cash')->first();
         $max_limit = $charges->max_limit;
 
         $info = CarBooking::where('id', $id)->first();
-        if($max_limit <= $info->cars->vendor->wallets->due_payment){
+        if ($max_limit <= $info->cars->vendor->wallets->due_payment) {
             return back()->with(['warning' => [__('Please pay your due amount')]]);
         }
 
@@ -77,7 +106,8 @@ class BookingRequestController extends Controller
                         )
                         ->send();
                 }
-            } catch (Exception $e) { }
+            } catch (Exception $e) {
+            }
         } catch (Exception $e) {
             return back()->with(['error' => [__('Oops! Something went wrong! Please try again')]]);
         }
@@ -145,33 +175,26 @@ class BookingRequestController extends Controller
                     return back()->with(['danger' => [__("Vendor wallet couldn't found")]]);
                 }
 
-                if($wallet->due_payment != 0 && $wallet->due_payment == $info->transaction->receive_amount)
-                {
+                if ($wallet->due_payment != 0 && $wallet->due_payment == $info->transaction->receive_amount) {
                     $charge = $wallet->due_payment;
                     $this->insertProfit($charge);
                     $wallet->update([
                         'due_payment' => 0,
                     ]);
-                }
-                elseif($wallet->due_payment != 0 && $wallet->due_payment < $info->transaction->receive_amount)
-                {
+                } elseif ($wallet->due_payment != 0 && $wallet->due_payment < $info->transaction->receive_amount) {
                     $charge = $wallet->due_payment;
                     $this->insertProfit($charge);
                     $wallet->update([
                         'balance' => $wallet->balance + ($info->transaction->receive_amount - $wallet->due_payment),
                         'due_payment' => 0,
                     ]);
-                }
-                elseif($wallet->due_payment != 0 && $wallet->due_payment > $info->transaction->receive_amount)
-                {
+                } elseif ($wallet->due_payment != 0 && $wallet->due_payment > $info->transaction->receive_amount) {
                     $charge = $info->transaction->receive_amount;
                     $this->insertProfit($charge);
                     $wallet->update([
                         'due_payment' => $wallet->due_payment - $info->transaction->receive_amount,
                     ]);
-                }
-                elseif($wallet->due_payment == 0)
-                {
+                } elseif ($wallet->due_payment == 0) {
                     $wallet->update([
                         'balance' => $wallet->balance + $info->transaction->receive_amount,
                     ]);
@@ -186,9 +209,6 @@ class BookingRequestController extends Controller
                 $wallet->update([
                     'due_payment' => $wallet->due_payment + $info->charges,
                 ]);
-
-
-
             }
 
             $info->update([
@@ -223,19 +243,19 @@ class BookingRequestController extends Controller
 
                     Notification::route('mail', $info->email)->notify(new rideComplete($info));
                 }
-
             } catch (Exception $e) {
             }
-        }catch (Exception $e) {
+        } catch (Exception $e) {
             return back()->with(['danger' => [__('Oops! Something went wrong! Please try again')]]);
         }
         return back()->with(['success' => [__('Tour Complete')]]);
     }
 
 
-    public function insertProfit($charge) {
+    public function insertProfit($charge)
+    {
         DB::beginTransaction();
-        try{
+        try {
             DB::table('admin_profits')->insert([
                 'percent_charge'    => 0,
                 'fixed_charge'      => 0,
@@ -243,7 +263,7 @@ class BookingRequestController extends Controller
                 'created_at'        => now(),
             ]);
             DB::commit();
-        }catch(Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             throw new Exception($e->getMessage());
         }

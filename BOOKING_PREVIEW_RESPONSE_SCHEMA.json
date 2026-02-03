@@ -1,0 +1,689 @@
+{
+   "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Car Booking Preview Response",
+    "description": "Complete JSON schema for the GET /api/v1/user/car-booking/preview endpoint response",
+    "type": "object",
+    "required": ["message", "type", "data"],
+    "properties": {
+        "message": {
+            "type": "array",
+            "description": "Array of success messages",
+            "items": {
+                "type": "string"
+            },
+            "example": ["Booking data stored in the temporary table"]
+        },
+        "type": {
+            "type": "string",
+            "enum": ["success", "error"],
+            "description": "Response type indicator"
+        },
+        "data": {
+            "type": "object",
+            "required": [
+                "token",
+                "booking_details",
+                "booking_currency",
+                "car",
+                "user",
+                "user_balance",
+                "delivery_info",
+                "pricing_breakdown",
+                "payment-type",
+                "payment_gateways"
+            ],
+            "properties": {
+                "token": {
+                    "type": "string",
+                    "description": "Unique session token for booking confirmation",
+                    "minLength": 1
+                },
+                "booking_details": {
+                    "type": "object",
+                    "required": [
+                        "car_type",
+                        "pickup_date",
+                        "pickup_time",
+                        "rental_days",
+                        "pickup_location"
+                    ],
+                    "properties": {
+                        "car_type": {
+                            "type": "integer",
+                            "description": "Car type ID",
+                            "minimum": 1
+                        },
+                        "pickup_date": {
+                            "type": "string",
+                            "pattern": "^\\d{2}-\\d{2}-\\d{4}$",
+                            "description": "Pickup date in DD-MM-YYYY format",
+                            "example": "15-02-2024"
+                        },
+                        "pickup_time": {
+                            "type": "string",
+                            "pattern": "^(0?[1-9]|1[0-2]):[0-5][0-9] (AM|PM)$",
+                            "description": "Pickup time in 12-hour format with AM/PM",
+                            "example": "02:30 PM"
+                        },
+                        "rental_days": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "description": "Number of days for rental"
+                        },
+                        "pickup_location": {
+                            "type": "object",
+                            "required": ["latitude", "longitude", "address"],
+                            "properties": {
+                                "latitude": {
+                                    "type": "number",
+                                    "minimum": -90,
+                                    "maximum": 90,
+                                    "description": "Latitude coordinate"
+                                },
+                                "longitude": {
+                                    "type": "number",
+                                    "minimum": -180,
+                                    "maximum": 180,
+                                    "description": "Longitude coordinate"
+                                },
+                                "address": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "description": "Full address string"
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "round_pickup_date": {
+                            "type": ["string", "null"],
+                            "pattern": "^\\d{2}-\\d{2}-\\d{4}$",
+                            "description": "Return date for round trip in DD-MM-YYYY format (null if one-way)",
+                            "example": "20-02-2024"
+                        },
+                        "round_pickup_time": {
+                            "type": ["string", "null"],
+                            "pattern": "^(0?[1-9]|1[0-2]):[0-5][0-9] (AM|PM)$",
+                            "description": "Return time for round trip in 12-hour format with AM/PM (null if one-way)",
+                            "example": "05:00 PM"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "booking_currency": {
+                    "type": "string",
+                    "description": "Currency code for the booking",
+                    "minLength": 3,
+                    "maxLength": 3,
+                    "example": "USD"
+                },
+                "car": {
+                    "type": "object",
+                    "required": [
+                        "id",
+                        "vendor_id",
+                        "branch_id",
+                        "car_title",
+                        "car_type",
+                        "car_model",
+                        "car_number",
+                        "seat",
+                        "year",
+                        "fees",
+                        "price",
+                        "price_per_day",
+                        "price_per_week",
+                        "price_per_month",
+                        "image",
+                        "image_url",
+                        "status",
+                        "approval",
+                        "created_at"
+                    ],
+                    "properties": {
+                        "id": {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "vendor_id": {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "branch_id": {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "car_title": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "car_type": {
+                            "type": "string",
+                            "description": "Car type name (Sedan, SUV, etc.)",
+                            "example": "Sedan"
+                        },
+                        "car_model": {
+                            "type": "string",
+                            "description": "Car model name from relationship or database"
+                        },
+                        "car_number": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "Vehicle registration number"
+                        },
+                        "seat": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 10
+                        },
+                        "year": {
+                            "type": "integer",
+                            "minimum": 1900,
+                            "maximum": 2100
+                        },
+                        "fees": {
+                            "type": "string",
+                            "pattern": "^[0-9]+(\\.[0-9]{1,2})?$",
+                            "description": "Fees as decimal string"
+                        },
+                        "price": {
+                            "type": "string",
+                            "pattern": "^[0-9]+(\\.[0-9]{1,2})?$",
+                            "description": "Price per unit as decimal string"
+                        },
+                        "price_per_day": {
+                            "type": "string",
+                            "pattern": "^[0-9]+(\\.[0-9]{1,2})?$"
+                        },
+                        "price_per_week": {
+                            "type": "string",
+                            "pattern": "^[0-9]+(\\.[0-9]{1,2})?$"
+                        },
+                        "price_per_month": {
+                            "type": "string",
+                            "pattern": "^[0-9]+(\\.[0-9]{1,2})?$"
+                        },
+                        "image": {
+                            "type": "string",
+                            "description": "Image filename"
+                        },
+                        "image_url": {
+                            "type": "string",
+                            "format": "uri",
+                            "description": "Full URL to car image"
+                        },
+                        "status": {
+                            "type": "integer",
+                            "enum": [0, 1],
+                            "description": "0=inactive, 1=active"
+                        },
+                        "approval": {
+                            "type": "boolean",
+                            "description": "Admin approval status"
+                        },
+                        "allowance_km": {
+                            "type": "number",
+                            "description": "Allowed kilometers for rental period"
+                        },
+                        "allowance_price_per_km": {
+                            "type": "number",
+                            "description": "Price per kilometer over allowance"
+                        },
+                        "area": {
+                            "type": "object",
+                            "required": ["id", "name"],
+                            "properties": {
+                                "id": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                },
+                                "name": {
+                                    "type": "string",
+                                    "minLength": 1
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "branch": {
+                            "type": "object",
+                            "required": [
+                                "id",
+                                "name",
+                                "slug",
+                                "address",
+                                "status"
+                            ],
+                            "properties": {
+                                "id": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                },
+                                "name": {
+                                    "type": "string",
+                                    "minLength": 1
+                                },
+                                "slug": {
+                                    "type": "string",
+                                    "minLength": 1
+                                },
+                                "address": {
+                                    "type": "string",
+                                    "minLength": 1
+                                },
+                                "status": {
+                                    "type": "integer",
+                                    "enum": [0, 1]
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "vendor": {
+                            "type": "object",
+                            "required": ["id", "name", "username"],
+                            "properties": {
+                                "id": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                },
+                                "name": {
+                                    "type": "string",
+                                    "minLength": 1
+                                },
+                                "username": {
+                                    "type": "string",
+                                    "minLength": 1
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "created_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "ISO8601 timestamp"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "user": {
+                    "type": "object",
+                    "required": [
+                        "id",
+                        "firstname",
+                        "lastname",
+                        "fullname",
+                        "email",
+                        "mobile",
+                        "email_verified",
+                        "kyc_verified",
+                        "two_factor_verified"
+                    ],
+                    "properties": {
+                        "id": {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "firstname": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "lastname": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "fullname": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "email": {
+                            "type": "string",
+                            "format": "email"
+                        },
+                        "mobile": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "Mobile number with country code"
+                        },
+                        "email_verified": {
+                            "type": "boolean"
+                        },
+                        "kyc_verified": {
+                            "type": "boolean"
+                        },
+                        "two_factor_verified": {
+                            "type": "boolean"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "user_balance": {
+                    "type": "object",
+                    "required": ["balance", "has_sufficient_balance"],
+                    "properties": {
+                        "balance": {
+                            "type": "string",
+                            "pattern": "^[0-9]+(\\.[0-9]{1,2})?$",
+                            "description": "User's wallet balance as decimal string"
+                        },
+                        "has_sufficient_balance": {
+                            "type": "boolean",
+                            "description": "Whether user has enough balance for this booking"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "delivery_info": {
+                    "type": "object",
+                    "required": ["available", "price"],
+                    "properties": {
+                        "available": {
+                            "type": "boolean",
+                            "description": "Whether delivery is available for pickup location"
+                        },
+                        "price": {
+                            "type": "string",
+                            "pattern": "^[0-9]+(\\.[0-9]{1,2})?$",
+                            "description": "Delivery price as decimal string"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "pricing_breakdown": {
+                    "type": "object",
+                    "required": [
+                        "rental_days",
+                        "rental_fees",
+                        "delivery_price",
+                        "charges",
+                        "subtotal",
+                        "tax_percentage",
+                        "tax_amount",
+                        "total",
+                        "price_rule_applied",
+                        "tax_rate"
+                    ],
+                    "properties": {
+                        "rental_days": {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "rental_fees": {
+                            "type": "string",
+                            "pattern": "^[0-9]+(\\.[0-9]{1,2})?$",
+                            "description": "Base rental cost calculated from pricing rules"
+                        },
+                        "delivery_price": {
+                            "type": "string",
+                            "pattern": "^[0-9]+(\\.[0-9]{1,2})?$"
+                        },
+                        "charges": {
+                            "type": "string",
+                            "pattern": "^[0-9]+(\\.[0-9]{1,2})?$",
+                            "description": "Additional charges/fees"
+                        },
+                        "subtotal": {
+                            "type": "string",
+                            "pattern": "^[0-9]+(\\.[0-9]{1,2})?$",
+                            "description": "rental_fees + charges + delivery_price"
+                        },
+                        "tax_percentage": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "description": "Tax percentage (e.g., 15 for 15%)"
+                        },
+                        "tax_amount": {
+                            "type": "string",
+                            "pattern": "^[0-9]+(\\.[0-9]{1,2})?$",
+                            "description": "Calculated tax amount (subtotal * tax_percentage / 100)"
+                        },
+                        "total": {
+                            "type": "string",
+                            "pattern": "^[0-9]+(\\.[0-9]{1,2})?$",
+                            "description": "Final total (subtotal + tax_amount)"
+                        },
+                        "price_rule_applied": {
+                            "type": "string",
+                            "enum": ["daily", "weekly", "monthly"],
+                            "description": "Pricing tier used: daily (≤7 days), weekly (8-30 days), monthly (>30 days)"
+                        },
+                        "tax_rate": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "description": "Tax rate percentage"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "payment-type": {
+                    "type": "object",
+                    "required": ["online-payment", "cash", "balance"],
+                    "properties": {
+                        "online-payment": {
+                            "type": "string",
+                            "enum": ["online-payment"],
+                            "description": "Online payment method identifier"
+                        },
+                        "cash": {
+                            "type": "string",
+                            "enum": ["cash"],
+                            "description": "Cash payment method identifier"
+                        },
+                        "balance": {
+                            "type": "string",
+                            "enum": ["balance"],
+                            "description": "Wallet balance payment method identifier"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "payment_gateways": {
+                    "type": "array",
+                    "description": "Available payment gateway options",
+                    "items": {
+                        "type": "object",
+                        "required": ["id", "name", "status", "currencies"],
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "minimum": 1
+                            },
+                            "name": {
+                                "type": "string",
+                                "minLength": 1,
+                                "example": "PayPal"
+                            },
+                            "status": {
+                                "type": "integer",
+                                "enum": [0, 1],
+                                "description": "0=inactive, 1=active"
+                            },
+                            "currencies": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "required": ["id", "name", "code"],
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "minLength": 1
+                                        },
+                                        "code": {
+                                            "type": "string",
+                                            "minLength": 3,
+                                            "maxLength": 3,
+                                            "example": "USD"
+                                        }
+                                    },
+                                    "additionalProperties": false
+                                }
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": false,
+    "examples": [
+        {
+            "message": ["Booking data stored in the temporary table"],
+            "type": "success",
+            "data": {
+                "token": "abc123def456789xyz",
+                "booking_details": {
+                    "car_type": 1,
+                    "pickup_date": "2026-02-15",
+                    "pickup_time": "10:30",
+                    "rental_days": 3,
+                    "pickup_location": {
+                        "latitude": 24.7136,
+                        "longitude": 46.6753,
+                        "address": "King Fahd Road, Riyadh, Saudi Arabia"
+                    },
+                    "round_pickup_date": null,
+                    "round_pickup_time": null
+                },
+                "booking_currency": "USD",
+                "car": {
+                    "id": 15,
+                    "vendor_id": 3,
+                    "branch_id": 1,
+                    "car_title": "Luxury Sedan - Premium Experience",
+                    "car_type": "Sedan",
+                    "car_model": "Toyota Camry 2024",
+                    "car_number": "ABC-1234",
+                    "seat": 5,
+                    "year": 2024,
+                    "fees": "250.00",
+                    "price": "250.00",
+                    "price_per_day": "250.00",
+                    "price_per_week": "1500.00",
+                    "price_per_month": "5000.00",
+                    "allowance_km": 300,
+                    "allowance_price_per_km": 100,
+                    "image": "car-image-1234.jpg",
+                    "image_url": "https://domain.com/backend/car-models/car-image-1234.jpg",
+                    "status": 1,
+                    "approval": true,
+                    "area": {
+                        "id": 2,
+                        "name": "Riyadh"
+                    },
+                    "branch": {
+                        "id": 1,
+                        "name": "Downtown Branch",
+                        "slug": "downtown-branch",
+                        "address": "123 Main Street, City Center",
+                        "status": 1
+                    },
+                    "vendor": {
+                        "id": 3,
+                        "name": "John Doe",
+                        "username": "johndoe"
+                    },
+                    "created_at": "2026-01-20T10:30:00+00:00"
+                },
+                "user": {
+                    "id": 1,
+                    "firstname": "Ahmed",
+                    "lastname": "Ali",
+                    "fullname": "Ahmed Ali",
+                    "email": "ahmed@example.com",
+                    "mobile": "+966501234567",
+                    "email_verified": true,
+                    "kyc_verified": true,
+                    "two_factor_verified": false
+                },
+                "user_balance": {
+                    "balance": "1500.00",
+                    "has_sufficient_balance": true
+                },
+                "delivery_info": {
+                    "available": true,
+                    "price": "50.00"
+                },
+                "pricing_breakdown": {
+                    "rental_days": 3,
+                    "rental_fees": "750.00",
+                    "delivery_price": "0.00",
+                    "charges": "0.00",
+                    "subtotal": "750.00",
+                    "tax_percentage": 15.0,
+                    "tax_amount": "112.50",
+                    "total": "862.50",
+                    "price_rule_applied": "daily",
+                    "tax_rate": 15.0
+                },
+                "payment-type": {
+                    "online-payment": "online-payment",
+                    "cash": "cash",
+                    "balance": "balance"
+                },
+                "payment_gateways": [
+                    {
+                        "id": 1,
+                        "name": "PayPal",
+                        "status": 1,
+                        "currencies": [
+                            {
+                                "id": 1,
+                                "name": "USD",
+                                "code": "USD"
+                            }
+                        ]
+                    },
+                    {
+                        "id": 2,
+                        "name": "Stripe",
+                        "status": 1,
+                        "currencies": [
+                            {
+                                "id": 1,
+                                "name": "USD",
+                                "code": "USD"
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+  ,
+          "cash": "cash",
+          "balance": "balance"
+        },
+        "payment_gateways": [
+          {
+            "id": 1,
+            "name": "PayPal",
+            "status": 1,
+            "currencies": [
+              {
+                "id": 1,
+                "name": "USD",
+                "code": "USD"
+              }
+            ]
+          },
+          {
+            "id": 2,
+            "name": "Stripe",
+            "status": 1,
+            "currencies": [
+              {
+                "id": 1,
+                "name": "USD",
+                "code": "USD"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -18,150 +18,225 @@
         <div class="col-xl-12 col-lg-12 mb-20">
             <div class="custom-card mt-10">
                 <div class="dashboard-header-wrapper">
-                    <h4 class="title">{{ __('Edit Car') }}</h4>
+                    <div>
+                        <h4 class="title">{{ __('Edit Car') }}</h4>
+                        <p class="subtitle text-muted mt-2">
+                            <strong>{{ __('Car Title') }}*:</strong>
+                            @if ($cars->car_title)
+                                {{ $cars->car_title->{get_default_language_code()}->car_title ?? 'N/A' }}
+                            @else
+                                <span class="text-warning">{{ __('Not Set') }}</span>
+                            @endif
+                        </p>
+                    </div>
                 </div>
                 <div class="card-body">
                     <form class="card-form" action="{{ setRoute('vendor.car.update', $cars->id) }}" method="POST"
                         enctype="multipart/form-data">
                         @method('PUT')
                         @csrf
-                        <div class="row mb-10-none">
-                            <div class="col-xl-12 col-lg-12 col-md-6 mb-10 form-group">
-                                <nav>
-                                    <div class="nav nav-tabs car-tab-button" id="nav-tab" role="tablist">
-                                        @foreach ($languages as $item)
-                                            <button class="nav-link @if (get_default_language_code() == $item->code) active @endif"
-                                                id="{{ $item->code }}-tab" data-bs-toggle="tab"
-                                                data-bs-target="#{{ $item->code }}" type="button" role="tab"
-                                                aria-controls="{{ $item->code }}"
-                                                aria-selected="true">{{ $item->name }}</button>
-                                        @endforeach
-
+                        <div class="row mb-20-none">
+                            {{-- Fields Section --}}
+                            <div class="col-lg-8 col-md-12 mb-20">
+                                <div class="row mb-10-none">
+                                    <div class="col-xl-12 col-lg-12 col-md-12 mb-10 form-group">
+                                        <nav>
+                                            <div class="nav nav-tabs car-tab-button" id="nav-tab" role="tablist">
+                                                @foreach ($languages as $item)
+                                                    <button class="nav-link @if (get_default_language_code() == $item->code) active @endif"
+                                                        id="{{ $item->code }}-tab" data-bs-toggle="tab"
+                                                        data-bs-target="#{{ $item->code }}" type="button" role="tab"
+                                                        aria-controls="{{ $item->code }}"
+                                                        aria-selected="true">{{ $item->name }}</button>
+                                                @endforeach
+                                            </div>
+                                        </nav>
+                                        <div class="tab-content" id="nav-tabContent">
+                                            @foreach ($languages as $item)
+                                                @php
+                                                    $lang_code = $item->code;
+                                                @endphp
+                                                <div class="tab-pane @if (get_default_language_code() == $item->code) fade show active @endif"
+                                                    id="{{ $item->code }}" role="tabpanel" aria-labelledby="english-tab">
+                                                    <div class="form-group">
+                                                        @include('admin.components.form.input', [
+                                                            'label' => __('Car Title'),
+                                                            'label_after' => '*',
+                                                            'placeholder' => __('Write Here') . '...',
+                                                            'name' => $lang_code . '_car_title',
+                                                            'value' => old(
+                                                                $lang_code . '_car_title',
+                                                                $cars->car_title->$lang_code->car_title ?? ''),
+                                                        ])
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
                                     </div>
-                                </nav>
-                                <div class="tab-content" id="nav-tabContent">
-                                    @foreach ($languages as $item)
-                                        @php
-                                            $lang_code = $item->code;
-                                        @endphp
-                                        <div class="tab-pane @if (get_default_language_code() == $item->code) fade show active @endif"
-                                            id="{{ $item->code }}" role="tabpanel" aria-labelledby="english-tab">
-                                            <div class="form-group">
-                                                @include('admin.components.form.input', [
-                                                    'label' => __('Car Title'),
-                                                    'label_after' => '*',
-                                                    'placeholder' => __('Write Here') . '...',
-                                                    'name' => $lang_code . '_car_title',
-                                                    'value' => old(
-                                                        $lang_code . '_car_title',
-                                                        $cars->car_title->$lang_code->car_title ?? ''),
-                                                ])
+                                    <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
+                                        <div class="vehicle-type">
+                                            <label>{{ __('Vehicle Type') }}<span>*</span></label>
+                                            <select class="select2 select2-basic" name="type" id="car_type"
+                                                value="{{ old('type') }}">
+                                                <option disabled selected>{{ __('Select Vehicle Type') }}</option>
+                                                @foreach ($car_type as $type)
+                                                    <option value="{{ $type->id }}"
+                                                        {{ $type->id == $cars->car_type_id ? 'selected' : '' }}>
+                                                        {{ $type->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
+                                        <div class="vehicle-type">
+                                            <label>{{ __('Vehicle Model') }}<span>*</span></label>
+                                            <select class="select2 select2-basic" name="car_model_id" id="car_model">
+                                                <option disabled selected>{{ __('Select Vehicle Model') }}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
+                                        <label>{{ __('Total Seat') }}<span>*</span></label>
+                                        <input type="number" class="form--control" name="seat"
+                                            placeholder="Enter Number" value="{{ old('seat', $cars->seat) }}">
+                                    </div>
+                                    <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
+                                        <label>{{ __('Year') }}<span>*</span></label>
+                                        <select class="select2 select2-basic" name="year" id="car_year">
+                                            <option disabled selected>{{ __('Select Year') }}</option>
+                                            @for ($y = date('Y') + 1; $y >= 1900; $y--)
+                                                <option value="{{ $y }}"
+                                                    {{ old('year', $cars->year) == $y ? 'selected' : '' }}>
+                                                    {{ $y }}
+                                                </option>
+                                            @endfor
+                                        </select>
+                                    </div>
+                                    <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
+                                        <div class="vehicle-type">
+                                            <label>{{ __('Branch') }}<span>*</span></label>
+                                            <select class="select2 select2-basic" name="branch_id" id="branch_id">
+                                                <option disabled selected>{{ __('Select Branch') }}</option>
+                                                @forelse ($branches ?? [] as $branch)
+                                                    <option value="{{ $branch->id }}"
+                                                        {{ old('branch_id', $cars->branch_id) == $branch->id ? 'selected' : '' }}>
+                                                        {{ $branch->name }}
+                                                    </option>
+                                                @empty
+                                                    <option disabled>{{ __('No branches available') }}</option>
+                                                @endforelse
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    {{-- Pricing & Usage Limits Section --}}
+                                    <div class="col-xl-12 col-lg-12 mb-10 mt-20">
+                                        <div class="dashboard-header-wrapper">
+                                            <h5 class="title">{{ __('Pricing & Usage Limits') }}</h5>
+                                        </div>
+                                    </div>
+
+                                    {{-- Hidden fees syncer --}}
+                                    <input type="hidden" name="fees" id="fees_input"
+                                        value="{{ old('fees', get_amount($cars->fees)) }}">
+
+                                    <div class="col-xl-4 col-lg-6 col-md-6 mb-10 form-group">
+                                        <label>{{ __('Price per Day') }}<span>*</span></label>
+                                        <input type="number" step="0.01" class="form--control klm-charge"
+                                            name="price_per_day" id="price_per_day"
+                                            placeholder="{{ __('Enter Daily Price') }}"
+                                            value="{{ old('price_per_day', get_amount($cars->price_per_day > 0 ? $cars->price_per_day : $cars->fees)) }}"
+                                            oninput="document.getElementById('fees_input').value = this.value">
+                                        <span
+                                            class="charge-currency">{{ get_default_currency_code($default_currency ?? 'USD') }}</span>
+                                    </div>
+
+                                    <div class="col-xl-4 col-lg-6 col-md-6 mb-10 form-group">
+                                        <label>{{ __('Price per Week') }}<span>*</span></label>
+                                        <input type="number" step="0.01" class="form--control klm-charge"
+                                            name="price_per_week" placeholder="{{ __('Enter Weekly Price') }}"
+                                            value="{{ old('price_per_week', get_amount($cars->price_per_week)) }}">
+                                        <span
+                                            class="charge-currency">{{ get_default_currency_code($default_currency ?? 'USD') }}</span>
+                                    </div>
+
+                                    <div class="col-xl-4 col-lg-6 col-md-6 mb-10 form-group">
+                                        <label>{{ __('Price per Month') }}<span>*</span></label>
+                                        <input type="number" step="0.01" class="form--control klm-charge"
+                                            name="price_per_month" placeholder="{{ __('Enter Monthly Price') }}"
+                                            value="{{ old('price_per_month', get_amount($cars->price_per_month)) }}">
+                                        <span
+                                            class="charge-currency">{{ get_default_currency_code($default_currency ?? 'USD') }}</span>
+                                    </div>
+
+                                    {{-- Allowance KM Input --}}
+                                    <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
+                                        <label>{{ __('Allowance KM') }}</label>
+                                        <input type="number" step="any" class="form--control" name="allowance_km"
+                                            id="allowance_km" placeholder="{{ __('Enter Allowance KM') }}"
+                                            value="{{ old('allowance_km', $cars->allowance_km ?? 0) }}">
+                                    </div>
+
+                                    {{-- Allowance Price Per KM Input --}}
+                                    <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
+                                        <label>{{ __('Price Per Extra KM') }}</label>
+                                        <input type="number" step="any" class="form--control"
+                                            name="allowance_price_per_km" id="allowance_price_per_km"
+                                            placeholder="{{ __('Enter Price Per Extra KM') }}"
+                                            value="{{ old('allowance_price_per_km', get_amount($cars->allowance_price_per_km ?? 0)) }}">
+                                        <span
+                                            class="charge-currency">{{ get_default_currency_code($default_currency ?? 'USD') }}</span>
+                                    </div>
+
+                                    {{-- Delivery Settings Section --}}
+                                    <div class="col-xl-12 col-lg-12 mb-10 mt-20">
+                                        <div class="dashboard-header-wrapper">
+                                            <h5 class="title">{{ __('Delivery Settings') }}</h5>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-12 col-lg-12 col-md-12 mb-10 form-group">
+                                        <div class="switch-wrapper d-flex align-items-center mt-4"
+                                            style="display: flex; align-items: center;">
+                                            <label class="switch m-0">
+                                                <input type="checkbox" name="delivery_available" value="1"
+                                                    {{ old('delivery_available', $delivery_setting->delivery_available ?? false) ? 'checked' : '' }}>
+                                                <span class="slider round"></span>
+                                            </label>
+                                            <div class="ms-2">
+                                                <h6 class="mb-0 text-dark fw-bold">{{ __('Delivery Available') }}</h6>
                                             </div>
                                         </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                            <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
-                                <div class="vehicle-type">
-                                    <label>{{ __('Vehicle Type') }}<span>*</span></label>
-                                    <select class="select2 select2-basic" name="type" id="car_type"
-                                        value="{{ old('type') }}">
-                                        <option disabled selected>{{ __('Select Vehicle Type') }}</option>
-                                        @foreach ($car_type as $type)
-                                            <option value="{{ $type->id }}"
-                                                {{ $type->id == $cars->car_type_id ? 'selected' : '' }}>
-                                                {{ $type->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
-                                <div class="vehicle-type">
-                                    <label>{{ __('Vehicle Model') }}<span>*</span></label>
-                                    <select class="select2 select2-basic" name="car_model_id" id="car_model">
-                                        <option disabled selected>{{ __('Select Vehicle Model') }}</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
-                                <label>{{ __('Total Seat') }}<span>*</span></label>
-                                <input type="number" class="form--control" name="seat" placeholder="Enter Number"
-                                    value="{{ old('seat', $cars->seat) }}">
-                            </div>
-                            <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
-                                <label>{{ __('Year') }}<span>*</span></label>
-                                <select class="select2 select2-basic" name="year" id="car_year">
-                                    <option disabled selected>{{ __('Select Year') }}</option>
-                                    @for ($y = date('Y') + 1; $y >= 1900; $y--)
-                                        <option value="{{ $y }}"
-                                            {{ old('year', $cars->year) == $y ? 'selected' : '' }}>{{ $y }}
-                                        </option>
-                                    @endfor
-                                </select>
-                            </div>
-                            <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
-                                <label>{{ __('Rental Price Day') }}<span>*</span></label>
-                                <input type="text" class="form--control klm-charge" name="fees"
-                                    placeholder="{{ __('Enter Rental Price') }}"
-                                    value="{{ old('fees', get_amount($cars->fees)) }}">
-                                <span class="charge-currency">{{ get_default_currency_code($default_currency) }}</span>
-                            </div>
-                            <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
-                                <div class="vehicle-type">
-                                    <label>{{ __('Branch') }}<span>*</span></label>
-                                    <select class="select2 select2-basic" name="branch_id" id="branch_id">
-                                        <option disabled selected>{{ __('Select Branch') }}</option>
-                                        @forelse ($branches ?? [] as $branch)
-                                            <option value="{{ $branch->id }}"
-                                                {{ old('branch_id', $cars->branch_id) == $branch->id ? 'selected' : '' }}>
-                                                {{ $branch->name }}
-                                            </option>
-                                        @empty
-                                            <option disabled>{{ __('No branches available') }}</option>
-                                        @endforelse
-                                    </select>
+                                    </div>
                                 </div>
                             </div>
 
-                            {{-- Delivery Settings Section --}}
-                            <div class="col-xl-12 col-lg-12 mb-10">
-                                <div class="dashboard-header-wrapper mt-3 mb-2">
-                                    <h5 class="title">{{ __('Delivery Settings') }}</h5>
-                                </div>
-                            </div>
-                            <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
-                                <label>{{ __('Delivery Available') }}</label>
-                                <div class="switch-wrapper">
-                                    <label class="switch">
-                                        <input type="checkbox" name="delivery_available" value="1"
-                                            {{ old('delivery_available', $delivery_setting->delivery_available ?? false) ? 'checked' : '' }}>
-                                        <span class="slider round"></span>
-                                    </label>
-                                    <span class="ms-2">{{ __('Enable delivery for this branch') }}</span>
-                                </div>
-                            </div>
-                            <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
-                                <label>{{ __('Delivery Price') }}</label>
-                                <input type="text" class="form--control klm-charge" name="delivery_price"
-                                    placeholder="{{ __('Enter Delivery Price') }}"
-                                    value="{{ old('delivery_price', $delivery_setting->delivery_price ?? 0) }}">
-                                <span class="charge-currency">{{ get_default_currency_code($default_currency) }}</span>
-                            </div>
-
-                            <div class="col-xl-12 col-lg-12 mb-10 form-group">
-                                <label>{{ __('Car Model Image') }}</label>
-                                <div class="car-model-image-display">
-                                    @if ($cars->carModel && $cars->carModel->image)
-                                        <img id="modelImage" src="{{ $cars->carModel->image_url }}" alt="Car Model Image"
-                                            style="max-width: 100%; max-height: 300px; height: auto; border-radius: 8px;">
-                                    @else
-                                        <img id="modelImage" src="" alt="Car Model Image"
-                                            style="max-width: 100%; max-height: 300px; height: auto; border-radius: 8px; display: none;">
-                                    @endif
-                                    <p id="noImage"
-                                        style="color: #999; {{ $cars->carModel && $cars->carModel->image ? 'display: none;' : '' }}">
-                                        {{ __('Select a vehicle model to see the image') }}</p>
+                            {{-- Image and Info Section --}}
+                            <div class="col-lg-4 col-md-12 mb-20">
+                                <div class="row mb-10-none">
+                                    <div class="col-xl-12 col-lg-12 mb-10 form-group">
+                                        <label>{{ __('Car Model Image') }}</label>
+                                        <div class="car-model-image-display">
+                                            @if ($cars->carModel && $cars->carModel->image)
+                                                <img id="modelImage" src="{{ $cars->carModel->image_url }}"
+                                                    alt="Car Model Image"
+                                                    style="max-width: 100%; max-height: 300px; height: auto; border-radius: 8px;">
+                                            @else
+                                                <img id="modelImage" src="" alt="Car Model Image"
+                                                    style="max-width: 100%; max-height: 300px; height: auto; border-radius: 8px; display: none;">
+                                            @endif
+                                            <p id="noImage"
+                                                style="color: #999; {{ $cars->carModel && $cars->carModel->image ? 'display: none;' : '' }}">
+                                                {{ __('Select a vehicle model to see the image') }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-12 col-lg-12 mb-10">
+                                        <div class="alert alert-info" role="alert"
+                                            style="direction: rtl; text-align: justify;">
+                                            <span id="allowance-text">الكيلومترات المسموح بها هي 0 كم، وفي حال تجاوزها يتم
+                                                احتساب 0 هللة لكل كيلومتر إضافي</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -178,6 +253,21 @@
 @push('script')
     <script>
         $(document).ready(function() {
+            function updateAllowanceText() {
+                var km = $('#allowance_km').val() || 0;
+                var amount = $('#allowance_price_per_km').val() || 0;
+
+                // Assuming 'هللة' is hardcoded as per request, otherwise use currency symbol
+                var text =
+                    `الكيلومترات المسموح بها هي ${km} كم، وفي حال تجاوزها يتم احتساب ${amount} هللة لكل كيلومتر إضافي`;
+                $('#allowance-text').text(text);
+            }
+
+            $('#allowance_km, #allowance_price_per_km').on('input change', updateAllowanceText);
+
+            // Initial call
+            updateAllowanceText();
+
             var getModelsURL = "{{ setRoute('vendor.car.get.models') }}";
             var selectedModelId = "{{ $cars->car_model_id ?? '' }}";
             var selectedTypeName = $('select[name="type"] option:selected').text().trim();

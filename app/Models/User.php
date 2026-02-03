@@ -43,6 +43,7 @@ class User extends Authenticatable
         'mobile_code'            => 'string',
         'mobile'                 => 'string',
         'full_mobile'            => 'string',
+        'driving_license'        => 'string',
         'password'               => 'string',
         'image'                  => 'string',
         'status'                 => 'integer',

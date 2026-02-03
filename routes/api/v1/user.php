@@ -1,5 +1,7 @@
 <?php
 
+use App\Providers\Admin\BasicSettingsProvider;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\User\ProfileController;
 use App\Http\Controllers\Api\V1\User\AddMoneyController;
@@ -8,10 +10,51 @@ use App\Http\Controllers\Api\V1\User\DashboardController;
 use App\Http\Controllers\Api\V1\User\TransactionController;
 use App\Http\Controllers\Api\V1\User\BalanceController;
 use App\Http\Controllers\Api\V1\User\BranchController;
+use Pusher\PushNotifications\PushNotifications;
 
 Route::prefix('user')
     ->name('api.user.')
     ->group(function () {
+
+        // Pusher Beams Auth (Mobile Push Notifications)
+        // Returns a Beams token JSON that the mobile SDK expects.
+        Route::get('pusher/beams-auth', function (Request $request) {
+            $user = auth('api')->user();
+            if (!$user) {
+                return response(['Inconsistent request'], 401);
+            }
+
+            $basic_settings = BasicSettingsProvider::get();
+            if (!$basic_settings) {
+                return response('Basic setting not found!', 404);
+            }
+
+            $notification_config = $basic_settings->push_notification_config;
+            if (!$notification_config) {
+                return response('Notification configuration not found!', 404);
+            }
+
+            $instance_id = $notification_config->instance_id ?? null;
+            $primary_key = $notification_config->primary_key ?? null;
+            if ($instance_id == null || $primary_key == null) {
+                return response('Sorry! You have to configure first to send push notification.', 404);
+            }
+
+            $beamsClient = new PushNotifications([
+                'instanceId' => $instance_id,
+                'secretKey' => $primary_key,
+            ]);
+
+            $publisherUserId = make_user_id_for_pusher('user', $user->id);
+            try {
+                $beamsToken = $beamsClient->generateToken($publisherUserId);
+            } catch (Throwable $e) {
+                return response(['Server Error. Failed to generate beams token.'], 500);
+            }
+
+            return response()->json($beamsToken);
+        })->name('pusher.beams.auth');
+
         Route::controller(ProfileController::class)
             ->prefix('profile')
             ->group(function () {

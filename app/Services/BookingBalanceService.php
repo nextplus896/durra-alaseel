@@ -7,10 +7,44 @@ use App\Models\User;
 use App\Models\CarBooking;
 use App\Models\BalanceTransaction;
 use App\Models\Admin\TaxSetting;
+use App\Models\Vendor\Cars\Car;
 use Illuminate\Support\Facades\DB;
 
 class BookingBalanceService
 {
+    /**
+     * Calculate rental fees based on tiered pricing (daily/weekly/monthly)
+     * Golden Rule: Price is decided ONLY by rental_days
+     */
+    public function calculateRentalFees(Car $car, int $rentalDays): array
+    {
+        $priceRule = '';
+        $basePrice = 0;
+
+        if ($rentalDays <= 7) {
+            // Daily pricing (1-7 days)
+            $basePrice = $car->price_per_day;
+            $priceRule = 'daily';
+        } elseif ($rentalDays <= 30) {
+            // Weekly pricing (8-30 days)
+            $basePrice = $car->price_per_week;
+            $priceRule = 'weekly';
+        } else {
+            // Monthly pricing (31+ days)
+            $basePrice = $car->price_per_month;
+            $priceRule = 'monthly';
+        }
+
+        $rentalFees = round($rentalDays * $basePrice, 2);
+
+        return [
+            'rental_fees' => $rentalFees,
+            'price_rule_applied' => $priceRule,
+            'base_price' => $basePrice,
+            'rental_days' => $rentalDays,
+        ];
+    }
+
     /**
      * Get current active tax percentage
      */

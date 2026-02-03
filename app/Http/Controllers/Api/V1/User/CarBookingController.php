@@ -16,6 +16,7 @@ use App\Constants\CarBookingConst;
 use App\Models\Admin\Cars\CarArea;
 use App\Models\Admin\Cars\CarType;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Models\Admin\BasicSettings;
 use App\Traits\PaymentGateway\Gpay;
 use App\Http\Controllers\Controller;
@@ -38,6 +39,8 @@ use net\authorize\api\controller as AnetController;
 use App\Http\Helpers\PaymentGateway as PaymentGatewayHelper;
 use App\Services\BookingBalanceService;
 use App\Models\BranchDeliverySetting;
+use App\Http\Resources\Api\CarBookingResource;
+use App\Http\Resources\Api\CarResource;
 
 class CarBookingController extends Controller
 {
@@ -45,11 +48,33 @@ class CarBookingController extends Controller
 
     public function bookingHistory()
     {
-        $user = Auth::guard('api')->user();
+        try {
+            $user = Auth::guard('api')->user();
 
-        $bookings = CarBooking::where('user_id', $user->id)->with(['cars'])->get();
+            $bookings = CarBooking::where('user_id', $user->id)
+                ->with(['cars'])
+                ->orderBy('created_at', 'desc')
+                ->get();
 
-        return Response::success([__('History fetched successfully!')], ['history' => $bookings], 200);
+            // Use Resource class for consistent type casting
+            return Response::success(
+                [__('History fetched successfully!')],
+                ['history' => CarBookingResource::collection($bookings)],
+                200
+            );
+        } catch (Exception $e) {
+            Log::error('CarBooking History Error: ' . $e->getMessage(), [
+                'user_id' => auth()->guard('api')->user()->id ?? null,
+                'trace' => $e->getTraceAsString(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+            ]);
+            return Response::error(
+                [__('Error fetching booking history')],
+                ['error_details' => config('app.debug') ? $e->getMessage() : 'Internal server error'],
+                500
+            );
+        }
     }
 
     public function carArea()
@@ -93,10 +118,13 @@ class CarBookingController extends Controller
     public function searchCar(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'car_area' => 'required',
             'car_type' => 'required',
             'pickup_time' => 'required',
             'pickup_date' => 'required',
+            'pickup_location' => 'nullable|array',
+            'pickup_location.latitude' => 'required_with:pickup_location|numeric|between:-90,90',
+            'pickup_location.longitude' => 'required_with:pickup_location|numeric|between:-180,180',
+            'pickup_location.address' => 'required_with:pickup_location|string|max:500',
         ]);
         if ($validator->fails()) {
             return Response::error($validator->errors()->all());
@@ -119,8 +147,7 @@ class CarBookingController extends Controller
                 return Response::error([__('Round pickup date and time must be greater than pickup date and time.')], []);
             }
         }
-        $cars = Car::where('car_area_id', $request->car_area)
-            ->where('car_type_id', $request->car_type)
+        $cars = Car::where('car_type_id', $request->car_type)
             ->where('status', true)
             ->where('approval', true)
             ->whereDoesntHave('bookings', function ($query) use ($validated) {
@@ -138,136 +165,387 @@ class CarBookingController extends Controller
                 'type' => Str::slug(CarBookingConst::CAR_BOOKING),
                 'data' => $validated,
             ]);
-            return Response::success([__('Car search successful')], ['token' => $car_booking->identifier, 'cars' => $cars, 'data_path' => $data_path], 200);
+            return Response::success(
+                [__('Car search successful')],
+                [
+                    'token' => $car_booking->identifier,
+                    'cars' => CarResource::collection($cars),
+                    'data_path' => $data_path
+                ],
+                200
+            );
         } catch (Exception $e) {
-            return Response::error(['error' => [__('Something Went Wrong! Please try again.')]], [], 500);
+            Log::error('CarBooking Search Error: ' . $e->getMessage(), [
+                'validated_data' => $validated ?? null,
+                'trace' => $e->getTraceAsString(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+            ]);
+            return Response::error(
+                [__('Something Went Wrong! Please try again.')],
+                ['error_details' => config('app.debug') ? $e->getMessage() : 'Internal server error'],
+                500
+            );
         }
     }
 
     public function viewCar()
     {
-        $cars = Car::where('status', true)
-            ->whereHas('type', function ($query) {
-                $query->where('status', true);
-            })
-            ->whereHas('branch', function ($query) {
-                $query->where('status', true);
-            })
-            ->where(function ($query) {
-                $query
-                    ->whereHas('bookings', function ($subquery) {
-                        $subquery->where('status', '=', 3)->orWhere('status', '=', 1);
-                    })
-                    ->orWhereDoesntHave('bookings');
-            })
-            ->get();
-        $car_data = [
-            'base_url' => url('/'),
-            'image_path' => files_asset_path_basename('site-section'),
-            'cars' => $cars,
-        ];
-        $message = [__('Cars Fetched Successfully!')];
-        return Response::success($message, ['cars' => $car_data], 200);
+        try {
+            $cars = Car::where('status', true)
+                ->whereHas('type', function ($query) {
+                    $query->where('status', true);
+                })
+                ->whereHas('branch', function ($query) {
+                    $query->where('status', true);
+                })
+                ->where(function ($query) {
+                    $query
+                        ->whereHas('bookings', function ($subquery) {
+                            $subquery->where('status', '=', 3)->orWhere('status', '=', 1);
+                        })
+                        ->orWhereDoesntHave('bookings');
+                })
+                ->get();
+
+            $car_data = [
+                'base_url' => url('/'),
+                'image_path' => files_asset_path_basename('site-section'),
+                'cars' => CarResource::collection($cars),
+            ];
+
+            $message = [__('Cars Fetched Successfully!')];
+            return Response::success($message, ['cars' => $car_data], 200);
+        } catch (Exception $e) {
+            Log::error('CarBooking ViewCar Error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+            ]);
+            return Response::error(
+                [__('Error fetching cars')],
+                ['error_details' => config('app.debug') ? $e->getMessage() : 'Internal server error'],
+                500
+            );
+        }
     }
 
     public function preview(Request $request)
     {
-        // token is optional: accept either an existing token or inline booking data
-        if ($request->filled('token')) {
-            $validator = Validator::make($request->all(), [
-                'token' => 'required',
-                'car_id' => 'required',
+        $requestId = (string) Str::uuid();
+        $userId = Auth::guard('api')->id();
+
+        Log::info('API car-booking.preview start', [
+            'request_id' => $requestId,
+            'user_id' => $userId,
+            'ip' => $request->ip(),
+            'has_token' => $request->filled('token'),
+            'car_id' => $request->input('car_id'),
+            'rental_days' => $request->input('rental_days'),
+            'pickup_date' => $request->input('pickup_date'),
+            'pickup_time' => $request->input('pickup_time'),
+            'include_delivery' => $request->input('include_delivery'),
+        ]);
+
+        try {
+            // token is optional: accept either an existing token or inline booking data
+            if ($request->filled('token')) {
+                $validator = Validator::make($request->all(), [
+                    'token' => 'required',
+                    'car_id' => 'required',
+                    'rental_days' => 'required|integer|min:1',
+                    'pickup_location' => 'nullable|array',
+                    'pickup_location.latitude' => 'required_with:pickup_location|numeric|between:-90,90',
+                    'pickup_location.longitude' => 'required_with:pickup_location|numeric|between:-180,180',
+                    'pickup_location.address' => 'required_with:pickup_location|string|max:500',
+                ]);
+
+                if ($validator->fails()) {
+                    return Response::error($validator->errors()->all(), []);
+                }
+
+                $validated = $validator->validate();
+
+                Log::info('API car-booking.preview validated (token flow)', [
+                    'request_id' => $requestId,
+                    'user_id' => $userId,
+                    'token' => $validated['token'],
+                    'car_id' => $validated['car_id'],
+                    'rental_days' => $validated['rental_days'],
+                ]);
+
+                $booking_details = TemporaryData::where('identifier', $validated['token'])->first();
+
+                if (!$booking_details) {
+                    Log::warning('API car-booking.preview missing TemporaryData', [
+                        'request_id' => $requestId,
+                        'user_id' => $userId,
+                        'token' => $validated['token'],
+                    ]);
+                    return Response::error([__('Something Went Wrong! Please try again.')], [], 500);
+                }
+
+                $car = Car::with(['type', 'carModel', 'area', 'branch', 'vendor'])
+                    ->where('id', $validated['car_id'])
+                    ->first();
+
+                if (!$car) {
+                    Log::warning('API car-booking.preview car not found (token flow)', [
+                        'request_id' => $requestId,
+                        'user_id' => $userId,
+                        'car_id' => $validated['car_id'],
+                    ]);
+                    return Response::error([__('Car not found')], [], 404);
+                }
+
+                $validated_user = Auth::guard('api')->user();
+                if (!$validated_user) {
+                    Log::warning('API car-booking.preview unauthenticated (token flow)', [
+                        'request_id' => $requestId,
+                    ]);
+                    return Response::error([__('Unauthorized')], [], 401);
+                }
+                $booking_data = $booking_details->data;
+                $tokenToReturn = $validated['token'];
+            } else {
+                $validator = Validator::make($request->all(), [
+                    'car_id' => 'required',
+                    'pickup_time' => 'required',
+                    'pickup_date' => 'required',
+                    'rental_days' => 'required|integer|min:1',
+                    'pickup_location' => 'nullable|array',
+                    'pickup_location.latitude' => 'required_with:pickup_location|numeric|between:-90,90',
+                    'pickup_location.longitude' => 'required_with:pickup_location|numeric|between:-180,180',
+                    'pickup_location.address' => 'required_with:pickup_location|string|max:500',
+                ]);
+
+                if ($validator->fails()) {
+                    return Response::error($validator->errors()->all(), []);
+                }
+
+                $validated = $validator->validate();
+
+                Log::info('API car-booking.preview validated (inline flow)', [
+                    'request_id' => $requestId,
+                    'user_id' => $userId,
+                    'car_id' => $validated['car_id'],
+                    'rental_days' => $validated['rental_days'],
+                ]);
+
+                $car = Car::with(['type', 'carModel', 'area', 'branch', 'vendor'])
+                    ->where('id', $validated['car_id'])
+                    ->first();
+
+                if (!$car) {
+                    Log::warning('API car-booking.preview car not found (inline flow)', [
+                        'request_id' => $requestId,
+                        'user_id' => $userId,
+                        'car_id' => $validated['car_id'],
+                    ]);
+                    return Response::error([__('Car not found')], [], 404);
+                }
+
+                $validated_user = Auth::guard('api')->user();
+                if (!$validated_user) {
+                    Log::warning('API car-booking.preview unauthenticated (inline flow)', [
+                        'request_id' => $requestId,
+                    ]);
+                    return Response::error([__('Unauthorized')], [], 401);
+                }
+                // booking details come from request directly
+                // Add car_type from the retrieved car
+                $validated['car_type'] = $car->car_type_id;
+                $booking_data = (object) $validated;
+                $tokenToReturn = null;
+            }
+
+            Log::info('API car-booking.preview loaded car', [
+                'request_id' => $requestId,
+                'user_id' => $userId,
+                'car_id' => $car->id,
+                'vendor_id' => $car->vendor_id,
+                'branch_id' => $car->branch_id,
             ]);
 
-            if ($validator->fails()) {
-                return Response::error($validator->errors()->all(), []);
+            // Get delivery settings for this car
+            $deliveryInfo = null;
+            if ($car && $car->branch_id && $car->vendor_id) {
+                $deliverySetting = BranchDeliverySetting::where('branch_id', $car->branch_id)
+                    ->where('vendor_id', $car->vendor_id)
+                    ->first();
+
+                if ($deliverySetting) {
+                    $deliveryInfo = [
+                        'available' => $deliverySetting->delivery_available,
+                        'price' => $deliverySetting->delivery_price,
+                    ];
+                }
             }
 
-            $validated = $validator->validate();
-
-            $booking_details = TemporaryData::where('identifier', $validated['token'])->first();
-
-            if (!$booking_details) {
-                return Response::error([__('Something Went Wrong! Please try again.')], [], 500);
-            }
-
-            $car = Car::where('id', $validated['car_id'])->with(['branch', 'vendor'])->first();
-
-            $validated_user = auth()->user();
-            $booking_data = $booking_details->data;
-            $tokenToReturn = $validated['token'];
-        } else {
-            $validator = Validator::make($request->all(), [
-                'car_id' => 'required',
-                'car_area' => 'required',
-                'car_type' => 'required',
-                'pickup_time' => 'required',
-                'pickup_date' => 'required',
-            ]);
-
-            if ($validator->fails()) {
-                return Response::error($validator->errors()->all(), []);
-            }
-
-            $validated = $validator->validate();
-
-            $car = Car::where('id', $validated['car_id'])->with(['branch', 'vendor'])->first();
-            $validated_user = auth()->user();
-            // booking details come from request directly
-            $booking_data = (object) $validated;
-            $tokenToReturn = null;
-        }
-
-        // Get delivery settings for this car
-        $deliveryInfo = null;
-        if ($car && $car->branch_id && $car->vendor_id) {
-            $deliverySetting = BranchDeliverySetting::where('branch_id', $car->branch_id)
-                ->where('vendor_id', $car->vendor_id)
-                ->first();
-
-            if ($deliverySetting) {
-                $deliveryInfo = [
-                    'available' => $deliverySetting->delivery_available,
-                    'price' => $deliverySetting->delivery_price,
-                ];
-            }
-        }
-
-        // Calculate pricing with tax
-        $balanceService = new BookingBalanceService();
-        $rentalFees = $car ? floatval($car->fees) : 0;
-        $deliveryPrice = ($request->include_delivery && $deliveryInfo && $deliveryInfo['available'])
-            ? floatval($deliveryInfo['price'])
-            : 0;
-
-        $pricingBreakdown = $balanceService->calculateBookingTotal($rentalFees, $deliveryPrice);
-
-        $payment_gateways = PaymentGateway::addMoney()->active()->with('currencies')->has('currencies')->get();
-        $payment_gateways->makeHidden(['credentials', 'created_at', 'input_fields', 'last_edit_by', 'updated_at', 'supported_currencies', 'image', 'env', 'slug', 'title', 'alias', 'code']);
-
-        return Response::success(
-            [__('Booking data stored in the temporary table')],
-            [
-                'token' => $tokenToReturn,
-                'booking_details' => $booking_data,
-                'booking_currency' => get_default_currency_code(),
-                'car' => $car,
-                'user' => $validated_user,
-                'user_balance' => [
-                    'balance' => number_format($validated_user->balance ?? 0, 2),
-                    'has_sufficient_balance' => ($validated_user->balance ?? 0) >= $pricingBreakdown['total'],
-                ],
+            Log::info('API car-booking.preview delivery resolved', [
+                'request_id' => $requestId,
+                'user_id' => $userId,
                 'delivery_info' => $deliveryInfo,
-                'pricing_breakdown' => $pricingBreakdown,
-                'payment-type' => [
-                    'online-payment' => Str::Slug(PaymentGatewayConst::ONLINEPAYMENT),
-                    'cash' => Str::Slug(PaymentGatewayConst::CASH),
-                    'balance' => 'balance',
+            ]);
+
+            // Calculate pricing with tax - GOLDEN RULE: Backend calculates everything
+            $balanceService = new BookingBalanceService();
+
+            // Calculate rental fees based on tiered pricing (daily/weekly/monthly)
+            $rentalDays = intval($validated['rental_days']);
+            $rentalCalculation = $balanceService->calculateRentalFees($car, $rentalDays);
+            $rentalFees = $rentalCalculation['rental_fees'];
+
+            Log::info('API car-booking.preview rental fees calculated', [
+                'request_id' => $requestId,
+                'user_id' => $userId,
+                'rental_days' => $rentalDays,
+                'rental_fees' => $rentalFees,
+                'price_rule_applied' => $rentalCalculation['price_rule_applied'] ?? null,
+            ]);
+
+            $deliveryPrice = ($request->include_delivery && $deliveryInfo && $deliveryInfo['available'])
+                ? floatval($deliveryInfo['price'])
+                : 0;
+
+            $pricingBreakdown = $balanceService->calculateBookingTotal($rentalFees, $deliveryPrice);
+
+            Log::info('API car-booking.preview totals calculated', [
+                'request_id' => $requestId,
+                'user_id' => $userId,
+                'delivery_price' => $deliveryPrice,
+                'pricing_total' => $pricingBreakdown['total'] ?? null,
+                'tax_percentage' => $pricingBreakdown['tax_percentage'] ?? null,
+            ]);
+
+            // Add rental-specific details to pricing breakdown
+            $pricingBreakdown['rental_days'] = $rentalDays;
+            $pricingBreakdown['allowance_km'] = intval($request->allowance_km ?? 0);
+            $pricingBreakdown['price_rule_applied'] = $rentalCalculation['price_rule_applied'];
+            $pricingBreakdown['tax_rate'] = $pricingBreakdown['tax_percentage']; // Alias for frontend compatibility
+
+            $payment_gateways = PaymentGateway::addMoney()->active()->with('currencies')->has('currencies')->get();
+
+            Log::info('API car-booking.preview gateways loaded', [
+                'request_id' => $requestId,
+                'user_id' => $userId,
+                'gateway_count' => $payment_gateways->count(),
+            ]);
+
+            // Transform payment gateways to minimal structure to prevent JSON truncation
+            $payment_gateways_minimal = $payment_gateways->map(function ($gateway) {
+                return [
+                    'id' => (int) $gateway->id,
+                    'name' => (string) $gateway->name,
+                    'type' => (string) $gateway->type,
+                    'currencies' => $gateway->currencies->map(function ($currency) {
+                        return [
+                            'id' => (int) $currency->id,
+                            'name' => (string) $currency->name,
+                            'currency_code' => (string) $currency->currency_code,
+                            'currency_symbol' => (string) $currency->currency_symbol,
+                            'min_limit' => (float) ($currency->min_limit ?? 0),
+                            'max_limit' => (float) ($currency->max_limit ?? 0),
+                        ];
+                    })->values()
+                ];
+            })->values();
+
+            // Clean booking_details to prevent circular references or large objects
+            $cleanBookingDetails = is_object($booking_data) ? (array) $booking_data : $booking_data;
+
+            // Ensure only primitive types in booking_details
+            $cleanBookingDetails = array_map(function ($value) {
+                if (is_object($value)) {
+                    return (array) $value;
+                }
+                return $value;
+            }, $cleanBookingDetails);
+
+            // Format dates and times for display
+            if (isset($cleanBookingDetails['pickup_date'])) {
+                try {
+                    $cleanBookingDetails['pickup_date'] = Carbon::parse($cleanBookingDetails['pickup_date'])->format('d-m-Y');
+                } catch (\Exception $e) {
+                    // Keep original if parsing fails
+                }
+            }
+
+            if (isset($cleanBookingDetails['pickup_time'])) {
+                try {
+                    $cleanBookingDetails['pickup_time'] = Carbon::parse($cleanBookingDetails['pickup_time'])->format('h:i A');
+                } catch (\Exception $e) {
+                    // Keep original if parsing fails
+                }
+            }
+
+            if (isset($cleanBookingDetails['round_pickup_date']) && $cleanBookingDetails['round_pickup_date']) {
+                try {
+                    $cleanBookingDetails['round_pickup_date'] = Carbon::parse($cleanBookingDetails['round_pickup_date'])->format('d-m-Y');
+                } catch (\Exception $e) {
+                    // Keep original if parsing fails
+                }
+            }
+
+            if (isset($cleanBookingDetails['round_pickup_time']) && $cleanBookingDetails['round_pickup_time']) {
+                try {
+                    $cleanBookingDetails['round_pickup_time'] = Carbon::parse($cleanBookingDetails['round_pickup_time'])->format('h:i A');
+                } catch (\Exception $e) {
+                    // Keep original if parsing fails
+                }
+            }
+
+            Log::info('API car-booking.preview success', [
+                'request_id' => $requestId,
+                'user_id' => $userId,
+            ]);
+
+            return Response::success(
+                [__('Booking data stored in the temporary table')],
+                [
+                    'token' => $tokenToReturn,
+                    'booking_details' => $cleanBookingDetails,
+                    'booking_currency' => get_default_currency_code(),
+                    'car' => new CarResource($car),
+                    'user' => [
+                        'id' => (int) $validated_user->id,
+                        'firstname' => (string) ($validated_user->firstname ?? ''),
+                        'lastname' => (string) ($validated_user->lastname ?? ''),
+                        'email' => (string) ($validated_user->email ?? ''),
+                        'mobile' => (string) ($validated_user->mobile ?? ''),
+                        'balance' => (float) ($validated_user->balance ?? 0),
+                    ],
+                    'user_balance' => [
+                        'balance' => number_format($validated_user->balance ?? 0, 2),
+                        'has_sufficient_balance' => ($validated_user->balance ?? 0) >= $pricingBreakdown['total'],
+                    ],
+                    'delivery_info' => $deliveryInfo,
+                    'pricing_breakdown' => $pricingBreakdown,
+                    'payment-type' => [
+                        'online-payment' => Str::Slug(PaymentGatewayConst::ONLINEPAYMENT),
+                        'cash' => Str::Slug(PaymentGatewayConst::CASH),
+                        'balance' => 'balance',
+                    ],
+                    'payment_gateways' => $payment_gateways_minimal,
                 ],
-                'payment_gateways' => $payment_gateways,
-            ],
-            200,
-        );
+                200,
+            );
+        } catch (\Throwable $e) {
+            Log::error('API car-booking.preview exception', [
+                'request_id' => $requestId,
+                'user_id' => $userId,
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return Response::error(
+                [__('Something went wrong! Please try again.')],
+                ['request_id' => $requestId],
+                500
+            );
+        }
     }
 
     public function confirm(Request $request)
@@ -276,14 +554,16 @@ class CarBookingController extends Controller
             'car_id' => 'required',
             'car_slug' => 'required',
             'location' => 'required',
-            'destination' => 'required',
-            'distance' => 'required',
+            'rental_days' => 'required|integer|min:1',
+            'pickup_location' => 'nullable|array',
+            'pickup_location.latitude' => 'required_with:pickup_location|numeric|between:-90,90',
+            'pickup_location.longitude' => 'required_with:pickup_location|numeric|between:-180,180',
+            'pickup_location.address' => 'required_with:pickup_location|string|max:500',
             'credentials' => 'required|email',
             'mobile' => 'nullable',
             'round_pickup_date' => 'nullable',
             'round_pickup_time' => 'nullable',
             'message' => 'nullable',
-            'fees' => 'required',
             'token' => 'nullable',
             'payment' => 'required',
             'include_delivery' => 'nullable|boolean',
@@ -301,7 +581,7 @@ class CarBookingController extends Controller
         // can still use a booking token. We create it before handling payment type.
         if (!$request->filled('token')) {
             try {
-                $payload = $request->only(['car_area', 'car_type', 'pickup_time', 'pickup_date', 'round_pickup_date', 'round_pickup_time', 'location', 'destination', 'distance', 'credentials', 'mobile', 'message', 'fees', 'payment', 'car_id', 'car_slug', 'include_delivery', 'delivery_price']);
+                $payload = $request->only(['car_type', 'pickup_time', 'pickup_date', 'round_pickup_date', 'round_pickup_time', 'location', 'credentials', 'mobile', 'message', 'payment', 'car_id', 'car_slug', 'include_delivery', 'delivery_price', 'rental_days', 'pickup_location']);
                 $payload = array_filter($payload, function ($v) {
                     return $v !== null && $v !== '';
                 });
@@ -313,7 +593,13 @@ class CarBookingController extends Controller
                 $validated['token'] = $car_booking->identifier;
                 $request->merge(['token' => $car_booking->identifier]);
             } catch (Exception $e) {
-                return Response::error([__('Something went wrong! Please try again')], [], 500);
+                Log::error('CarBooking TemporaryData Creation Error: ' . $e->getMessage(), [
+                    'payload' => $payload ?? null,
+                    'trace' => $e->getTraceAsString(),
+                    'line' => $e->getLine(),
+                    'file' => $e->getFile(),
+                ]);
+                return Response::error([__('Something went wrong! Please try again')], ['error_details' => $e->getMessage()], 500);
             }
         }
 
@@ -349,14 +635,13 @@ class CarBookingController extends Controller
             $temp_data['car_id'] = $validated['car_id'];
             $temp_data['car_slug'] = $validated['car_slug'];
             $temp_data['location'] = $validated['location'];
-            $temp_data['destination'] = $validated['destination'];
-            $temp_data['distance'] = $validated['distance'];
+            $temp_data['rental_days'] = $validated['rental_days'];
+            $temp_data['pickup_location'] = $validated['pickup_location'] ?? null;
             $temp_data['credentials'] = $validated['credentials'];
             $temp_data['mobile'] = $validated['mobile'];
             $temp_data['round_pickup_date'] = $validated['round_pickup_date'];
             $temp_data['round_pickup_time'] = $validated['round_pickup_time'];
             $temp_data['message'] = $validated['message'];
-            $temp_data['fees'] = $validated['fees'];
             $temp_data['payment'] = $validated['payment'];
             $temp_data['token'] = $validated['token'];
             $temp_data['user_id'] = $validated['user_id'];
@@ -391,9 +676,15 @@ class CarBookingController extends Controller
         }
         $temp_data = json_decode(json_encode($temp_booking->data), true);
 
-        // Calculate charges and tax
+        // GOLDEN RULE: Recalculate everything in backend - NEVER trust frontend values
+        $car = Car::findOrFail($data['car_id']);
         $balanceService = new BookingBalanceService();
-        $rentalFees = floatval($data['fees']);
+
+        // Calculate rental fees based on tiered pricing
+        $rentalDays = intval($data['rental_days']);
+        $rentalCalculation = $balanceService->calculateRentalFees($car, $rentalDays);
+        $rentalFees = $rentalCalculation['rental_fees'];
+
         $deliveryPrice = ($request && $request->include_delivery) ? floatval($request->delivery_price ?? 0) : 0;
 
         $charges = 0;
@@ -409,6 +700,11 @@ class CarBookingController extends Controller
         $pricingBreakdown = $balanceService->calculateBookingTotal($rentalFees, $deliveryPrice, $charges);
 
         try {
+            // Extract pickup location data
+            $pickupLatitude = isset($data['pickup_location']['latitude']) ? floatval($data['pickup_location']['latitude']) : null;
+            $pickupLongitude = isset($data['pickup_location']['longitude']) ? floatval($data['pickup_location']['longitude']) : null;
+            $pickupAddress = isset($data['pickup_location']['address']) ? $data['pickup_location']['address'] : null;
+
             $booking_data = CarBooking::create([
                 'car_id' => $data['car_id'],
                 'user_id' => $data['user_id'],
@@ -418,16 +714,22 @@ class CarBookingController extends Controller
                 'phone' => $data['mobile'],
                 'email' => $data['credentials'],
                 'location' => $data['location'],
-                'destination' => $data['destination'],
+                'destination' => $data['destination'] ?? null,
+                'distance' => $data['distance'] ?? 0,
+                'pickup_latitude' => $pickupLatitude,
+                'pickup_longitude' => $pickupLongitude,
+                'pickup_address' => $pickupAddress,
+                'rental_days' => $rentalDays,
+                'allowance_km' => null, // User doesn't set this - vendor only
                 'trip_id' => generate_unique_code(),
                 'pickup_time' => $temp_data['pickup_time'],
                 'pickup_date' => $temp_data['pickup_date'],
                 'round_pickup_time' => $data['round_pickup_time'],
                 'round_pickup_date' => $data['round_pickup_date'],
-                'distance' => $data['distance'],
                 'amount' => $rentalFees,
                 'charges' => $charges,
-                'delivery_price' => $deliveryPrice,
+                'delivery_fee' => $deliveryPrice,
+                'is_delivery' => ($deliveryPrice > 0),
                 'subtotal' => $pricingBreakdown['subtotal'],
                 'tax_percentage' => $pricingBreakdown['tax_percentage'],
                 'tax_amount' => $pricingBreakdown['tax_amount'],
@@ -449,7 +751,34 @@ class CarBookingController extends Controller
                 'total_amount' => $pricingBreakdown['total'],
             ], 200);
         } catch (Exception $e) {
-            return Response::error([__('Something went wrong! Please try again')], [], 400);
+            Log::error('CarBooking Confirm Error: ' . $e->getMessage(), [
+                'data' => $data ?? null,
+                'type' => $type ?? null,
+                'trx_id' => $trx_id ?? null,
+                'trace' => $e->getTraceAsString(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+                'sql' => DB::getQueryLog(),
+            ]);
+
+            // Check for specific null value errors
+            if (
+                strpos($e->getMessage(), 'must not be accessed before initialization') !== false ||
+                strpos($e->getMessage(), 'Null check operator') !== false
+            ) {
+                return Response::error([
+                    __('Missing required data. Please check all fields are filled.'),
+                ], [
+                    'error_type' => 'null_value_error',
+                    'error_details' => $e->getMessage(),
+                    'missing_fields' => $this->identifyNullFields($data),
+                ], 400);
+            }
+
+            return Response::error([__('Something went wrong! Please try again')], [
+                'error_details' => $e->getMessage(),
+                'error_type' => 'booking_creation_error',
+            ], 400);
         }
     }
 
@@ -467,9 +796,15 @@ class CarBookingController extends Controller
         }
         $temp_data = json_decode(json_encode($temp_booking->data), true);
 
-        // Calculate total amount with tax and delivery
+        // GOLDEN RULE: Recalculate everything in backend - NEVER trust frontend values
+        $car = Car::findOrFail($data['car_id']);
         $balanceService = new BookingBalanceService();
-        $rentalFees = floatval($data['fees']);
+
+        // Calculate rental fees based on tiered pricing
+        $rentalDays = intval($data['rental_days']);
+        $rentalCalculation = $balanceService->calculateRentalFees($car, $rentalDays);
+        $rentalFees = $rentalCalculation['rental_fees'];
+
         $deliveryPrice = $request->include_delivery ? floatval($request->delivery_price ?? 0) : 0;
 
         $pricingBreakdown = $balanceService->calculateBookingTotal($rentalFees, $deliveryPrice);
@@ -491,6 +826,11 @@ class CarBookingController extends Controller
 
         DB::beginTransaction();
         try {
+            // Extract pickup location data
+            $pickupLatitude = isset($data['pickup_location']['latitude']) ? floatval($data['pickup_location']['latitude']) : null;
+            $pickupLongitude = isset($data['pickup_location']['longitude']) ? floatval($data['pickup_location']['longitude']) : null;
+            $pickupAddress = isset($data['pickup_location']['address']) ? $data['pickup_location']['address'] : null;
+
             // Create booking
             $booking_data = CarBooking::create([
                 'car_id' => $data['car_id'],
@@ -501,16 +841,22 @@ class CarBookingController extends Controller
                 'phone' => $data['mobile'],
                 'email' => $data['credentials'],
                 'location' => $data['location'],
-                'destination' => $data['destination'],
+                'destination' => $data['destination'] ?? null,
+                'distance' => $data['distance'] ?? 0,
+                'pickup_latitude' => $pickupLatitude,
+                'pickup_longitude' => $pickupLongitude,
+                'pickup_address' => $pickupAddress,
+                'rental_days' => $rentalDays,
+                'allowance_km' => null, // User doesn't set this - vendor only
                 'trip_id' => generate_unique_code(),
                 'pickup_time' => $temp_data['pickup_time'],
                 'pickup_date' => $temp_data['pickup_date'],
                 'round_pickup_time' => $data['round_pickup_time'],
                 'round_pickup_date' => $data['round_pickup_date'],
-                'distance' => $data['distance'],
                 'amount' => $rentalFees,
                 'charges' => 0,
-                'delivery_price' => $deliveryPrice,
+                'delivery_fee' => $deliveryPrice,
+                'is_delivery' => ($deliveryPrice > 0),
                 'subtotal' => $pricingBreakdown['subtotal'],
                 'tax_percentage' => $pricingBreakdown['tax_percentage'],
                 'tax_amount' => $pricingBreakdown['tax_amount'],
@@ -538,9 +884,45 @@ class CarBookingController extends Controller
                 'amount_deducted' => $totalAmount,
                 'new_balance' => $user->fresh()->balance,
             ], 200);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
-            return Response::error([$e->getMessage()], [], 400);
+            Log::error('CarBooking Balance Payment Error: ' . $e->getMessage(), [
+                'data' => $data ?? null,
+                'trx_id' => $trx_id ?? null,
+                'user_id' => $user->id ?? null,
+                'trace' => $e->getTraceAsString(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+            ]);
+
+            // Check for type casting errors
+            if (strpos($e->getMessage(), 'is not a subtype of type') !== false) {
+                return Response::error([
+                    __('Data type mismatch. Please contact support.'),
+                ], [
+                    'error_type' => 'type_casting_error',
+                    'error_details' => $e->getMessage(),
+                ], 400);
+            }
+
+            // Check for null value errors
+            if (
+                strpos($e->getMessage(), 'must not be accessed before initialization') !== false ||
+                strpos($e->getMessage(), 'Null check operator') !== false
+            ) {
+                return Response::error([
+                    __('Missing required data. Please check all fields are filled.'),
+                ], [
+                    'error_type' => 'null_value_error',
+                    'error_details' => $e->getMessage(),
+                    'missing_fields' => $this->identifyNullFields($data),
+                ], 400);
+            }
+
+            return Response::error([__('Booking failed. Please try again.')], [
+                'error_details' => $e->getMessage(),
+                'error_type' => 'booking_creation_error',
+            ], 400);
         }
     }
 
@@ -1208,5 +1590,31 @@ class CarBookingController extends Controller
         } else {
             return Response::error([__('No response returned')], [], 400);
         }
+    }
+
+    /**
+     * Helper method to identify null or missing fields in data array
+     */
+    private function identifyNullFields($data)
+    {
+        $requiredFields = [
+            'car_id',
+            'user_id',
+            'car_slug',
+            'location',
+            'rental_days',
+            'credentials',
+            'mobile',
+            'token'
+        ];
+
+        $missingFields = [];
+        foreach ($requiredFields as $field) {
+            if (!isset($data[$field]) || $data[$field] === null || $data[$field] === '') {
+                $missingFields[] = $field;
+            }
+        }
+
+        return $missingFields;
     }
 }

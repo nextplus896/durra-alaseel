@@ -2,7 +2,9 @@
     "private": true,
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "vite build",
+        "generate:openapi": "node scripts/generate-openapi.js",
+        "generate:apidog": "npm run generate:openapi"
     },
     "devDependencies": {
         "@popperjs/core": "^2.11.6",
@@ -10,8 +12,10 @@
         "bootstrap": "^5.2.3",
         "laravel-vite-plugin": "^0.7.0",
         "lodash": "^4.17.19",
+        "postman-to-openapi": "^3.0.0",
         "postcss": "^8.1.14",
         "sass": "^1.56.1",
-        "vite": "^3.0.0"
+        "vite": "^3.0.0",
+        "yaml": "^2.4.5"
     }
 }
