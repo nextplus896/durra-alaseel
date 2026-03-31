@@ -28,7 +28,8 @@
                                 <td>{{ $history->pickup_time }}</td>
                                 <td>{{ $history->cars->car_model }}</td>
                                 <td>{{ $history->cars->car_number }}</td>
-                                <td>{{ get_amount($history->amount) }} {{ get_default_currency_code() }}</td>
+                                <td>{{ get_amount($history->total_amount ?? $history->amount) }}
+                                    {{ get_default_currency_code() }}</td>
                                 <td>
                                     @if ($history->status === 3)
                                         <span class="badge badge--success">{{ __('Complete') }}</span>

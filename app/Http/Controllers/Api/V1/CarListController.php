@@ -124,7 +124,20 @@ class CarListController extends Controller
             'available_filters' => [
                 'car_types' => CarType::whereIn('id', $typeIds)->select('id', 'name', 'slug')->get(),
                 'car_models' => CarModel::whereIn('id', $modelIds)->select('id', 'name', 'car_type_id')->get(),
-                'branches' => \App\Models\Admin\Branch::whereIn('id', $branchIds)->where('status', true)->select('id', 'name', 'slug', 'address')->get(),
+                'branches' => \App\Models\Admin\Branch::whereIn('id', $branchIds)->where('status', true)
+                    ->with(['deliverySettings'])
+                    ->get(['id', 'name', 'slug', 'address'])
+                    ->map(function ($branch) {
+                        $deliverySetting = $branch->deliverySettings->first();
+                        return [
+                            'id'             => $branch->id,
+                            'name'           => $branch->name,
+                            'slug'           => $branch->slug,
+                            'address'        => $branch->address,
+                            'is_delivery'    => $deliverySetting ? (bool) $deliverySetting->delivery_available : false,
+                            'delivery_price' => $deliverySetting ? (float) $deliverySetting->delivery_price : 0,
+                        ];
+                    }),
             ],
             'cars' => $cars->getCollection()->map(function ($car) {
                 $feesRaw = (float) $car->fees;
@@ -142,6 +155,8 @@ class CarListController extends Controller
                     'image'        => $car->image,
                     'image_url'    => $car->image_url,
                     'status'       => $car->status,
+                    'is_delivery'  => $car->isDeliveryAvailable(),
+                    'delivery_price' => $car->getDeliveryPrice(),
                     'car_type' => $car->type ? [
                         'id'   => $car->type->id,
                         'name' => $car->type->name,
@@ -157,10 +172,14 @@ class CarListController extends Controller
                         'name' => $car->area->name,
                     ] : null,
                     'branch' => $car->branch ? [
-                        'id'      => $car->branch->id,
-                        'name'    => $car->branch->name,
-                        'slug'    => $car->branch->slug,
-                        'address' => $car->branch->address,
+                        'id'               => $car->branch->id,
+                        'name'             => $car->branch->name,
+                        'slug'             => $car->branch->slug,
+                        'address'          => $car->branch->address,
+                        'latitude'         => $car->branch->latitude ? (float) $car->branch->latitude : null,
+                        'longitude'        => $car->branch->longitude ? (float) $car->branch->longitude : null,
+                        'delivery_enabled' => (bool) $car->branch->delivery_enabled,
+                        'delivery_radius_km' => (float) ($car->branch->delivery_radius_km ?? $car->branch->service_radius_km),
                     ] : null,
                     'vendor' => $car->vendor ? [
                         'id'       => $car->vendor->id,
@@ -252,9 +271,20 @@ class CarListController extends Controller
     public function branches()
     {
         $branches = \App\Models\Admin\Branch::where('status', true)
-            ->select('id', 'name', 'slug', 'address')
+            ->with(['deliverySettings'])
             ->orderBy('name', 'asc')
-            ->get();
+            ->get(['id', 'name', 'slug', 'address'])
+            ->map(function ($branch) {
+                $deliverySetting = $branch->deliverySettings->first();
+                return [
+                    'id'             => $branch->id,
+                    'name'           => $branch->name,
+                    'slug'           => $branch->slug,
+                    'address'        => $branch->address,
+                    'is_delivery'    => $deliverySetting ? (bool) $deliverySetting->delivery_available : false,
+                    'delivery_price' => $deliverySetting ? (float) $deliverySetting->delivery_price : 0,
+                ];
+            });
 
         return Response::success([__('Branches fetched successfully!')], ['branches' => $branches], 200);
     }
@@ -328,6 +358,8 @@ class CarListController extends Controller
                 'image'        => $car->image,
                 'image_url'    => $car->image_url,
                 'status'       => $car->status,
+                'is_delivery'  => $car->isDeliveryAvailable(),
+                'delivery_price' => $car->getDeliveryPrice(),
                 'car_type' => $car->type ? [
                     'id'   => $car->type->id,
                     'name' => $car->type->name,
@@ -343,10 +375,14 @@ class CarListController extends Controller
                     'name' => $car->area->name,
                 ] : null,
                 'branch' => $car->branch ? [
-                    'id'      => $car->branch->id,
-                    'name'    => $car->branch->name,
-                    'slug'    => $car->branch->slug,
-                    'address' => $car->branch->address,
+                    'id'               => $car->branch->id,
+                    'name'             => $car->branch->name,
+                    'slug'             => $car->branch->slug,
+                    'address'          => $car->branch->address,
+                    'latitude'         => $car->branch->latitude ? (float) $car->branch->latitude : null,
+                    'longitude'        => $car->branch->longitude ? (float) $car->branch->longitude : null,
+                    'delivery_enabled' => (bool) $car->branch->delivery_enabled,
+                    'delivery_radius_km' => (float) ($car->branch->delivery_radius_km ?? $car->branch->service_radius_km),
                 ] : null,
                 'vendor' => $car->vendor ? [
                     'id'       => $car->vendor->id,

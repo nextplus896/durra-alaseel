@@ -58,17 +58,32 @@
                 @csrf
                 @method('PUT')
                 <div class="row mb-10-none">
+                    <div class="col-xl-12 col-lg-12 form-group">
+                        <label>{{ __('Enable Delivery') }}</label>
+                        <div class="d-flex align-items-center mt-2">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" name="delivery_enabled"
+                                    id="delivery_enabled" value="1"
+                                    {{ old('delivery_enabled', $branch->delivery_enabled) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="delivery_enabled">
+                                    {{ __('Allow delivery to user locations') }}
+                                </label>
+                            </div>
+                        </div>
+                        <small
+                            class="text-muted d-block mt-1">{{ __('When disabled, users must pick up from the branch.') }}</small>
+                    </div>
                     <div class="col-xl-6 col-lg-6 form-group">
                         <label>{{ __('Branch Name') }}<span>*</span></label>
-                        <input type="text" name="name" class="form--control" placeholder="{{ __('Enter branch name') }}"
-                            value="{{ old('name', $branch->name) }}" required>
+                        <input type="text" name="name" class="form--control"
+                            placeholder="{{ __('Enter branch name') }}" value="{{ old('name', $branch->name) }}" required>
                     </div>
                     <div class="col-xl-6 col-lg-6 form-group">
                         <label>{{ __('Service Radius (km)') }}<span>*</span></label>
                         <input type="number" name="service_radius_km" class="form--control"
                             placeholder="{{ __('Enter service radius in km') }}"
-                            value="{{ old('service_radius_km', $branch->service_radius_km) }}" step="0.1" min="0.1"
-                            max="500" required>
+                            value="{{ old('service_radius_km', $branch->service_radius_km) }}" step="0.1"
+                            min="0.1" max="500" required>
                     </div>
                     <div class="col-xl-12 col-lg-12 form-group">
                         <label>{{ __('Address') }}</label>
@@ -97,6 +112,7 @@
                             placeholder="{{ __('Longitude') }}" value="{{ old('longitude', $branch->longitude) }}"
                             readonly required>
                     </div>
+
                     <div class="col-xl-12 col-lg-12 form-group">
                         @include('admin.components.button.form-btn', [
                             'class' => 'w-100 btn-loading',

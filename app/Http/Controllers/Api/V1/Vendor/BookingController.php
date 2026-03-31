@@ -11,12 +11,15 @@ use App\Http\Helpers\Response;
 use App\Models\Admin\BasicSettings;
 use App\Models\Admin\TransactionSetting;
 use App\Models\CarBooking;
+use App\Models\User;
 use App\Models\UserNotification;
 use App\Notifications\User\rideComplete;
+use App\Services\BookingBalanceService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 
@@ -137,7 +140,24 @@ class BookingController extends Controller
 
     public function reject(Request $request)
     {
+        // Validate rejection reason
+        $request->validate([
+            'id' => 'required|integer',
+            'reason' => 'required|string',
+            'custom_reason' => 'nullable|required_if:reason,other|string|max:1000',
+        ]);
+
+        // Determine the final rejection reason
+        $rejectionReason = $request->reason === 'other'
+            ? $request->custom_reason
+            : $request->reason;
+
         $booking_info = CarBooking::where('id', $request->id)->first();
+
+        if (!$booking_info) {
+            return Response::error([__('Booking not found')]);
+        }
+
         $basic_setting = BasicSettings::first();
         try {
 
@@ -146,10 +166,42 @@ class BookingController extends Controller
                     'refundable' => PaymentGatewayConst::STATUSPENDING,
                 ]);
             };
-            $booking_info->update(['status' => 4]);
+
+            // Update booking status and store rejection reason
+            $booking_info->update([
+                'status' => 4,
+                'rejection_reason' => $rejectionReason,
+            ]);
+
+            // Auto-refund: if booking was paid from wallet balance, refund immediately
+            if ($booking_info->paid_from_balance && $booking_info->balance_deducted > 0) {
+                try {
+                    $bookingUser = User::find($booking_info->user_id);
+                    if ($bookingUser) {
+                        $balanceService = new BookingBalanceService();
+                        $balanceService->refundBalance(
+                            $bookingUser,
+                            $booking_info,
+                            (float) $booking_info->balance_deducted,
+                            __('Auto-refund: Booking rejected by vendor — :reason', ['reason' => $rejectionReason]),
+                        );
+                        Log::info('Auto-refund processed for rejected booking', [
+                            'booking_id' => $booking_info->id,
+                            'user_id'    => $bookingUser->id,
+                            'amount'     => $booking_info->balance_deducted,
+                        ]);
+                    }
+                } catch (Exception $e) {
+                    Log::error('Auto-refund failed for rejected booking', [
+                        'booking_id' => $booking_info->id,
+                        'error'      => $e->getMessage(),
+                    ]);
+                }
+            }
+
             $notification_content = [
-                'title'   => "Request Rejected",
-                'message' => "Vendor rejected your request",
+                'title'   => "Booking Rejected",
+                'message' => "Your booking #{$booking_info->trx_id} was rejected. Reason: {$rejectionReason}",
                 'time'    => Carbon::now()->diffForHumans(),
                 'image'   => files_asset_path('profile-default'),
             ];
@@ -161,7 +213,13 @@ class BookingController extends Controller
 
             try {
                 if ($basic_setting->push_notification) {
-                    (new PushNotificationHelper())
+                    Log::info('API: Attempting to send push notification', [
+                        'user_id' => $booking_info->user_id,
+                        'title' => $notification_content['title'],
+                        'message' => $notification_content['message'],
+                    ]);
+
+                    $result = (new PushNotificationHelper())
                         ->prepare(
                             [$booking_info->user_id],
                             [
@@ -171,14 +229,25 @@ class BookingController extends Controller
                             ],
                         )
                         ->send();
+
+                    Log::info('API: Push notification sent successfully', ['result' => $result]);
+                } else {
+                    Log::info('API: Push notification is disabled in settings');
                 }
             } catch (Exception $e) {
+                Log::error('API: Push notification failed: ' . $e->getMessage(), [
+                    'exception' => $e,
+                    'trace' => $e->getTraceAsString(),
+                ]);
             }
         } catch (Exception $e) {
             return Response::error([__('Oops! Something went wrong! Please try again')]);
         }
 
-        return Response::success([__('Request Rejected')]);
+        return Response::success([__('Request Rejected')], [
+            'booking_id' => $booking_info->id,
+            'rejection_reason' => $rejectionReason,
+        ]);
     }
 
     public function complete(Request $request)

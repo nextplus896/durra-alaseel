@@ -39,6 +39,15 @@ The app uses **three distinct role systems** with separate authentication guards
 - **Same business logic** shared via Service classes (`App\Services\`)
 - Example: `CarBookingController` (web) mirrors `CarBookingController` (API) with different response formats
 
+### Booking System
+
+- booking Id must be 6 digits, unique, and non-sequential (e.g. `5G7H2K`)
+- Booking status flow: `pending → booked → ongoing → completed` or `pending → rejected`
+- Critical: Car availability must be checked at every step to prevent double-booking
+- Pricing includes rental fees, delivery fee, charges, tax — all calculated in `BookingBalanceService` for consistency
+- Payment methods: balance only
+- Daily rate of extension must be same daily rate as original booking, even if car price has changed since then
+
 ### Database: PostgreSQL with Timestamps & Polymorphic Relationships
 
 - **Naming convention:** `snake_case` tables, migrations in `database/migrations/`
@@ -47,6 +56,78 @@ The app uses **three distinct role systems** with separate authentication guards
     - Relationships: `belongsTo()`, `hasMany()`, `hasOne()`
     - Casts: Explicit type casting in `$casts` array (User: `balance => 'decimal:8'`)
     - Scopes: Query builder shortcuts (`User::kycVerified()`, `User::active()`)
+
+---
+
+## Branch & Delivery System
+
+### Branch Model (`App\Models\Admin\Branch`)
+
+Branches are admin-managed pickup locations assigned to cars. Key fields: `name`, `slug`, `address`, `latitude`, `longitude`, `service_radius_km`, `status`.
+
+- `Branch::active()` scope for enabled branches
+- `Branch->cars()` — hasMany Car (via `branch_id`)
+- `Branch->deliverySettings()` — hasMany `BranchDeliverySetting` (each vendor can have its own delivery price per branch)
+- `Branch->calculateDistance($lat, $lng)` — uses Haversine formula
+
+### Delivery Settings (`App\Models\BranchDeliverySetting`)
+
+Delivery is **per-vendor per-branch**, not global. Keyed on `(branch_id, vendor_id)`.
+
+- `delivery_available` (boolean) — whether vendor offers delivery at this branch
+- `delivery_price` (decimal:8) — what vendor charges for delivery
+- `BranchDeliverySetting::getOrCreate($branchId, $vendorId)` — safe upsert helper
+- `scopeAvailable($query)` — filter only enabled delivery settings
+
+### Car Delivery Helpers (`App\Models\Vendor\Cars\Car`)
+
+- `$car->delivery_setting` — dynamic attribute; queries `BranchDeliverySetting` for the car's `(branch_id, vendor_id)`
+- `$car->isDeliveryAvailable()` — returns bool
+- `$car->getDeliveryPrice()` — returns decimal (0 if no setting)
+
+**Pattern when exposing delivery in API responses:**
+
+```php
+'is_delivery'    => $car->isDeliveryAvailable(),
+'delivery_price' => $car->getDeliveryPrice(),
+```
+
+**Pattern when exposing delivery in branch list responses:**
+
+```php
+->with(['deliverySettings'])->get()->map(function ($branch) {
+    $setting = $branch->deliverySettings->first();
+    return [
+        'is_delivery'    => $setting ? (bool) $setting->delivery_available : false,
+        'delivery_price' => $setting ? (float) $setting->delivery_price : 0,
+    ];
+});
+```
+
+> **Note:** `Car::query()->with(['type', 'carModel', 'area', 'vendor'])` does NOT eager-load delivery settings — delivery is resolved via the dynamic attribute (lazy). If you need eager loading for delivery, add `'branch.deliverySettings'` to the with() call.
+
+---
+
+## Public Car Listing API (`App\Http\Controllers\Api\V1\CarListController`)
+
+No auth required. Centralizes all public car discovery:
+
+| Endpoint                             | Method         | Description                                                 |
+| ------------------------------------ | -------------- | ----------------------------------------------------------- |
+| `GET /api/v1/cars`                   | `index()`      | Paginated car list with filters + `available_filters` block |
+| `GET /api/v1/cars/{id}`              | `show()`       | Single car detail                                           |
+| `GET /api/v1/cars/vendor/{vendorId}` | `vendorCars()` | Delegates to `index()` with vendor filter                   |
+| `GET /api/v1/cars/branches`          | `branches()`   | All active branches with `is_delivery` + `delivery_price`   |
+| `GET /api/v1/cars/types`             | `carTypes()`   | Filter options for car type                                 |
+| `GET /api/v1/cars/models`            | `carModels()`  | Filter options for car model                                |
+
+**`available_filters` pattern in `index()`:** The response includes a dynamic `available_filters` block (types, models, branches) computed from the _current filtered result set_ — not all records. This means filters update contextually. Clone the query before each filter aggregation to avoid cross-contamination:
+
+```php
+$typeIds = (clone $query)->select('car_type_id')->distinct()->pluck('car_type_id')->filter()->toArray();
+```
+
+**`TemporaryData` token flow in listing:** If the client provides `pickup_date` + `pickup_time`, the listing API creates a `TemporaryData` record and returns a `token` identifier. This token is passed into the booking preview/confirm flow. Always echo back an existing valid token if the client provides one.
 
 ---
 
@@ -79,10 +160,13 @@ The app uses **three distinct role systems** with separate authentication guards
 - Status: `status` (1=active, 0=banned)
 - Relations: `hasMany(CarBooking)`, `hasOne(UserKycData)`, `hasMany(BalanceTransaction)`
 
-**Car** (cars table in Vendor namespace)
+**Car** (`App\Models\Vendor\Cars\Car`, cars table)
 
-- Links to Vendor: `vendor_id` (FK)
-- Relations: `belongsTo(Vendor)`, `hasMany(CarBooking)`
+- Links to: `vendor_id`, `branch_id`, `car_type_id`, `car_model_id`, `car_area_id`
+- Pricing tiers: `fees` (base), `price_per_day`, `price_per_week`, `price_per_month`, `allowance_km`, `allowance_price_per_km`
+- Relations: `belongsTo(Vendor)`, `belongsTo(Branch)`, `belongsTo(CarType)`, `belongsTo(CarModel)`, `hasMany(CarBooking)`
+- Delivery: resolved via `$car->delivery_setting` (dynamic attribute) → `isDeliveryAvailable()`, `getDeliveryPrice()`
+- Image: `$car->image_url` (appended attribute using `files_asset_path('car-models')`)
 
 ### Payment System: Three Methods
 
@@ -259,3 +343,263 @@ When notifying vendors/users:
 - **Payment gateways:** TWILIO_INTEGRATION_GUIDE.md
 - **API testing:** POSTMAN_TESTING_GUIDE.md
 - **System setup:** QUICK_START_GUIDE.md
+
+---
+
+## Enterprise AI Code Generation Standards
+
+You are an **enterprise-level senior Laravel architect**. Always generate **production-ready, audit-safe, scalable code**. Never produce demo-level or simplified shortcuts.
+
+### Priority Order (Highest to Lowest)
+
+1. **Availability Integrity** — Car must never be double-booked
+2. **Financial Integrity** — Every deduction/charge must have a transaction record
+3. **Audit Trail** — Every mutation to a booking must be logged with old/new values
+4. **Data Consistency** — All multi-step writes inside `DB::transaction()`
+5. **Clean Architecture** — SOLID, single responsibility, service abstraction
+
+---
+
+## Enterprise Feature: Extend Rental Days
+
+This feature is **CRITICAL**. All rules below are **MANDATORY** and non-negotiable.
+
+### Extension Flow (Required Order)
+
+```
+1. Validate booking status (BOOKED or ONGOING only)
+2. Check car availability for new end date (no overlapping bookings)
+3. Calculate extra days in backend (never trust frontend value)
+4. Calculate price via BookingBalanceService / PricingService
+5. DB::transaction():
+   a. Create CarBookingExtension record
+   b. Create BalanceTransaction / Payment record
+   c. Update CarBooking end_date
+   d. Create BookingHistory audit record
+6. Commit transaction
+```
+
+### CarBookingExtension Model — Required Fields
+
+| Field             | Type              | Notes                     |
+| ----------------- | ----------------- | ------------------------- |
+| `id`              | bigint PK         |                           |
+| `booking_id`      | FK → car_bookings |                           |
+| `car_id`          | FK → cars         |                           |
+| `vendor_id`       | FK → vendors      |                           |
+| `old_end_date`    | date              | snapshot before change    |
+| `new_end_date`    | date              | snapshot after change     |
+| `extra_days`      | int               | calculated server-side    |
+| `daily_rate_used` | decimal:8         | rate at time of extension |
+| `extra_cost`      | decimal:8         | before tax                |
+| `tax_amount`      | decimal:8         |                           |
+| `total_amount`    | decimal:8         |                           |
+| `created_by`      | FK → users        | acting user ID            |
+| `status`          | string            | `active`, `cancelled`     |
+| `created_at`      | timestamp         |                           |
+
+### Extension Business Rules
+
+**Status validation** — Only extend if `status` is `BOOKED` or `ONGOING`. Reject for `COMPLETED`, `REJECTED`, or `CANCELLED`.
+
+**Availability check** — Query for overlapping bookings on the same car:
+
+```php
+CarBooking::where('car_id', $car->id)
+    ->where('id', '!=', $booking->id)
+    ->where('pickup_date', '<', $newEndDate)
+    ->where('return_date', '>', $currentEndDate)
+    ->where('status', '!=', CarBookingConst::REJECTED)
+    ->lockForUpdate()
+    ->exists();
+```
+
+**Extra days calculation** — Always compute server-side:
+
+```php
+$extraDays = Carbon::parse($currentEndDate)->diffInDays(Carbon::parse($newEndDate));
+```
+
+**Pricing** — Always delegate to `BookingBalanceService` or `PricingService`. Never hardcode rates.
+
+**Tax** — Always use `TaxSetting` model. Never hardcode percentage:
+
+```php
+$taxAmount = $subtotal * ($taxPercentage / 100);
+```
+
+**Never delete extension records** — Use `status = cancelled` for cancellations.
+
+**Support multiple extensions** — Extension chain must remain fully auditable from the original booking.
+
+### Extension Service — Required Methods
+
+`App\Services\CarBookingExtensionService`:
+
+- `validateExtension(CarBooking $booking): void` — throws if status invalid
+- `checkAvailability(int $carId, int $bookingId, string $newEndDate, string $currentEndDate): void` — throws if conflict
+- `calculateExtensionCost(Car $car, int $extraDays): array` — returns cost breakdown
+- `createExtension(CarBooking $booking, array $data): CarBookingExtension` — creates record inside DB::transaction
+- `createPayment(CarBooking $booking, CarBookingExtension $extension, string $method): void`
+- `createHistory(CarBooking $booking, CarBookingExtension $extension): void`
+
+### Extension Controller Rules
+
+Controller **only**:
+
+1. Validates request input
+2. Calls `CarBookingExtensionService`
+3. Returns `Response::success()` or `Response::error()`
+
+**Never** place business logic inside the controller.
+
+### Extension Database Transaction (Mandatory)
+
+```php
+DB::transaction(function () use ($booking, $data) {
+    $extension = $this->createExtensionRecord($booking, $data);
+    $this->createPaymentRecord($booking, $extension);
+    $booking->update(['return_date' => $data['new_end_date']]);
+    $this->createHistoryRecord($booking, $extension);
+});
+```
+
+---
+
+## Enterprise-Wide Code Rules
+
+### Service Layer
+
+All business logic **must** live inside `App\Services\`. Controllers are thin orchestrators only.
+
+### Database Safety
+
+- Wrap all multi-step writes in `DB::transaction()`
+- Use `->lockForUpdate()` on booking rows when checking availability to prevent race conditions
+- Never perform partial writes without rollback protection
+
+### Multi-Role Security
+
+- **User** — can only access their own bookings (`booking.user_id == auth()->id()`)
+- **Vendor** — can only access cars/bookings linked to their vendor (`booking.vendor_id == auth()->user()->vendor_id`)
+- **Admin** — full access
+- Never trust frontend ownership claims; always re-verify in backend
+
+### Payment Integrity
+
+- **Balance payment** → `BookingBalanceService::deductBalanceForBooking()` → creates `BalanceTransaction`
+- **Gateway payment** → create Payment record, redirect via `PaymentGatewayHelper::init()`
+- **Cash** → create pending payment record
+- Never silently modify `User.balance`; every change requires a `BalanceTransaction` record
+
+### Audit Trail
+
+Every mutation to `CarBooking` must produce a record in `BookingHistory` / `CarBookingHistory` with: `action`, `old_value`, `new_value`, `user_id`, `timestamp`.
+
+### Performance
+
+- Always eager-load relationships: `->with(['car', 'user', 'vendor', 'extensions'])`
+- Avoid N+1 queries — never lazy-load inside loops
+- Use database indexes on `car_id`, `booking_id`, `status`, `pickup_date`, `return_date`
+
+### AI Code Generation Checklist
+
+When generating any booking-mutation feature, always include:
+
+- [ ] Migration with proper indexes
+- [ ] Model with relationships and casts
+- [ ] Service class with isolated methods
+- [ ] Controller method (thin — validate → service → response)
+- [ ] Input validation rules
+- [ ] `DB::transaction()` wrapping all writes
+- [ ] Car availability check with `lockForUpdate()`
+- [ ] Payment/transaction record creation
+- [ ] Audit history record creation
+- [ ] `Response::success()` / `Response::error()` responses
+
+## MCP Module Playbook (When Adding a New API Endpoint)
+
+### 1) Confirm the API
+
+- Verify endpoint stability, URL, methods, response JSON, and auth requirements.
+
+### 2) Create Module Structure
+
+```text
+app/Modules/NewResource/
+├─ Controllers/
+├─ Services/
+├─ Routes/
+```
+
+### 3) Implement Service Layer
+
+- File: `app/Modules/NewResource/Services/NewResourceService.php`
+- Responsibilities:
+    1. Call existing API endpoints via `Http::get/post/put/delete`.
+    2. Support filters, sorting, and pagination.
+    3. Normalize responses to standard MCP JSON:
+
+```json
+{
+    "status": "success",
+    "message": "string",
+    "data": {},
+    "pagination": {}
+}
+```
+
+### 4) Implement Controller
+
+- File: `app/Modules/NewResource/Controllers/NewResourceController.php`
+- Keep controller thin: receive request, call service, return JSON.
+- Typical methods: `index()`, `show($id)`, `create()`, `update($id)`, `delete($id)`.
+
+### 5) Define Routes
+
+- File: `app/Modules/NewResource/routes.php`
+- Prefix with `/mcp/new-resource` and apply auth/RBAC middleware.
+
+```php
+Route::prefix('mcp/new-resource')->group(function () {
+        Route::get('/', [NewResourceController::class, 'index']);
+        Route::get('/{id}', [NewResourceController::class, 'show']);
+        Route::post('/', [NewResourceController::class, 'create']);
+        Route::put('/{id}', [NewResourceController::class, 'update']);
+        Route::delete('/{id}', [NewResourceController::class, 'delete']);
+});
+```
+
+### 6) Standardize JSON Output
+
+All MCP modules should return:
+
+```json
+{
+    "status": "success|error",
+    "message": "Action description",
+    "data": {},
+    "pagination": {}
+}
+```
+
+### 7) Validation and Logging
+
+- Validate all input before API calls.
+- Log create/update/delete actions with user ID, action type, and timestamp.
+- Optionally cache GET requests for performance.
+
+### 8) Register Module Discovery
+
+If module discovery is dynamic, add the module to configuration (for example in `config/mcp-modules.php`).
+
+### 9) Test End-to-End
+
+- Run feature tests for module endpoints.
+- Verify MCP dashboard rendering and AI/automation consumption.
+
+### 10) Keep Future Changes Consistent
+
+- Preserve modular structure.
+- Keep controllers thin.
+- Keep JSON response shape consistent.

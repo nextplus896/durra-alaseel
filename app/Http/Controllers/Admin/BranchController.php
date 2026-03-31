@@ -44,11 +44,12 @@ class BranchController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255|unique:branches,name',
-            'address' => 'nullable|string|max:500',
-            'latitude' => 'required|numeric|between:-90,90',
-            'longitude' => 'required|numeric|between:-180,180',
-            'service_radius_km' => 'required|numeric|min:0.1|max:500',
+            'name'               => 'required|string|max:255|unique:branches,name',
+            'address'            => 'nullable|string|max:500',
+            'latitude'           => 'required|numeric|between:-90,90',
+            'longitude'          => 'required|numeric|between:-180,180',
+            'service_radius_km'  => 'required|numeric|min:0.1|max:500',
+            'delivery_enabled'   => 'nullable|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -57,9 +58,10 @@ class BranchController extends Controller
 
         $validated = $validator->validate();
 
-        $validated['slug'] = Str::slug($validated['name']);
-        $validated['status'] = true;
-        $validated['last_edit_by'] = auth()->user()->id;
+        $validated['slug']             = Str::slug($validated['name']);
+        $validated['status']           = true;
+        $validated['last_edit_by']     = auth()->user()->id;
+        $validated['delivery_enabled'] = $request->boolean('delivery_enabled');
 
         try {
             Branch::create($validated);
@@ -99,11 +101,12 @@ class BranchController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255|unique:branches,name,' . $id,
-            'address' => 'nullable|string|max:500',
-            'latitude' => 'required|numeric|between:-90,90',
-            'longitude' => 'required|numeric|between:-180,180',
-            'service_radius_km' => 'required|numeric|min:0.1|max:500',
+            'name'               => 'required|string|max:255|unique:branches,name,' . $id,
+            'address'            => 'nullable|string|max:500',
+            'latitude'           => 'required|numeric|between:-90,90',
+            'longitude'          => 'required|numeric|between:-180,180',
+            'service_radius_km'  => 'required|numeric|min:0.1|max:500',
+            'delivery_enabled'   => 'nullable|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -111,8 +114,9 @@ class BranchController extends Controller
         }
 
         $validated = $validator->validate();
-        $validated['slug'] = Str::slug($validated['name']);
-        $validated['last_edit_by'] = auth()->user()->id;
+        $validated['slug']             = Str::slug($validated['name']);
+        $validated['last_edit_by']     = auth()->user()->id;
+        $validated['delivery_enabled'] = $request->boolean('delivery_enabled');
 
         try {
             $branch->update($validated);

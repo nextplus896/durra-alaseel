@@ -43,6 +43,13 @@ class CarResource extends JsonResource
             'created_at' => $this->created_at ? $this->created_at->toIso8601String() : null,
             'updated_at' => $this->updated_at ? $this->updated_at->toIso8601String() : null,
 
+            // Branch delivery fields (flat scalars — always present so Flutter never gets a missing-key error)
+            'branch_name'        => $this->branch ? (string) $this->branch->name : null,
+            'branch_latitude'    => $this->branch ? (float) $this->branch->latitude : null,
+            'branch_longitude'   => $this->branch ? (float) $this->branch->longitude : null,
+            'delivery_enabled'   => $this->branch ? (bool) $this->branch->delivery_enabled : false,
+            'delivery_radius_km' => $this->branch ? (float) ($this->branch->delivery_radius_km ?? $this->branch->service_radius_km) : null,
+
             // Relationships
             'type' => $this->whenLoaded('type'),
             'car_model_relation' => $this->whenLoaded('carModel'),

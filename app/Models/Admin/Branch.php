@@ -22,6 +22,8 @@ class Branch extends Model
         'latitude' => 'decimal:8',
         'longitude' => 'decimal:8',
         'service_radius_km' => 'decimal:2',
+        'delivery_enabled' => 'boolean',
+        'delivery_radius_km' => 'decimal:2',
         'status' => 'boolean',
         'last_edit_by' => 'integer',
         'created_at' => 'datetime',
@@ -100,6 +102,21 @@ class Branch extends Model
     {
         $distance = $this->calculateDistance($lat, $lng);
         return $distance <= $this->service_radius_km;
+    }
+
+    /**
+     * Check if given coordinates are within the branch delivery radius
+     *
+     * @param float $lat
+     * @param float $lng
+     * @return bool
+     */
+    public function isWithinDeliveryRadius($lat, $lng)
+    {
+        if (!$this->delivery_enabled || !$this->delivery_radius_km) {
+            return false;
+        }
+        return $this->calculateDistance($lat, $lng) <= $this->delivery_radius_km;
     }
 
     /**

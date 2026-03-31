@@ -20,7 +20,7 @@ use App\Models\CarBooking;
 use App\Models\Vendor\Cars\Car;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Notification;
-use App\Notifications\User\carBookingNotification;
+use App\Notifications\User\CarBookingNotification;
 use App\Providers\Admin\BasicSettingsProvider;
 use App\Http\Helpers\PaymentGateway as PaymentGatewayHelper;
 use App\Models\Admin\BasicSettings;
@@ -41,9 +41,28 @@ use net\authorize\api\controller as AnetController;
 
 class CarBookingController extends Controller
 {
+
     use ControlDynamicInputFields, Authorize;
 
-    public function booking(BasicSettingsProvider $basic_settings, $slug)
+    /**
+     * Convert time to 24-hour format (HH:mm) if it's in 12-hour format (h:i A)
+     */
+    private function convertTo24HourFormat($time)
+    {
+        try {
+            // If time contains AM/PM, convert it to 24-hour format
+            if (preg_match('/(AM|PM|am|pm)/', $time)) {
+                return Carbon::parse($time)->format('H:i');
+            }
+            // Already in 24-hour format, return as-is
+            return $time;
+        } catch (\Exception $e) {
+            // If parsing fails, return original
+            return $time;
+        }
+    }
+
+    public function index(BasicSettingsProvider $basic_settings, $slug)
     {
         $site_name = $basic_settings->get()?->site_name;
         $page_title = setPageTitle(__('Car Booking'));
@@ -80,6 +99,13 @@ class CarBookingController extends Controller
         }
 
         $validated = $validator->validate();
+
+        // Convert time to 24-hour format if needed
+        $validated['pickup_time'] = $this->convertTo24HourFormat($validated['pickup_time']);
+        if (!empty($validated['round_pickup_time'])) {
+            $validated['round_pickup_time'] = $this->convertTo24HourFormat($validated['round_pickup_time']);
+        }
+
         $pickupDateTime = Carbon::parse($validated['pickup_date'] . ' ' . $validated['pickup_time']);
 
         if ($pickupDateTime->isPast()) {
@@ -125,7 +151,6 @@ class CarBookingController extends Controller
             Session::forget('form_data');
 
             return redirect(route('frontend.cars'))->with(['cars' => $cars, 'token' => $car_booking->identifier]);
-
         } catch (Exception $e) {
             return back()->with(['error' => [__('Something Went Wrong! Please try again.')]]);
         }
@@ -211,9 +236,18 @@ class CarBookingController extends Controller
                 ->with(['error' => [__('Something went wrong! Please try again')]]);
         }
         $temp_data = json_decode(json_encode($temp_booking->data), true);
+
+        // Convert time formats to 24-hour format if needed
+        if (isset($temp_data['pickup_time'])) {
+            $temp_data['pickup_time'] = $this->convertTo24HourFormat($temp_data['pickup_time']);
+        }
+        if (isset($temp_data['round_pickup_time']) && !empty($temp_data['round_pickup_time'])) {
+            $temp_data['round_pickup_time'] = $this->convertTo24HourFormat($temp_data['round_pickup_time']);
+        }
+
         try {
             if ($type === 'cash') {
-                $charges = TransactionSetting::where('slug','cash')->first();
+                $charges = TransactionSetting::where('slug', 'cash')->first();
                 $amount = $temp_data['total_rent'];
 
                 $fixed_charge_calc = $charges->fixed_charge;
@@ -272,7 +306,7 @@ class CarBookingController extends Controller
             ]);
             try {
                 if ($basic_setting->email_notification) {
-                    Notification::route('mail', $confirm_booking->email)->notify(new carBookingNotification($confirm_booking));
+                    Notification::route('mail', $confirm_booking->email)->notify(new CarBookingNotification($confirm_booking));
                 }
                 if ($basic_setting->vendor_push_notification) {
                     (new PushNotificationHelper())
@@ -331,9 +365,9 @@ class CarBookingController extends Controller
         }
         $transaction_info = Transaction::where('booking_token', $temp_data['data']->booking_token)->first();
 
-        $car_booking = CarBooking::where('trx_id',$transaction_info->trx_id)->first();
+        $car_booking = CarBooking::where('trx_id', $transaction_info->trx_id)->first();
 
-        if(!$car_booking){
+        if (!$car_booking) {
             $this->bookingConfirm($temp_data['data']->booking_token, 'online-payment', $transaction_info->trx_id);
         }
 
@@ -345,8 +379,8 @@ class CarBookingController extends Controller
         $token = PaymentGatewayHelper::getToken($request->all(), $gateway);
         if (
             $temp_data = TemporaryData::where('type', PaymentGatewayConst::TYPEADDMONEY)
-                ->where('identifier', $token)
-                ->first()
+            ->where('identifier', $token)
+            ->first()
         ) {
             $temp_data->delete();
         }
@@ -387,7 +421,7 @@ class CarBookingController extends Controller
     public function callback(Request $request, $gateway)
     {
         $callback_data = $request->all();
-        $callback_token = $callback_data['payload']['order']['entity']['receipt']??$callback_data['data']['reference']??$request->get('token');
+        $callback_token = $callback_data['payload']['order']['entity']['receipt'] ?? $callback_data['data']['reference'] ?? $request->get('token');
 
         try {
             PaymentGatewayHelper::init([])
@@ -474,7 +508,6 @@ class CarBookingController extends Controller
 
             DB::commit();
             $this->bookingConfirm($transaction->booking_token, 'online-payment', $transaction->id);
-
         } catch (Exception $e) {
             DB::rollback();
             return back()->with(['error' => [__('Something went wrong! Please try again')]]);
@@ -741,11 +774,12 @@ class CarBookingController extends Controller
      * Method for view authorize card view page
      * @param Illuminate\Http\Request $request,$identifier
      */
-    public function authorizeCardInfo(Request $request,$identifier){
+    public function authorizeCardInfo(Request $request, $identifier)
+    {
         $page_title         = "Authorize card information";
-        $temp_data          = TemporaryData::where('identifier',$identifier)->first();
+        $temp_data          = TemporaryData::where('identifier', $identifier)->first();
 
-        return view('user.sections.add-money.automatic.authorize',compact(
+        return view('user.sections.add-money.automatic.authorize', compact(
             'page_title',
             'temp_data'
         ));
@@ -754,17 +788,18 @@ class CarBookingController extends Controller
      * Method function authorize payment submit
      * @param Illuminate\Http\Request $request, $identifier
      */
-    public function authorizePaymentSubmit(Request $request,$identifier){
-        $temp_data          = TemporaryData::where('identifier',$identifier)->first();
-        if(!$temp_data) return back()->with(['error' => ['Sorry ! Data not found.']]);
+    public function authorizePaymentSubmit(Request $request, $identifier)
+    {
+        $temp_data          = TemporaryData::where('identifier', $identifier)->first();
+        if (!$temp_data) return back()->with(['error' => ['Sorry ! Data not found.']]);
 
-        $validator          = Validator::make($request->all(),[
+        $validator          = Validator::make($request->all(), [
             'card_number'   => 'required',
             'date'          => 'required',
             'code'          => 'required'
         ]);
 
-        if($validator->fails()) return back()->withErrors($validator)->withInput($request->all());
+        if ($validator->fails()) return back()->withErrors($validator)->withInput($request->all());
         $validated          = $validator->validate();
 
         $gateway_credentials          = $this->authorizeCredentials($temp_data);
@@ -852,29 +887,28 @@ class CarBookingController extends Controller
         // Create the controller and get the response
         $controller = new AnetController\CreateTransactionController($request);
 
-        if($gateway_credentials->mode == GlobalConst::ENV_SANDBOX){
+        if ($gateway_credentials->mode == GlobalConst::ENV_SANDBOX) {
             $environment = \net\authorize\api\constants\ANetEnvironment::SANDBOX;
-
-        }else{
+        } else {
             $environment = \net\authorize\api\constants\ANetEnvironment::PRODUCTION;
         }
         $response   = $controller->executeWithApiResponse($environment);
-        if ($response != null) {
+        if ($response instanceof AnetAPI\CreateTransactionResponse) {
             if ($response->getMessages()->getResultCode() == "Ok") {
                 $tresponse = $response->getTransactionResponse();
 
                 if ($tresponse != null && $tresponse->getMessages() != null) {
-                    $trx_id = generate_unique_string("transactions","trx_id",16);
+                    $trx_id = generate_unique_string("transactions", "trx_id", 16);
                     $status = PaymentGatewayConst::STATUSSUCCESS;
-                    $inserted_id = $this->createTransactionAuthorize($trx_id,$temp_data,$status);
+                    $inserted_id = $this->createTransactionAuthorize($trx_id, $temp_data, $status);
                     return view('user.sections.car-booking.booking-complete');
-                }else {
+                } else {
                     return redirect()->route('user.car.booking.index')->with(['error' => ['Transaction Failed']]);
                     if ($tresponse->getErrors() != null) {
                         return redirect()->route('user.car.booking.index')->with(['error' => [$tresponse->getErrors()[0]->getErrorText()]]);
                     }
                 }
-            }else {
+            } else {
                 return redirect()->route('user.car.booking.index')->with(['error' => ['Transaction Failed']]);
                 $tresponse = $response->getTransactionResponse();
 
@@ -884,7 +918,7 @@ class CarBookingController extends Controller
                     return redirect()->route('user.car.booking.index')->with(['error' => [$response->getMessages()->getMessage()[0]->getText()]]);
                 }
             }
-        }else {
+        } else {
             return redirect()->route('user.car.booking.index')->with(['error' => ['No response returned']]);
         }
     }

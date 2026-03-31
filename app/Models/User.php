@@ -44,6 +44,7 @@ class User extends Authenticatable
         'mobile'                 => 'string',
         'full_mobile'            => 'string',
         'driving_license'        => 'string',
+        'national_id'            => 'string',
         'password'               => 'string',
         'image'                  => 'string',
         'status'                 => 'integer',
@@ -52,7 +53,6 @@ class User extends Authenticatable
         'email_verified'         => 'integer',
         'sms_verified'           => 'integer',
         'kyc_verified'           => 'integer',
-        'balance'                => 'decimal:8',
         'ver_code'               => 'integer',
         'ver_code_send_at'       => 'datetime',
         'two_factor_verified'    => 'integer',
@@ -109,6 +109,17 @@ class User extends Authenticatable
         return $this->hasMany(UserWallet::class);
     }
 
+    /**
+     * Get the user's balance from their primary (default-currency) wallet.
+     * This is the single source of truth — reads from user_wallets table.
+     */
+    public function getBalanceAttribute(): float
+    {
+        return (float) ($this->wallets()
+            ->whereHas('currency', fn($q) => $q->where('default', true))
+            ->value('balance') ?? 0.0);
+    }
+
     public function balanceTransactions()
     {
         return $this->hasMany(BalanceTransaction::class);
@@ -117,44 +128,6 @@ class User extends Authenticatable
     public function bookings()
     {
         return $this->hasMany(CarBooking::class);
-    }
-
-    /**
-     * Check if user has sufficient balance
-     *
-     * @param float $amount
-     * @return bool
-     */
-    public function hasSufficientBalance($amount)
-    {
-        return $this->balance >= $amount;
-    }
-
-    /**
-     * Deduct balance from user
-     *
-     * @param float $amount
-     * @return bool
-     */
-    public function deductBalance($amount)
-    {
-        if (!$this->hasSufficientBalance($amount)) {
-            return false;
-        }
-        $this->balance -= $amount;
-        return $this->save();
-    }
-
-    /**
-     * Add balance to user
-     *
-     * @param float $amount
-     * @return bool
-     */
-    public function addBalance($amount)
-    {
-        $this->balance += $amount;
-        return $this->save();
     }
 
     public function getUserImageAttribute()

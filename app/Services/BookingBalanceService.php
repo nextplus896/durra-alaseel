@@ -8,10 +8,16 @@ use App\Models\CarBooking;
 use App\Models\BalanceTransaction;
 use App\Models\Admin\TaxSetting;
 use App\Models\Vendor\Cars\Car;
-use Illuminate\Support\Facades\DB;
+use App\DTO\WalletTransactionDTO;
 
 class BookingBalanceService
 {
+    protected WalletService $walletService;
+
+    public function __construct(?WalletService $walletService = null)
+    {
+        $this->walletService = $walletService ?? app(WalletService::class);
+    }
     /**
      * Calculate rental fees based on tiered pricing (daily/weekly/monthly)
      * Golden Rule: Price is decided ONLY by rental_days
@@ -103,37 +109,14 @@ class BookingBalanceService
      */
     public function deductBalanceForBooking(User $user, CarBooking $booking, float $amount): BalanceTransaction
     {
-        if (!$this->hasSufficientBalance($user, $amount)) {
-            throw new Exception(__('Insufficient balance. Please recharge your account.'));
-        }
+        $dto = WalletTransactionDTO::forWithdrawal(
+            amount: $amount,
+            description: __('Booking payment') . ' - ' . $booking->trx_id,
+            bookingId: $booking->id,
+            idempotencyKey: 'booking-deduct-' . $booking->id,
+        );
 
-        $balanceBefore = $user->balance;
-        $balanceAfter = $balanceBefore - $amount;
-
-        DB::beginTransaction();
-        try {
-            // Update user balance
-            $user->update(['balance' => $balanceAfter]);
-
-            // Create balance transaction record
-            $transaction = BalanceTransaction::create([
-                'user_id' => $user->id,
-                'type' => 'booking_deduction',
-                'amount' => $amount,
-                'balance_before' => $balanceBefore,
-                'balance_after' => $balanceAfter,
-                'booking_id' => $booking->id,
-                'description' => __('Booking payment') . ' - ' . $booking->trx_id,
-                'payment_gateway' => 'balance',
-                'reference' => $booking->trx_id,
-            ]);
-
-            DB::commit();
-            return $transaction;
-        } catch (Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+        return $this->walletService->withdraw($user, $amount, $dto);
     }
 
     /**
@@ -142,33 +125,16 @@ class BookingBalanceService
      */
     public function refundBalance(User $user, CarBooking $booking, float $amount, string $reason = ''): BalanceTransaction
     {
-        $balanceBefore = $user->balance;
-        $balanceAfter = $balanceBefore + $amount;
+        $dto = WalletTransactionDTO::forRefund(
+            amount: $amount,
+            description: $reason ?: __('Booking refund') . ' - ' . $booking->trx_id,
+            referenceType: 'App\\Models\\CarBooking',
+            referenceId: $booking->id,
+            bookingId: $booking->id,
+            idempotencyKey: 'booking-refund-' . $booking->id,
+        );
 
-        DB::beginTransaction();
-        try {
-            // Update user balance
-            $user->update(['balance' => $balanceAfter]);
-
-            // Create balance transaction record
-            $transaction = BalanceTransaction::create([
-                'user_id' => $user->id,
-                'type' => 'refund',
-                'amount' => $amount,
-                'balance_before' => $balanceBefore,
-                'balance_after' => $balanceAfter,
-                'booking_id' => $booking->id,
-                'description' => $reason ?: __('Booking refund') . ' - ' . $booking->trx_id,
-                'payment_gateway' => 'balance',
-                'reference' => 'REFUND-' . $booking->trx_id,
-            ]);
-
-            DB::commit();
-            return $transaction;
-        } catch (Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+        return $this->walletService->refund($user, $amount, $dto);
     }
 
     /**

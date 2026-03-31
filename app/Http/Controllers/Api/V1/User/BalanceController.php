@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Http\Request;
 use App\Http\Helpers\Response;
 use App\Models\BalanceTransaction;
+use App\Models\UserWallet;
 use App\Http\Controllers\Controller;
 use App\Models\Admin\TaxSetting;
 use Illuminate\Support\Facades\Auth;
@@ -25,7 +26,7 @@ class BalanceController extends Controller
         return Response::success(
             [__('Balance fetched successfully')],
             [
-                'balance' => number_format($user->balance, 2),
+                'balance'  => (float) round($user->balance, 2),
                 'currency' => get_default_currency_code(),
             ],
             200
@@ -121,24 +122,31 @@ class BalanceController extends Controller
                     $user = \App\Models\User::find($userId);
                     if ($user) {
                         $amount = $result['amount'];
-                        $balanceBefore = $user->balance;
-                        $balanceAfter = $balanceBefore + $amount;
+
+                        // Source of truth: update user_wallets balance
+                        $wallet = UserWallet::where('user_id', $user->id)
+                            ->whereHas('currency', fn($q) => $q->where('default', true))
+                            ->first();
+
+                        $balanceBefore = $wallet ? (float) $wallet->balance : 0;
+                        $balanceAfter  = $balanceBefore + $amount;
 
                         DB::beginTransaction();
                         try {
-                            // Update user balance
-                            $user->update(['balance' => $balanceAfter]);
+                            if ($wallet) {
+                                $wallet->update(['balance' => $balanceAfter]);
+                            }
 
                             // Create balance transaction record
                             BalanceTransaction::create([
-                                'user_id' => $user->id,
-                                'type' => 'recharge',
-                                'amount' => $amount,
+                                'user_id'        => $user->id,
+                                'type'           => 'recharge',
+                                'amount'         => $amount,
                                 'balance_before' => $balanceBefore,
-                                'balance_after' => $balanceAfter,
-                                'description' => __('Balance recharge via PayTabs'),
+                                'balance_after'  => $balanceAfter,
+                                'description'    => __('Balance recharge via PayTabs'),
                                 'payment_gateway' => 'paytabs',
-                                'reference' => $result['tran_ref'] ?? null,
+                                'reference'      => $result['tran_ref'] ?? null,
                             ]);
 
                             DB::commit();
@@ -253,11 +261,11 @@ class BalanceController extends Controller
         return Response::success(
             [__('Balance check completed')],
             [
-                'current_balance' => number_format($user->balance, 2),
-                'required_amount' => number_format($amount, 2),
+                'current_balance'       => (float) round($user->balance, 2),
+                'required_amount'       => (float) round($amount, 2),
                 'has_sufficient_balance' => $hasSufficientBalance,
-                'shortfall' => $hasSufficientBalance ? 0 : number_format($amount - $user->balance, 2),
-                'currency' => get_default_currency_code(),
+                'shortfall'             => $hasSufficientBalance ? 0.0 : (float) round($amount - $user->balance, 2),
+                'currency'              => get_default_currency_code(),
             ],
             200
         );

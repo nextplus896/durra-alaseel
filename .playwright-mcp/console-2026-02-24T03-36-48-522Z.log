@@ -1,0 +1,6 @@
+[     615ms] Uncaught Error: Pusher Beams relies on Service Workers, which only work in secure contexts. Check that your page is being served from localhost/over HTTPS
+    at Client (https://js.pusher.com/beams/1.0/push-notifications-cdn.js:1326:14)
+    at <anonymous> (http://192.168.1.211:8001/vendor/booking/details/1:1661:28)
+[   82770ms] Uncaught Error: Pusher Beams relies on Service Workers, which only work in secure contexts. Check that your page is being served from localhost/over HTTPS
+    at Client (https://js.pusher.com/beams/1.0/push-notifications-cdn.js:1326:14)
+    at <anonymous> (http://192.168.1.211:8001/vendor/booking/details/1:1619:28)

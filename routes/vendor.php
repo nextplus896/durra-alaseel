@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Vendor\KycController;
 use App\Providers\Admin\BasicSettingsProvider;
 use Pusher\PushNotifications\PushNotifications;
@@ -58,7 +59,7 @@ Route::prefix("vendor")->name("vendor.")->middleware("auth:vendor")->group(funct
         Route::get('/', 'index')->name('index');
         Route::get('details/{id}', 'details')->name('details');
         Route::get('status/accept/{id}', 'accept')->name('accept');
-        Route::get('status/reject/{id}', 'reject')->name('reject');
+        Route::post('status/reject/{id}', 'reject')->name('reject');
         Route::get('status/complete/{id}', 'complete')->name('complete');
     });
     //Withdraw Money
@@ -101,37 +102,110 @@ Route::prefix("vendor")->name("vendor.")->middleware("auth:vendor")->group(funct
 
 // Route For Pusher Beams Auth
 Route::get('vendor/pusher/beams-auth', function (Request $request) {
+    Log::info('═══════════════════════════════════════════════════');
+    Log::info('🔔 [VENDOR WEB] PUSHER BEAMS AUTH REQUEST RECEIVED');
+    Log::info('═══════════════════════════════════════════════════');
+    Log::info('📍 Request URL: ' . $request->fullUrl());
+    Log::info('📍 Request Method: ' . $request->method());
+    Log::info('📍 Request IP: ' . $request->ip());
+    Log::info('📍 Timestamp: ' . now()->toDateTimeString());
+    Log::info('Session ID: ' . session()->getId());
+    Log::info('Cookies: ' . json_encode($request->cookies->all()));
+    
     if (Auth::check() == false) {
+        Log::error('❌ Authentication failed - Vendor not logged in');
+        Log::error('Session authenticated: ' . (Auth::check() ? 'Yes' : 'No'));
         return response(['Inconsistent request'], 401);
     }
     $userID = Auth::user()->id;
+    
+    // Validate user_id query parameter matches authenticated vendor (security check)
+    $userIDInQueryParam = $request->query('user_id');
+    Log::info('📋 Validating user_id query parameter', [
+        'authenticated_vendor_id' => $userID,
+        'query_param_user_id' => $userIDInQueryParam,
+    ]);
+    
+    // The Pusher Beams SDK automatically sends user_id as query param
+    // We must verify it matches the authenticated vendor
+    if ($userIDInQueryParam && $userIDInQueryParam != 'vendor-' . $userID) {
+        Log::error('❌ Vendor ID mismatch - query param does not match authenticated vendor', [
+            'authenticated_vendor_id' => $userID,
+            'expected_format' => 'vendor-' . $userID,
+            'received' => $userIDInQueryParam,
+        ]);
+        return response(['Inconsistent request - vendor ID mismatch'], 401);
+    }
+    
+    Log::info('✅ Vendor authenticated successfully', [
+        'vendor_id' => $userID,
+        'email' => Auth::user()->email,
+    ]);
 
     $basic_settings = BasicSettingsProvider::get();
     if (!$basic_settings) {
+        Log::error('❌ Basic settings not found');
         return response('Basic setting not found!', 404);
     }
 
     $notification_config = $basic_settings->push_notification_config;
 
     if (!$notification_config) {
+        Log::error('❌ Push notification config not found in basic settings');
         return response('Notification configuration not found!', 404);
     }
 
     $instance_id    = $notification_config->instance_id ?? null;
     $primary_key    = $notification_config->primary_key ?? null;
+    
+    Log::info('📋 Push Notification Config:', [
+        'instance_id' => $instance_id ? (substr($instance_id, 0, 10) . '...') : 'Missing',
+        'primary_key' => $primary_key ? 'Present (****)' : 'Missing',
+    ]);
+    
     if ($instance_id == null || $primary_key == null) {
+        Log::error('❌ Instance ID or Primary Key missing');
         return response('Sorry! You have to configure first to send push notification.', 404);
     }
-    $beamsClient = new PushNotifications(
-        array(
-            "instanceId" => $notification_config->instance_id,
-            "secretKey" => $notification_config->primary_key,
-        )
-    );
+    
+    try {
+        $beamsClient = new PushNotifications(
+            array(
+                "instanceId" => $notification_config->instance_id,
+                "secretKey" => $notification_config->primary_key,
+            )
+        );
+        Log::info('✅ Pusher Beams client created');
+    } catch(Throwable $e) {
+        Log::error('❌ Failed to create Pusher Beams client: ' . $e->getMessage());
+        return response(['Server Error. Failed to create beams client.'], 500);
+    }
+    
     $publisherUserId = make_user_id_for_pusher("vendor", $userID);
+    Log::info('📱 Publisher User ID: ' . $publisherUserId);
+    
     try {
         $beamsToken = $beamsClient->generateToken($publisherUserId);
+        Log::info('✅ Beams token generated successfully');
+        Log::info('Token structure: ' . json_encode(array_keys((array)$beamsToken)));
+        
+        // Log the complete response (for debugging)
+        $responseData = json_decode(json_encode($beamsToken), true);
+        Log::info('📤 Response Data:', [
+            'token_length' => isset($responseData['token']) ? strlen($responseData['token']) : 0,
+            'has_token' => isset($responseData['token']),
+            'response_keys' => array_keys($responseData),
+        ]);
+        
+        Log::info('═══════════════════════════════════════════════════');
+        Log::info('✅ [VENDOR WEB] PUSHER BEAMS AUTH SUCCESSFUL');
+        Log::info('📱 Returning token to web app');
+        Log::info('═══════════════════════════════════════════════════');
     } catch (Exception $e) {
+        Log::error('❌ Failed to generate beams token: ' . $e->getMessage());
+        Log::error('Exception: ' . get_class($e));
+        Log::error('Stack trace: ' . $e->getTraceAsString());
+        Log::error('═══════════════════════════════════════════════════');
         return response(['Server Error. Failed to generate beams token.'], 500);
     }
 

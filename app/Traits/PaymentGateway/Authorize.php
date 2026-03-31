@@ -8,11 +8,30 @@ use App\Constants\PaymentGatewayConst;
 use App\Models\Admin\BasicSettings;
 use App\Models\Admin\PaymentGateway;
 use App\Models\CarBooking;
+use Carbon\Carbon;
 
 use Illuminate\Support\Facades\DB;
 
 
 trait Authorize{
+
+    /**
+     * Convert time to 24-hour format (HH:mm) if it's in 12-hour format (h:i A)
+     */
+    private function convertTo24HourFormat($time)
+    {
+        try {
+            // If time contains AM/PM, convert it to 24-hour format
+            if (preg_match('/(AM|PM|am|pm)/', $time)) {
+                return Carbon::parse($time)->format('H:i');
+            }
+            // Already in 24-hour format, return as-is
+            return $time;
+        } catch (\Exception $e) {
+            // If parsing fails, return original
+            return $time;
+        }
+    }
 
     public function authorizeInit($output = null){
         if(!$output) $output = $this->output;
@@ -152,6 +171,14 @@ trait Authorize{
         $temp_booking = TemporaryData::where('identifier', $token)->first();
         $basic_setting = BasicSettings::first();
         $temp_data = json_decode(json_encode($temp_booking->data), true);
+
+        // Convert time formats to 24-hour format if needed
+        if (isset($temp_data['pickup_time'])) {
+            $temp_data['pickup_time'] = $this->convertTo24HourFormat($temp_data['pickup_time']);
+        }
+        if (isset($temp_data['round_pickup_time']) && !empty($temp_data['round_pickup_time'])) {
+            $temp_data['round_pickup_time'] = $this->convertTo24HourFormat($temp_data['round_pickup_time']);
+        }
 
         try {
             $booking_data = CarBooking::create([

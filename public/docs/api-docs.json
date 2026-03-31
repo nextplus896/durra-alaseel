@@ -1,0 +1,3963 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Dorra Alaseel – Car Rental API",
+        "description": "RESTful JSON API for the Dorra Alaseel car rental platform. Response envelope: message.success[] or message.error[], data, type=success|error.",
+        "contact": {
+            "name": "Support",
+            "email": "support@dorraalaseel.com"
+        },
+        "license": {
+            "name": "Proprietary"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://192.168.1.211:8001",
+            "description": "API Server"
+        }
+    ],
+    "paths": {
+        "/api/v1/register": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Register a new user account",
+                "operationId": "userRegister",
+                "requestBody": {
+                    "description": "New user registration payload.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "firstname",
+                                    "lastname",
+                                    "email",
+                                    "password",
+                                    "phone"
+                                ],
+                                "properties": {
+                                    "firstname": {
+                                        "type": "string",
+                                        "example": "Ahmad"
+                                    },
+                                    "lastname": {
+                                        "type": "string",
+                                        "example": "Al-Rashidi"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "ahmad@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "minLength": 6,
+                                        "example": "P@ssw0rd!"
+                                    },
+                                    "phone": {
+                                        "description": "Phone number including country code.",
+                                        "type": "string",
+                                        "example": "+966501234567"
+                                    },
+                                    "refer": {
+                                        "description": "Referral ID of an existing user (optional).",
+                                        "type": "string",
+                                        "example": "ABCD1234",
+                                        "nullable": true
+                                    },
+                                    "agree": {
+                                        "description": "Required only when agree_policy is enabled in system settings.",
+                                        "type": "string",
+                                        "example": "on",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Registration successful.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "properties": {
+                                                "success": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "User successfully registered"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/AuthTokenData"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "example": "success"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "User already exists or registration failed.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Authenticate a user and issue a Bearer token",
+                "operationId": "userLogin",
+                "requestBody": {
+                    "description": "Use email address or username in the credentials field.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "credentials",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "credentials": {
+                                        "description": "User email address or username.",
+                                        "type": "string",
+                                        "example": "aymansaadtest@gmail.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "Aym@nS23d"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "properties": {
+                                                "success": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "User successfully logged in"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/AuthTokenData"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "example": "success"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Wrong credentials or account suspended.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user/logout": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Revoke the current Bearer token (logout)",
+                "operationId": "userLogout",
+                "responses": {
+                    "200": {
+                        "description": "Successfully logged out.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "properties": {
+                                                "success": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "Logout success!"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "example": "success"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthenticatedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/password/forgot/find/user": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Step 1 – Find account and send reset code to email",
+                "operationId": "forgotPasswordSendCode",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "credentials"
+                                ],
+                                "properties": {
+                                    "credentials": {
+                                        "description": "User email address or username.",
+                                        "type": "string",
+                                        "example": "ahmad@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Verification code sent to email.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "properties": {
+                                                "success": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "Verification code sended to your email address"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "token": {
+                                                    "description": "Pass this token in Steps 2 and 3.",
+                                                    "type": "string",
+                                                    "example": "abc123def456..."
+                                                },
+                                                "wait_time": {
+                                                    "type": "string",
+                                                    "example": ""
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "example": "success"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Account suspended.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/password/forgot/verify/code": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Step 2 – Verify the reset code",
+                "operationId": "forgotPasswordVerifyCode",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "token",
+                                    "code"
+                                ],
+                                "properties": {
+                                    "token": {
+                                        "description": "Token received from Step 1.",
+                                        "type": "string",
+                                        "example": "abc123def456..."
+                                    },
+                                    "code": {
+                                        "description": "Numeric OTP code received by email.",
+                                        "type": "integer",
+                                        "example": 483921
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP verified successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "properties": {
+                                                "success": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "OTP successfully verified!"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "token": {
+                                                    "type": "string",
+                                                    "example": "abc123def456..."
+                                                },
+                                                "wait_time": {
+                                                    "type": "string",
+                                                    "example": ""
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "example": "success"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid OTP.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "440": {
+                        "description": "Session expired.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/password/forgot/resend/code": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Step 2b – Resend the password-reset code",
+                "operationId": "forgotPasswordResendCode",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "description": "Token received from Step 1.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "abc123def456..."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OTP resent successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "properties": {
+                                                "success": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "OTP resend success"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "token": {
+                                                    "type": "string",
+                                                    "example": "abc123def456..."
+                                                },
+                                                "wait_time": {
+                                                    "type": "string",
+                                                    "example": ""
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "example": "success"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Too soon to resend or invalid token.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/password/forgot/reset": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Step 3 – Set a new password",
+                "operationId": "forgotPasswordReset",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "token",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "token": {
+                                        "description": "Token from Step 1 (must not be expired).",
+                                        "type": "string",
+                                        "example": "abc123def456..."
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "minLength": 6,
+                                        "example": "NewP@ssw0rd!"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "NewP@ssw0rd!"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password reset successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "properties": {
+                                                "success": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "Password reset success"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "example": "success"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid or expired token.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/otp/request": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Request an OTP via SMS or WhatsApp (Twilio Verify)",
+                "operationId": "otpRequest",
+                "requestBody": {
+                    "description": "Send OTP to the given phone number via the chosen channel.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "phone",
+                                    "channel"
+                                ],
+                                "properties": {
+                                    "phone": {
+                                        "description": "Full E.164 phone number including country code.",
+                                        "type": "string",
+                                        "example": "+966501234567"
+                                    },
+                                    "channel": {
+                                        "description": "Delivery channel: sms or whatsapp.",
+                                        "type": "string",
+                                        "enum": [
+                                            "sms",
+                                            "whatsapp"
+                                        ],
+                                        "example": "sms"
+                                    },
+                                    "locale": {
+                                        "description": "Language for the OTP message (default: en).",
+                                        "type": "string",
+                                        "enum": [
+                                            "en",
+                                            "ar",
+                                            "es",
+                                            "fr"
+                                        ],
+                                        "example": "en",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP sent successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP sent successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "verification_id": {
+                                                    "type": "string",
+                                                    "example": "VE1234567890abcdef"
+                                                },
+                                                "channel": {
+                                                    "type": "string",
+                                                    "example": "sms"
+                                                },
+                                                "to": {
+                                                    "type": "string",
+                                                    "example": "+966501234567"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "pending"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Failed to send OTP (e.g. invalid number, Twilio error).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to send OTP"
+                                        },
+                                        "error_code": {
+                                            "type": "string",
+                                            "example": "21211",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Rate limit exceeded (max 10 requests/minute).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/otp/verify": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Verify an OTP code (Twilio Verify)",
+                "operationId": "otpVerify",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "phone",
+                                    "code"
+                                ],
+                                "properties": {
+                                    "phone": {
+                                        "description": "Full E.164 phone number used when requesting the OTP.",
+                                        "type": "string",
+                                        "example": "+966501234567"
+                                    },
+                                    "code": {
+                                        "description": "6-digit OTP code received via SMS or WhatsApp.",
+                                        "type": "string",
+                                        "maxLength": 6,
+                                        "minLength": 6,
+                                        "example": "482910"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP verified successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Phone verified successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "verification_id": {
+                                                    "type": "string",
+                                                    "example": "VE1234567890abcdef"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "approved"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid or expired OTP code.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid verification code"
+                                        },
+                                        "error_code": {
+                                            "type": "string",
+                                            "example": "60200",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Rate limit exceeded.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user/car-booking/history": {
+            "get": {
+                "tags": [
+                    "Bookings"
+                ],
+                "summary": "List authenticated user's booking history (paginated)",
+                "operationId": "bookingHistory",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "booked",
+                                "ongoing",
+                                "completed",
+                                "rejected",
+                                "cancelled"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Booking history.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Booking history retrieved."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/CarBookingResource"
+                                                    }
+                                                },
+                                                "meta": {
+                                                    "$ref": "#/components/schemas/PaginationMeta"
+                                                },
+                                                "links": {
+                                                    "$ref": "#/components/schemas/PaginationLinks"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthenticatedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/car-booking/temp/store": {
+            "post": {
+                "tags": [
+                    "Bookings"
+                ],
+                "summary": "Save a temporary (draft) booking",
+                "operationId": "bookingTempStore",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "car_id",
+                                    "pickup_date",
+                                    "return_date"
+                                ],
+                                "properties": {
+                                    "car_id": {
+                                        "type": "integer",
+                                        "example": 101
+                                    },
+                                    "pickup_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-06-01"
+                                    },
+                                    "return_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-06-08"
+                                    },
+                                    "delivery": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "delivery_address": {
+                                        "type": "string",
+                                        "example": "123 King Fahd Road, Riyadh",
+                                        "nullable": true
+                                    },
+                                    "delivery_lat": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 24.7136,
+                                        "nullable": true
+                                    },
+                                    "delivery_lng": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 46.6753,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Temporary booking saved.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Booking draft saved."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "temp_booking_id": {
+                                                    "type": "string",
+                                                    "example": "TB-20250520-9XKL2"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthenticatedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/car-booking/preview": {
+            "get": {
+                "tags": [
+                    "Bookings"
+                ],
+                "summary": "Preview booking cost breakdown before confirming",
+                "operationId": "bookingPreview",
+                "parameters": [
+                    {
+                        "name": "temp_booking_id",
+                        "in": "query",
+                        "description": "Temp booking reference",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "TB-20250520-9XKL2"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Booking cost preview.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Booking preview ready."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "rental_days": {
+                                                    "type": "integer",
+                                                    "example": 7
+                                                },
+                                                "rental_fees": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 1050
+                                                },
+                                                "delivery_fee": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 50
+                                                },
+                                                "tax_rate": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 15
+                                                },
+                                                "tax_amount": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 165
+                                                },
+                                                "total_amount": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 1265
+                                                },
+                                                "currency": {
+                                                    "type": "string",
+                                                    "example": "SAR"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthenticatedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/car-booking/confirm": {
+            "post": {
+                "tags": [
+                    "Bookings"
+                ],
+                "summary": "Confirm and submit a booking",
+                "operationId": "bookingConfirm",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "temp_booking_id",
+                                    "payment_method"
+                                ],
+                                "properties": {
+                                    "temp_booking_id": {
+                                        "type": "string",
+                                        "example": "TB-20250520-9XKL2"
+                                    },
+                                    "payment_method": {
+                                        "type": "string",
+                                        "enum": [
+                                            "wallet",
+                                            "online"
+                                        ],
+                                        "example": "wallet"
+                                    },
+                                    "payment_gateway_id": {
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Booking confirmed.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Booking confirmed successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/CarBookingResource"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthenticatedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/car-booking/cancel": {
+            "post": {
+                "tags": [
+                    "Bookings"
+                ],
+                "summary": "Cancel an active booking",
+                "operationId": "bookingCancel",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "booking_id"
+                                ],
+                                "properties": {
+                                    "booking_id": {
+                                        "type": "integer",
+                                        "example": 201
+                                    },
+                                    "reason": {
+                                        "type": "string",
+                                        "example": "Change of plans",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Booking cancelled.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthenticatedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/car-booking/extend/preview": {
+            "get": {
+                "tags": [
+                    "Bookings"
+                ],
+                "summary": "Preview the cost of extending a booking",
+                "operationId": "bookingExtendPreview",
+                "parameters": [
+                    {
+                        "name": "booking_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 201
+                        }
+                    },
+                    {
+                        "name": "new_return_date",
+                        "in": "query",
+                        "description": "New return date (YYYY-MM-DD)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-06-15"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Extension cost preview.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Extension preview ready."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "extra_days": {
+                                                    "type": "integer",
+                                                    "example": 7
+                                                },
+                                                "extra_cost": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 1050
+                                                },
+                                                "tax_amount": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 157.5
+                                                },
+                                                "total_due": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 1207.5
+                                                },
+                                                "currency": {
+                                                    "type": "string",
+                                                    "example": "SAR"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthenticatedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/car-booking/extend": {
+            "post": {
+                "tags": [
+                    "Bookings"
+                ],
+                "summary": "Confirm a booking extension",
+                "operationId": "bookingExtend",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "booking_id",
+                                    "new_return_date",
+                                    "payment_method"
+                                ],
+                                "properties": {
+                                    "booking_id": {
+                                        "type": "integer",
+                                        "example": 201
+                                    },
+                                    "new_return_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-06-15"
+                                    },
+                                    "payment_method": {
+                                        "type": "string",
+                                        "enum": [
+                                            "wallet",
+                                            "online"
+                                        ],
+                                        "example": "wallet"
+                                    },
+                                    "payment_gateway_id": {
+                                        "type": "integer",
+                                        "example": null,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Booking extended.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthenticatedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/car-booking/{bookingId}/extensions": {
+            "get": {
+                "tags": [
+                    "Bookings"
+                ],
+                "summary": "List all extensions for a specific booking",
+                "operationId": "bookingExtensionsList",
+                "parameters": [
+                    {
+                        "name": "bookingId",
+                        "in": "path",
+                        "description": "Booking ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 201
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Booking extensions list.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Extensions retrieved."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "extra_days": {
+                                                        "type": "integer",
+                                                        "example": 7
+                                                    },
+                                                    "new_return_date": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2025-06-15"
+                                                    },
+                                                    "amount_paid": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 1207.5
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Booking not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthenticatedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/payment-gateway/additional-fields": {
+            "get": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "List available payment gateways with their additional fields",
+                "operationId": "paymentGatewayFields",
+                "parameters": [
+                    {
+                        "name": "purpose",
+                        "in": "query",
+                        "description": "Gateway purpose context",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "recharge",
+                                "booking"
+                            ],
+                            "example": "booking"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Payment gateways.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Payment gateways retrieved."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PaymentGatewayResource"
+                                            }
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthenticatedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/payments/{paymentId}/refund": {
+            "post": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Request a refund for a specific payment",
+                "operationId": "paymentRefund",
+                "parameters": [
+                    {
+                        "name": "paymentId",
+                        "in": "path",
+                        "description": "Payment ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 301
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "reason": {
+                                        "type": "string",
+                                        "example": "Booking cancelled by vendor",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Refund initiated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Refund processed. Amount will be credited within 3-5 business days."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "refund_id": {
+                                                    "type": "integer",
+                                                    "example": 401
+                                                },
+                                                "amount": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 1265
+                                                },
+                                                "currency": {
+                                                    "type": "string",
+                                                    "example": "SAR"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "pending",
+                                                        "completed",
+                                                        "failed"
+                                                    ],
+                                                    "example": "pending"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Payment not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Refund not eligible.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthenticatedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/transaction/log": {
+            "get": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Full payment transaction log (paginated)",
+                "operationId": "transactionLog",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "completed",
+                                "failed",
+                                "refunded"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Transaction log.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Transaction log retrieved."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 301
+                                                            },
+                                                            "type": {
+                                                                "type": "string",
+                                                                "enum": [
+                                                                    "booking_payment",
+                                                                    "wallet_recharge",
+                                                                    "refund"
+                                                                ],
+                                                                "example": "booking_payment"
+                                                            },
+                                                            "amount": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 1265
+                                                            },
+                                                            "currency": {
+                                                                "type": "string",
+                                                                "example": "SAR"
+                                                            },
+                                                            "gateway": {
+                                                                "type": "string",
+                                                                "example": "PayTabs",
+                                                                "nullable": true
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "enum": [
+                                                                    "pending",
+                                                                    "completed",
+                                                                    "failed",
+                                                                    "refunded"
+                                                                ],
+                                                                "example": "completed"
+                                                            },
+                                                            "reference": {
+                                                                "type": "string",
+                                                                "example": "PT-REF-20250520",
+                                                                "nullable": true
+                                                            },
+                                                            "created_at": {
+                                                                "type": "string",
+                                                                "format": "date-time"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "meta": {
+                                                    "$ref": "#/components/schemas/PaginationMeta"
+                                                },
+                                                "links": {
+                                                    "$ref": "#/components/schemas/PaginationLinks"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthenticatedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/wallet/recharge": {
+            "post": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Initiate a wallet recharge via payment gateway callback",
+                "operationId": "walletRechargeCallback",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "transaction_ref",
+                                    "status"
+                                ],
+                                "properties": {
+                                    "transaction_ref": {
+                                        "type": "string",
+                                        "example": "TX-20250520-7Y2KL"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "success",
+                                            "failed"
+                                        ],
+                                        "example": "success"
+                                    },
+                                    "gateway_ref": {
+                                        "type": "string",
+                                        "example": "PT-CALLBACK-9832",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Wallet recharged.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Wallet recharged successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/WalletResource"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Transaction invalid or already processed.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthenticatedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/cars": {
+            "get": {
+                "tags": [
+                    "Cars"
+                ],
+                "summary": "List all available cars (paginated)",
+                "operationId": "carsList",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "car_type_id",
+                        "in": "query",
+                        "description": "Filter by car type",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "branch_id",
+                        "in": "query",
+                        "description": "Filter by branch",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "min_price",
+                        "in": "query",
+                        "description": "Min daily price",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "format": "float"
+                        }
+                    },
+                    {
+                        "name": "max_price",
+                        "in": "query",
+                        "description": "Max daily price",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "format": "float"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated list of cars.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Cars retrieved successfully."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/CarResource"
+                                                    }
+                                                },
+                                                "meta": {
+                                                    "$ref": "#/components/schemas/PaginationMeta"
+                                                },
+                                                "links": {
+                                                    "$ref": "#/components/schemas/PaginationLinks"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/cars/{id}": {
+            "get": {
+                "tags": [
+                    "Cars"
+                ],
+                "summary": "Get a single car by ID",
+                "operationId": "carShow",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Car ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 101
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Car resource.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Car retrieved successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/CarResource"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Car not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/cars/types": {
+            "get": {
+                "tags": [
+                    "Cars"
+                ],
+                "summary": "List all car types / categories",
+                "operationId": "carTypes",
+                "responses": {
+                    "200": {
+                        "description": "Car type list.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Car types retrieved."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "SUV"
+                                                    },
+                                                    "icon": {
+                                                        "type": "string",
+                                                        "format": "uri",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user/profile/info": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Retrieve the authenticated user's profile",
+                "operationId": "userProfileGet",
+                "responses": {
+                    "200": {
+                        "description": "User profile.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Profile retrieved successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/UserProfile"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthenticatedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/profile/info/update": {
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update the authenticated user's profile",
+                "operationId": "userProfileUpdate",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "firstname": {
+                                        "type": "string",
+                                        "example": "Ahmad"
+                                    },
+                                    "lastname": {
+                                        "type": "string",
+                                        "example": "Al-Rashidi"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "ahmad@example.com"
+                                    },
+                                    "mobile": {
+                                        "type": "string",
+                                        "example": "501234567"
+                                    },
+                                    "country_code": {
+                                        "type": "string",
+                                        "example": "+966"
+                                    },
+                                    "image": {
+                                        "description": "Profile picture (JPEG / PNG, max 2 MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile updated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Profile updated successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/UserProfile"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthenticatedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/profile/password/update": {
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Change the authenticated user's password",
+                "operationId": "userPasswordUpdate",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "current_password",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "current_password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "OldP@ssw0rd!"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "minLength": 8,
+                                        "example": "NewP@ssw0rd!"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "NewP@ssw0rd!"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password changed.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthenticatedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/dashboard": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Retrieve the user's dashboard summary",
+                "operationId": "userDashboard",
+                "responses": {
+                    "200": {
+                        "description": "Dashboard data.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Dashboard loaded."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "active_bookings": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "completed_bookings": {
+                                                    "type": "integer",
+                                                    "example": 14
+                                                },
+                                                "wallet_balance": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 250
+                                                },
+                                                "currency": {
+                                                    "type": "string",
+                                                    "example": "SAR"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthenticatedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/balance": {
+            "get": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Get the authenticated user's current balance",
+                "operationId": "userBalance",
+                "responses": {
+                    "200": {
+                        "description": "Current balance.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Balance retrieved."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/WalletResource"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthenticatedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/balance/history": {
+            "get": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "List balance transaction history (paginated)",
+                "operationId": "balanceHistory",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Filter by transaction type",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "recharge",
+                                "deduction",
+                                "refund",
+                                "adjustment"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Transaction history.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "History retrieved."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/BalanceTransactionResource"
+                                                    }
+                                                },
+                                                "meta": {
+                                                    "$ref": "#/components/schemas/PaginationMeta"
+                                                },
+                                                "links": {
+                                                    "$ref": "#/components/schemas/PaginationLinks"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthenticatedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/balance/recharge": {
+            "post": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Top up the user's wallet balance",
+                "operationId": "balanceRecharge",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "amount",
+                                    "payment_gateway_id"
+                                ],
+                                "properties": {
+                                    "amount": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "minimum": 10,
+                                        "example": 200
+                                    },
+                                    "payment_gateway_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Recharge initiated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Recharge initiated. Redirecting to payment gateway."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "payment_url": {
+                                                    "type": "string",
+                                                    "format": "uri",
+                                                    "example": "https://payment.paytabs.com/pay/123"
+                                                },
+                                                "transaction_ref": {
+                                                    "type": "string",
+                                                    "example": "TX-20250520-7Y2KL"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthenticatedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/balance/tax-settings": {
+            "get": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Get the current tax settings for wallet operations",
+                "operationId": "balanceTaxSettings",
+                "responses": {
+                    "200": {
+                        "description": "Tax settings.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Tax settings retrieved."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "vat_rate": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 15
+                                                },
+                                                "vat_included": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "currency": {
+                                                    "type": "string",
+                                                    "example": "SAR"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthenticatedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/balance/calculate-tax": {
+            "post": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Calculate the tax on a given amount",
+                "operationId": "balanceCalculateTax",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "amount"
+                                ],
+                                "properties": {
+                                    "amount": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 200
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Tax calculation result.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Tax calculated."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "amount": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 200
+                                                },
+                                                "tax_rate": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 15
+                                                },
+                                                "tax_amount": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 30
+                                                },
+                                                "total": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 230
+                                                },
+                                                "currency": {
+                                                    "type": "string",
+                                                    "example": "SAR"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthenticatedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/balance/check": {
+            "post": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Check if user's balance is sufficient for a given amount",
+                "operationId": "balanceCheck",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "amount"
+                                ],
+                                "properties": {
+                                    "amount": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1265
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Balance check result.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Balance sufficient."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "sufficient": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "current_balance": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 1500
+                                                },
+                                                "required_amount": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 1265
+                                                },
+                                                "deficit": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": null,
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthenticatedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/wallet": {
+            "get": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Get full wallet information",
+                "operationId": "walletGet",
+                "responses": {
+                    "200": {
+                        "description": "Wallet information.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Wallet retrieved."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/WalletResource"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthenticatedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/user/wallet/transactions": {
+            "get": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "List wallet transaction log (paginated)",
+                "operationId": "walletTransactions",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Wallet transactions.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Transactions retrieved."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/BalanceTransactionResource"
+                                                    }
+                                                },
+                                                "meta": {
+                                                    "$ref": "#/components/schemas/PaginationMeta"
+                                                },
+                                                "links": {
+                                                    "$ref": "#/components/schemas/PaginationLinks"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthenticatedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "SuccessResponse": {
+                "properties": {
+                    "message": {
+                        "properties": {
+                            "success": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "example": "Operation completed successfully."
+                                }
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "data": {
+                        "type": "object",
+                        "nullable": true
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "success"
+                    }
+                },
+                "type": "object"
+            },
+            "ErrorResponse": {
+                "properties": {
+                    "message": {
+                        "properties": {
+                            "error": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "example": "An error occurred."
+                                }
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "error"
+                    }
+                },
+                "type": "object"
+            },
+            "ValidationErrorResponse": {
+                "properties": {
+                    "message": {
+                        "properties": {
+                            "error": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "example": "The credentials field is required."
+                                }
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "error"
+                    }
+                },
+                "type": "object"
+            },
+            "UnauthenticatedResponse": {
+                "properties": {
+                    "message": {
+                        "properties": {
+                            "error": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "example": "Unauthenticated."
+                                }
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "error"
+                    }
+                },
+                "type": "object"
+            },
+            "PaginationMeta": {
+                "properties": {
+                    "current_page": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "from": {
+                        "type": "integer",
+                        "example": 1,
+                        "nullable": true
+                    },
+                    "last_page": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "per_page": {
+                        "type": "integer",
+                        "example": 15
+                    },
+                    "to": {
+                        "type": "integer",
+                        "example": 15,
+                        "nullable": true
+                    },
+                    "total": {
+                        "type": "integer",
+                        "example": 148
+                    }
+                },
+                "type": "object"
+            },
+            "PaginationLinks": {
+                "properties": {
+                    "first": {
+                        "type": "string",
+                        "example": "https://api.example.com/api/v1/cars?page=1",
+                        "nullable": true
+                    },
+                    "last": {
+                        "type": "string",
+                        "example": "https://api.example.com/api/v1/cars?page=10",
+                        "nullable": true
+                    },
+                    "prev": {
+                        "type": "string",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "next": {
+                        "type": "string",
+                        "example": "https://api.example.com/api/v1/cars?page=2",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "UserProfile": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 42
+                    },
+                    "firstname": {
+                        "type": "string",
+                        "example": "Ahmad"
+                    },
+                    "lastname": {
+                        "type": "string",
+                        "example": "Al-Rashidi"
+                    },
+                    "fullname": {
+                        "type": "string",
+                        "example": "Ahmad Al-Rashidi"
+                    },
+                    "username": {
+                        "type": "string",
+                        "example": "ahmad_alrashidi"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "ahmad@example.com"
+                    },
+                    "mobile_code": {
+                        "type": "string",
+                        "example": "+966"
+                    },
+                    "mobile": {
+                        "type": "string",
+                        "example": "501234567"
+                    },
+                    "full_mobile": {
+                        "type": "string",
+                        "example": "+966501234567"
+                    },
+                    "email_verified": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "kyc_verified": {
+                        "description": "0=Default, 1=Approved, 2=Pending, 3=Rejected",
+                        "type": "integer",
+                        "example": 0
+                    },
+                    "two_factor_verified": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "two_factor_status": {
+                        "type": "integer",
+                        "example": 0
+                    },
+                    "two_factor_secret": {
+                        "type": "string",
+                        "example": null,
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "AuthTokenData": {
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9..."
+                    },
+                    "user_info": {
+                        "$ref": "#/components/schemas/UserProfile"
+                    },
+                    "authorization": {
+                        "properties": {
+                            "status": {
+                                "description": "True when email verification is required before the account can be used.",
+                                "type": "boolean",
+                                "example": false
+                            },
+                            "token": {
+                                "description": "Short-lived token used for the email-verification step; empty when status is false.",
+                                "type": "string",
+                                "example": ""
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "CarResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 101
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Toyota Camry 2024"
+                    },
+                    "car_type": {
+                        "type": "string",
+                        "example": "Sedan"
+                    },
+                    "daily_price": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 150
+                    },
+                    "weekly_price": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 900
+                    },
+                    "monthly_price": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 3200
+                    },
+                    "currency": {
+                        "type": "string",
+                        "example": "SAR"
+                    },
+                    "branch_id": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "branch_name": {
+                        "type": "string",
+                        "example": "Riyadh – King Fahd Branch"
+                    },
+                    "vendor_id": {
+                        "type": "integer",
+                        "example": 7
+                    },
+                    "seats": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "transmission": {
+                        "type": "string",
+                        "enum": [
+                            "automatic",
+                            "manual"
+                        ],
+                        "example": "automatic"
+                    },
+                    "fuel_type": {
+                        "type": "string",
+                        "enum": [
+                            "petrol",
+                            "diesel",
+                            "electric",
+                            "hybrid"
+                        ],
+                        "example": "petrol"
+                    },
+                    "delivery_available": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "delivery_price": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 50,
+                        "nullable": true
+                    },
+                    "images": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uri"
+                        }
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "active",
+                            "inactive"
+                        ],
+                        "example": "active"
+                    }
+                },
+                "type": "object"
+            },
+            "CarBookingResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 201
+                    },
+                    "booking_id": {
+                        "type": "string",
+                        "example": "5G7H2K"
+                    },
+                    "car": {
+                        "$ref": "#/components/schemas/CarResource"
+                    },
+                    "pickup_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-06-01"
+                    },
+                    "return_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-06-08"
+                    },
+                    "rental_days": {
+                        "type": "integer",
+                        "example": 7
+                    },
+                    "rental_fees": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 1050
+                    },
+                    "delivery_fee": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 50
+                    },
+                    "tax_amount": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 165
+                    },
+                    "total_amount": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 1265
+                    },
+                    "currency": {
+                        "type": "string",
+                        "example": "SAR"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "pending",
+                            "booked",
+                            "ongoing",
+                            "completed",
+                            "rejected",
+                            "cancelled"
+                        ],
+                        "example": "booked"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-05-20T09:00:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "BalanceTransactionResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 501
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "recharge",
+                            "deduction",
+                            "refund",
+                            "adjustment"
+                        ],
+                        "example": "recharge"
+                    },
+                    "amount": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 200
+                    },
+                    "balance_before": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 50
+                    },
+                    "balance_after": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 250
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Wallet top-up via PayTabs",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-05-18T14:22:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "WalletResource": {
+                "properties": {
+                    "balance": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 250
+                    },
+                    "currency": {
+                        "type": "string",
+                        "example": "SAR"
+                    },
+                    "last_updated": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-05-20T10:00:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "PaymentGatewayResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "PayTabs"
+                    },
+                    "alias": {
+                        "type": "string",
+                        "example": "paytabs"
+                    },
+                    "image": {
+                        "type": "string",
+                        "format": "uri",
+                        "nullable": true
+                    },
+                    "min_limit": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 10
+                    },
+                    "max_limit": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 50000
+                    },
+                    "currency": {
+                        "type": "string",
+                        "example": "SAR"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "automatic",
+                            "manual"
+                        ],
+                        "example": "automatic"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "sanctumAuth": {
+                "type": "http",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Authentication",
+            "description": "Register, login, logout, OTP"
+        },
+        {
+            "name": "Users",
+            "description": "User profile management"
+        },
+        {
+            "name": "Cars",
+            "description": "Public car listing and search"
+        },
+        {
+            "name": "Bookings",
+            "description": "Car booking lifecycle"
+        },
+        {
+            "name": "Wallet",
+            "description": "Wallet and balance management"
+        },
+        {
+            "name": "Payments",
+            "description": "Payment operations and refunds"
+        }
+    ]
+}
