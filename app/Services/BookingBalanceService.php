@@ -6,7 +6,7 @@ use Exception;
 use App\Models\User;
 use App\Models\CarBooking;
 use App\Models\BalanceTransaction;
-use App\Models\Admin\TaxSetting;
+use App\Models\Admin\BasicSettings;
 use App\Models\Vendor\Cars\Car;
 use App\DTO\WalletTransactionDTO;
 
@@ -56,8 +56,11 @@ class BookingBalanceService
      */
     public function getTaxPercentage(): float
     {
-        $taxSetting = TaxSetting::where('status', true)->first();
-        return $taxSetting ? floatval($taxSetting->percentage) : 15.00;
+        $basicSettings = BasicSettings::first();
+        if ($basicSettings && $basicSettings->tax_status) {
+            return floatval($basicSettings->tax_percentage);
+        }
+        return 15.00;
     }
 
     /**

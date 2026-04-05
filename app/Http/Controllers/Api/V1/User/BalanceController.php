@@ -8,7 +8,7 @@ use App\Http\Helpers\Response;
 use App\Models\BalanceTransaction;
 use App\Models\UserWallet;
 use App\Http\Controllers\Controller;
-use App\Models\Admin\TaxSetting;
+use App\Models\Admin\BasicSettings;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -186,13 +186,14 @@ class BalanceController extends Controller
      */
     public function getTaxSettings()
     {
-        $taxSetting = TaxSetting::where('status', true)->first();
+        $basicSettings = BasicSettings::first();
+        $isActive = $basicSettings && $basicSettings->tax_status;
 
         return Response::success(
             [__('Tax settings fetched successfully')],
             [
-                'tax_percentage' => $taxSetting ? $taxSetting->percentage : 15.00,
-                'is_active' => $taxSetting ? $taxSetting->status : true,
+                'tax_percentage' => $basicSettings ? (float) $basicSettings->tax_percentage : 15.00,
+                'is_active'      => $isActive,
             ],
             200
         );
@@ -212,8 +213,8 @@ class BalanceController extends Controller
         }
 
         $amount = $request->amount;
-        $taxSetting = TaxSetting::where('status', true)->first();
-        $taxPercentage = $taxSetting ? $taxSetting->percentage : 15.00;
+        $basicSettings = BasicSettings::first();
+        $taxPercentage = $basicSettings ? (float) $basicSettings->tax_percentage : 15.00;
 
         $taxAmount = ($amount * $taxPercentage) / 100;
         $totalAmount = $amount + $taxAmount;
@@ -250,8 +251,8 @@ class BalanceController extends Controller
 
         // Include tax calculation if requested
         if ($request->include_tax) {
-            $taxSetting = TaxSetting::where('status', true)->first();
-            $taxPercentage = $taxSetting ? $taxSetting->percentage : 15.00;
+            $basicSettings = BasicSettings::first();
+            $taxPercentage = $basicSettings ? (float) $basicSettings->tax_percentage : 15.00;
             $taxAmount = ($amount * $taxPercentage) / 100;
             $amount += $taxAmount;
         }

@@ -14,6 +14,8 @@ use App\Constants\GlobalConst;
 use App\Http\Helpers\Response;
 use App\Models\Vendor\Cars\Car;
 use App\Constants\CarBookingConst;
+use App\Constants\NotificationConst;
+use App\Models\UserNotification;
 use App\Models\Admin\Cars\CarArea;
 use App\Models\Admin\Cars\CarType;
 use Illuminate\Support\Facades\DB;
@@ -1077,6 +1079,7 @@ class CarBookingController extends Controller
                 ->first();
 
             $this->bookingNotification($confirm_booking, $basic_setting);
+            $this->notifyUserOnBookingConfirmed($user, $confirm_booking, $basic_setting);
 
             return Response::success([__('Booking Successful! Amount deducted from your balance.')], [
                 'booking_id' => $booking_data->id,
@@ -1130,8 +1133,13 @@ class CarBookingController extends Controller
     {
         if (auth()->check()) {
             $notification_content = [
-                'title' => __('Booking'),
-                'message' => __('Your have a incoming booking request (Car Model: ') . $confirm_booking->cars->car_model . __(', Car Number: ') . $confirm_booking->cars->car_number . __(', Pick-up Date: ') . ($confirm_booking->pickup_date ? Carbon::parse($confirm_booking->pickup_date)->format('d-m-Y') : '') . __(', Pick-up Time: ') . ($confirm_booking->pickup_time ? Carbon::parse($confirm_booking->pickup_time)->format('h:i A') : '') . __(').'),
+                'title' => __('Booking', [], 'ar'),
+                'message' => __('Your have a incoming booking request (Car Model: :model, Car Number: :number, Pick-up Date: :date, Pick-up Time: :time).', [
+                    'model'  => $confirm_booking->cars->car_model,
+                    'number' => $confirm_booking->cars->car_number,
+                    'date'   => $confirm_booking->pickup_date ? Carbon::parse($confirm_booking->pickup_date)->format('d-m-Y') : '',
+                    'time'   => $confirm_booking->pickup_time ? Carbon::parse($confirm_booking->pickup_time)->format('h:i A') : '',
+                ], 'ar'),
             ];
             VendorNotification::create([
                 'vendor_id' => $confirm_booking->cars->vendor_id,
@@ -1875,11 +1883,11 @@ class CarBookingController extends Controller
                     ->prepare(
                         [$user->id],
                         [
-                            'title'     => __('Booking Extended'),
+                            'title'     => __('Booking Extended', [], 'ar'),
                             'desc'      => __('Your booking has been extended by :days day(s). New return date: :date.', [
                                 'days' => $extension->extension_days,
                                 'date' => $extension->new_return_date->toDateString(),
-                            ]),
+                            ], 'ar'),
                             'user_type' => 'user',
                         ]
                     )
@@ -2044,9 +2052,9 @@ class CarBookingController extends Controller
             return Response::error([__('Booking not found.')], [], 404);
         }
 
-        // Only pending bookings (status = 0) can be cancelled by the user
-        if ((int) $booking->status !== 0) {
-            return Response::error([__('Only pending bookings can be cancelled.')], [], 422);
+        // Only pending (status=0) or booked (status=1) bookings can be cancelled by the user
+        if (!in_array((int) $booking->status, [0, 1])) {
+            return Response::error([__('Only pending or unstarted bookings can be cancelled.')], [], 422);
         }
 
         DB::beginTransaction();
@@ -2066,6 +2074,9 @@ class CarBookingController extends Controller
 
             DB::commit();
 
+            // Send booking-cancelled notification to user
+            $this->notifyUserOnBookingCancelled($user, $booking);
+
             return Response::success([__('Booking cancelled successfully.')], [
                 'booking_id' => $booking->id,
                 'refunded'   => $booking->paid_from_balance ? number_format($booking->balance_deducted, 2) : '0.00',
@@ -2079,6 +2090,88 @@ class CarBookingController extends Controller
             ]);
 
             return Response::error([__('Failed to cancel booking. Please try again.')], [], 500);
+        }
+    }
+
+    private function notifyUserOnBookingConfirmed($user, CarBooking $booking, $basic_setting): void
+    {
+        $booking->loadMissing('cars');
+
+        $content = [
+            'title'   => __('Booking Confirmed', [], 'ar'),
+            'message' => __('Your booking is confirmed. Car: :model, Pickup: :date, Ref: :trx', [
+                'model' => $booking->cars?->car_model ?? '',
+                'date'  => $booking->pickup_date,
+                'trx'   => $booking->trx_id,
+            ], 'ar'),
+            'time'    => now()->diffForHumans(),
+            'image'   => files_asset_path('profile-default'),
+        ];
+
+        try {
+            UserNotification::create([
+                'type'    => NotificationConst::BOOKING_CONFIRMED,
+                'user_id' => $user->id,
+                'message' => $content,
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('notifyUserOnBookingConfirmed: UserNotification failed', ['error' => $e->getMessage()]);
+        }
+
+        try {
+            if ($basic_setting && $basic_setting->push_notification) {
+                (new PushNotificationHelper())
+                    ->prepare([$user->id], [
+                        'title'     => $content['title'],
+                        'desc'      => $content['message'],
+                        'user_type' => 'user',
+                    ])
+                    ->send();
+            }
+        } catch (\Throwable $e) {
+            Log::warning('notifyUserOnBookingConfirmed: Push failed', ['error' => $e->getMessage()]);
+        }
+    }
+
+    private function notifyUserOnBookingCancelled($user, CarBooking $booking): void
+    {
+        $booking->loadMissing('cars');
+        $basic_setting = BasicSettings::first();
+
+        $content = [
+            'title'   => __('Booking Cancelled', [], 'ar'),
+            'message' => __('Your booking :trx has been cancelled.:refund', [
+                'trx'    => $booking->trx_id,
+                'refund' => $booking->paid_from_balance
+                    ? ' ' . __(':amount SAR refunded to your wallet.', ['amount' => number_format($booking->balance_deducted, 2)], 'ar')
+                    : '',
+            ], 'ar'),
+            'time'    => now()->diffForHumans(),
+            'image'   => files_asset_path('profile-default'),
+        ];
+
+        try {
+            UserNotification::create([
+                'type'    => NotificationConst::BOOKING_CANCELLED,
+                'user_id' => $user->id,
+                'message' => $content,
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('notifyUserOnBookingCancelled: UserNotification failed', ['error' => $e->getMessage()]);
+        }
+
+        try {
+            if ($basic_setting && $basic_setting->push_notification) {
+                (new PushNotificationHelper())
+                    ->prepare([$user->id], [
+                        'title'     => $content['title'],
+                        'desc'      => $content['message'],
+                        'user_type' => 'user',
+                    ])
+                    ->send();
+            }
+        } catch (\Throwable $e) {
+            Log::warning('notifyUserOnBookingCancelled: Push failed', ['error' => $e->getMessage()]);
         }
     }
 }

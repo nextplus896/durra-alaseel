@@ -297,8 +297,13 @@ class CarBookingController extends Controller
     {
         if (auth()->check()) {
             $notification_content = [
-                'title' => __('Booking'),
-                'message' => __('Your have a incoming booking request (Car Model: ') . $confirm_booking->cars->car_model . __(', Car Number: ') . $confirm_booking->cars->car_number . __(', Pick-up Date: ') . ($confirm_booking->pickup_date ? Carbon::parse($confirm_booking->pickup_date)->format('d-m-Y') : '') . __(', Pick-up Time: ') . ($confirm_booking->pickup_time ? Carbon::parse($confirm_booking->pickup_time)->format('h:i A') : '') . __(').'),
+                'title' => __('Booking', [], 'ar'),
+                'message' => __('Your have a incoming booking request (Car Model: :model, Car Number: :number, Pick-up Date: :date, Pick-up Time: :time).', [
+                    'model'  => $confirm_booking->cars->car_model,
+                    'number' => $confirm_booking->cars->car_number,
+                    'date'   => $confirm_booking->pickup_date ? Carbon::parse($confirm_booking->pickup_date)->format('d-m-Y') : '',
+                    'time'   => $confirm_booking->pickup_time ? Carbon::parse($confirm_booking->pickup_time)->format('h:i A') : '',
+                ], 'ar'),
             ];
             VendorNotification::create([
                 'vendor_id' => $confirm_booking->cars->vendor_id,

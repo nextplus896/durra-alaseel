@@ -34,7 +34,7 @@ class WalletRefundNotification extends Notification implements ShouldQueue
             'amount'  => $this->amount,
             'balance' => $this->newBalance,
             'reason'  => $this->reason,
-            'message' => __(':amount SAR refunded to your wallet', ['amount' => number_format($this->amount, 2)]),
+            'message' => __(':amount SAR refunded to your wallet', ['amount' => number_format($this->amount, 2)], 'ar'),
         ];
     }
 
@@ -51,11 +51,11 @@ class WalletRefundNotification extends Notification implements ShouldQueue
     protected function sendPushAndInApp($notifiable): void
     {
         $content = [
-            'title'   => __('Wallet Refund'),
+            'title'   => __('Wallet Refund', [], 'ar'),
             'message' => __(':amount SAR has been refunded to your wallet. New balance: :balance SAR', [
                 'amount'  => number_format($this->amount, 2),
                 'balance' => number_format($this->newBalance, 2),
-            ]),
+            ], 'ar'),
             'time'  => Carbon::now()->diffForHumans(),
             'image' => files_asset_path('profile-default'),
         ];

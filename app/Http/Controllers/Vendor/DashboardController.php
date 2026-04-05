@@ -49,9 +49,9 @@ class DashboardController extends Controller
             ->get();
 
         $total_income = CarBooking::whereHas('cars', function ($query) {
-                $query->where('vendor_id', auth()->guard('vendor')->user()->id);
+            $query->where('vendor_id', auth()->guard('vendor')->user()->id);
         })
-        ->sum('amount');
+            ->sum('amount');
 
         $chart_one = [];
 
@@ -138,7 +138,7 @@ class DashboardController extends Controller
             $start_month->addDay(); // Move to next day
         }
 
-        return view('vendor-end.sections.dashboard.index', compact('page_title', 'breadcrumb', 'round_trips', 'booking_rejects', 'bookings', 'ride_complete','total_income','chartData', 'booking_accept', 'booking_complete', 'booking_reject', 'month_day'));
+        return view('vendor-end.sections.dashboard.index', compact('page_title', 'breadcrumb', 'round_trips', 'booking_rejects', 'bookings', 'ride_complete', 'total_income', 'chartData', 'booking_accept', 'booking_complete', 'booking_reject', 'month_day'));
     }
 
     public function duePay(Request $request)
@@ -170,13 +170,12 @@ class DashboardController extends Controller
 
             $paid = 0;
 
-            if($user_wallet->due_payment < $validated['amount'] || $user_wallet->due_payment == $validated['amount']){
+            if ($user_wallet->due_payment < $validated['amount'] || $user_wallet->due_payment == $validated['amount']) {
                 $user_wallet_balance = 0;
                 $paid = $user_wallet->due_payment;
                 $user_wallet->balance -= $user_wallet->due_payment;
                 $user_wallet->due_payment = 0;
-            }
-            else{
+            } else {
                 $user_wallet_balance = 0;
                 $paid = $validated['amount'];
                 $user_wallet->balance -= $validated['amount'];
@@ -207,8 +206,8 @@ class DashboardController extends Controller
             $user_wallet->save();
 
             $notification_content = [
-                'title' => 'Paid Due Amount',
-                'message' => 'You have successfully paid due payment',
+                'title' => __('Paid Due Amount', [], 'ar'),
+                'message' => __('You have successfully paid due payment', [], 'ar'),
                 'time' => Carbon::now()->diffForHumans(),
                 'image' => files_asset_path('profile-default'),
             ];

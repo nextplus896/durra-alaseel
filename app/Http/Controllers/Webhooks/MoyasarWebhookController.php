@@ -167,7 +167,7 @@ class MoyasarWebhookController extends Controller
 
             $dto = WalletTransactionDTO::forDeposit(
                 amount: $amount,
-                description: __('Wallet recharge via Moyasar'),
+                description: __('Wallet recharge', [], 'ar'),
                 referenceType: 'App\\Models\\PaymentTransaction',
                 referenceId: $paymentTx->id,
                 idempotencyKey: 'webhook-' . $invoiceId,

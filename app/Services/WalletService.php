@@ -63,7 +63,7 @@ class WalletService
 
             // Queue notification
             try {
-                $user->notify(new WalletChargedNotification($amount, $balanceAfter));
+                $user->notify((new WalletChargedNotification($amount, $balanceAfter))->locale('ar'));
             } catch (\Throwable $e) {
                 Log::warning('WalletService: Charge notification failed', ['error' => $e->getMessage()]);
             }
@@ -110,7 +110,7 @@ class WalletService
             $transaction = $this->repository->createTransaction($user, $dto, $balanceBefore, $balanceAfter);
 
             try {
-                $user->notify(new WalletDeductedNotification($amount, $balanceAfter, $dto->description));
+                $user->notify((new WalletDeductedNotification($amount, $balanceAfter, $dto->description))->locale('ar'));
             } catch (\Throwable $e) {
                 Log::warning('WalletService: Deduction notification failed', ['error' => $e->getMessage()]);
             }
@@ -153,7 +153,7 @@ class WalletService
             $transaction = $this->repository->createTransaction($user, $dto, $balanceBefore, $balanceAfter);
 
             try {
-                $user->notify(new WalletRefundNotification($amount, $balanceAfter, $dto->description));
+                $user->notify((new WalletRefundNotification($amount, $balanceAfter, $dto->description))->locale('ar'));
             } catch (\Throwable $e) {
                 Log::warning('WalletService: Refund notification failed', ['error' => $e->getMessage()]);
             }

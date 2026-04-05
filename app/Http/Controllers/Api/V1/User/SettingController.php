@@ -19,7 +19,7 @@ use App\Providers\Admin\BasicSettingsProvider;
 class SettingController extends Controller
 {
     public function basicSettings() {
-        $basic_settings = BasicSettingsProvider::get()->only(['id','site_name','site_title','timezone','site_logo','site_logo_dark','site_fav','site_fav_dark','base_color','secondary_color','vendor_base_color','vendor_secondary_color','vendor_logo','vendor_logo_dark','vendor_fav','vendor_fav_dark','user_registration','kyc_verification','email_verification','agree_policy','vendor_registration','vendor_kyc_verification','vendor_email_verification','vendor_agree_policy','vendor_agree_policy','precision']);
+        $basic_settings = BasicSettingsProvider::get()->only(['id','site_name','site_title','timezone','site_logo','site_logo_dark','site_fav','site_fav_dark','base_color','secondary_color','vendor_base_color','vendor_secondary_color','vendor_logo','vendor_logo_dark','vendor_fav','vendor_fav_dark','user_registration','kyc_verification','email_verification','agree_policy','vendor_registration','vendor_kyc_verification','vendor_email_verification','vendor_agree_policy','vendor_agree_policy','precision','tax_name','tax_percentage','tax_status']);
 
         $languages = Language::select(['id','name','code','status'])->get();
 

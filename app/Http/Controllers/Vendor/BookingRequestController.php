@@ -88,8 +88,8 @@ class BookingRequestController extends Controller
         try {
             $info->update(['status' => 2]);
             $notification_content = [
-                'title'   => "Request Accepted",
-                'message' => "Vendor accepted your request",
+                'title'   => __('Request Accepted', [], 'ar'),
+                'message' => __('Vendor accepted your request', [], 'ar'),
                 'time'    => Carbon::now()->diffForHumans(),
                 'image'   => files_asset_path('profile-default'),
             ];
@@ -150,8 +150,8 @@ class BookingRequestController extends Controller
             ]);
 
             $notification_content = [
-                'title'   => "Booking Rejected",
-                'message' => "Your booking #{$booking_info->trx_id} was rejected. Reason: {$rejectionReason}",
+                'title'   => __('Booking Rejected', [], 'ar'),
+                'message' => __('Your booking #:trx was rejected. Reason: :reason', ['trx' => $booking_info->trx_id, 'reason' => $rejectionReason], 'ar'),
                 'time'    => Carbon::now()->diffForHumans(),
                 'image'   => files_asset_path('profile-default'),
             ];
@@ -253,8 +253,8 @@ class BookingRequestController extends Controller
                 'status' => CarBookingConst::STATUSCOMPLETE,
             ]);
             $notification_content = [
-                'title'   => "Ride Complete",
-                'message' => "You have completed your ride",
+                'title'   => __('Ride Complete', [], 'ar'),
+                'message' => __('You have completed your ride', [], 'ar'),
                 'time'    => Carbon::now()->diffForHumans(),
                 'image'   => files_asset_path('profile-default'),
             ];

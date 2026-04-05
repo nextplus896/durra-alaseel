@@ -22,7 +22,8 @@ use Illuminate\Support\Facades\Validator;
 
 class DashboardController extends Controller
 {
-    public function dashboard() {
+    public function dashboard()
+    {
 
         $wallets_balance = auth()->guard('vendor_api')->user()->wallets->balance;
         $wallets_currency = auth()->guard('vendor_api')->user()->wallets->currency;
@@ -81,16 +82,16 @@ class DashboardController extends Controller
             ->orderByDesc('id')
             ->get();
 
-            if(!$bookings){
-                return Response::error([__('Oops! Something went wrong! Please try again')]);
-            }
+        if (!$bookings) {
+            return Response::error([__('Oops! Something went wrong! Please try again')]);
+        }
 
-            $my_cars = Car::where('vendor_id',auth()->guard('vendor_api')->user()->id)->get();
+        $my_cars = Car::where('vendor_id', auth()->guard('vendor_api')->user()->id)->get();
 
-            $car_image_path = [
-                'base_url' => url('/'),
-                'image_path' => files_asset_path_basename('site-section'),
-            ];
+        $car_image_path = [
+            'base_url' => url('/'),
+            'image_path' => files_asset_path_basename('site-section'),
+        ];
 
         $month = Carbon::now()->month;
         $start_of_month = Carbon::parse(now()->startOfMonth());
@@ -136,7 +137,7 @@ class DashboardController extends Controller
             $start_month->addDay(); // Move to next day
         }
 
-        return Response::success([__('Vendor dashboard data fetch successfully!')],[
+        return Response::success([__('Vendor dashboard data fetch successfully!')], [
 
             'user_info'     => $user_info,
             'wallets'       => $wallets_balance,
@@ -158,16 +159,17 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function notifications() {
+    public function notifications()
+    {
         $notifications = get_vendor_notifications();
-        return Response::success([__('Notification fetch successfully!')],[
+        return Response::success([__('Notification fetch successfully!')], [
             'notification'  => $notifications,
         ]);
     }
 
     public function duePay(Request $request)
     {
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'amount'    => "required|numeric",
         ]);
 
@@ -177,13 +179,13 @@ class DashboardController extends Controller
         }
 
         $validated = $validator->validate();
-        $user_wallet = VendorWallet::where('vendor_id',auth()->guard('vendor_api')->user()->id)->first();
+        $user_wallet = VendorWallet::where('vendor_id', auth()->guard('vendor_api')->user()->id)->first();
 
-        if(!$user_wallet) return Response::error([__("Vendor wallet not found!")]);
+        if (!$user_wallet) return Response::error([__("Vendor wallet not found!")]);
 
         DB::beginTransaction();
 
-        try{
+        try {
 
             if ($user_wallet->balance < $validated['amount'] || $user_wallet->due_payment == 0) {
                 $message = $user_wallet->due_payment == 0 ? 'Insufficient Due Payment' : '';
@@ -193,16 +195,14 @@ class DashboardController extends Controller
                 return back()->with(['error' => [__($message)]]);
             }
 
-            if($user_wallet->due_payment < $validated['amount'] || $user_wallet->due_payment == $validated['amount']){
+            if ($user_wallet->due_payment < $validated['amount'] || $user_wallet->due_payment == $validated['amount']) {
                 $user_wallet_balance = 0;
                 $user_wallet->balance -= $user_wallet->due_payment;
                 $user_wallet->due_payment = 0;
-            }
-            else{
+            } else {
                 $user_wallet_balance = 0;
                 $user_wallet->balance -= $validated['amount'];
                 $user_wallet->due_payment -= $validated['amount'];
-
             }
 
 
@@ -212,7 +212,7 @@ class DashboardController extends Controller
                 'vendor_id'         => $user_wallet->vendor->id,
                 'wallet_id'         => $user_wallet->id,
                 'type'              => PaymentGatewayConst::TYPEDUEPAY,
-                'trx_id'            => generate_unique_string("transactions","trx_id",16),
+                'trx_id'            => generate_unique_string("transactions", "trx_id", 16),
                 'request_amount'    => $validated['amount'],
                 'total_charge'      => $validated['amount'],
                 'available_balance' => $user_wallet_balance,
@@ -232,8 +232,8 @@ class DashboardController extends Controller
             $user_wallet->save();
 
             $notification_content = [
-                'title'         => "Paid Due Amount",
-                'message'       => "You have successfully paid due payment",
+                'title'         => __('Paid Due Amount', [], 'ar'),
+                'message'       => __('You have successfully paid due payment', [], 'ar'),
                 'time'          => Carbon::now()->diffForHumans(),
                 'image'         => files_asset_path('profile-default'),
             ];
@@ -243,25 +243,26 @@ class DashboardController extends Controller
                 'vendor_id'  => $user_wallet->vendor->id,
                 'message'   => $notification_content,
             ]);
-             //push notification
-           try{
-                (new PushNotificationHelper())->prepare([$user_wallet->vendor->id],[
+            //push notification
+            try {
+                (new PushNotificationHelper())->prepare([$user_wallet->vendor->id], [
                     'title' => $notification_content['title'],
                     'desc'  => $notification_content['message'],
                     'user_type' => 'user',
                 ])->send();
-            }catch(Exception $e) {}
+            } catch (Exception $e) {
+            }
 
 
             //admin notification
-             $notification_content['title'] = $user_wallet->vendor->username."'s  paid his/her due amount ". $validated['amount'] ??"";
+            $notification_content['title'] = $user_wallet->vendor->username . "'s  paid his/her due amount " . $validated['amount'] ?? "";
             AdminNotification::create([
                 'type'      => NotificationConst::BALANCE_UPDATE,
                 'admin_id'  => 1,
                 'message'   => $notification_content,
             ]);
             DB::commit();
-        }catch(Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             return Response::error([__("Transaction Failed!")]);
         }

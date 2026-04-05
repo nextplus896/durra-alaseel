@@ -18,7 +18,7 @@ use App\Providers\Admin\BasicSettingsProvider;
 class SettingController extends Controller
 {
     public function basicSettings() {
-        $basic_settings = BasicSettingsProvider::get()->only(['id','site_name','site_title','timezone','site_logo','site_logo_dark','site_fav','site_fav_dark']);
+        $basic_settings = BasicSettingsProvider::get()->only(['id','site_name','site_title','timezone','site_logo','site_logo_dark','site_fav','site_fav_dark','tax_name','tax_percentage','tax_status']);
 
         $user_kyc_settings = SetupKyc::UserKyc()->first() ?? false;
         if($user_kyc_settings != false) {

@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find 'C:\\\\DATA\\\\Dora Alaseel\\\\Source Code\\\\durra-alaseel-web\\\\resources\\\\js' -type f -name *.js -o -name *.vue)"
+    ]
+  }
+}
