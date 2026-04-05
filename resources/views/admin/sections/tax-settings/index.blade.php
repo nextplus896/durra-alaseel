@@ -36,8 +36,8 @@
                         <label>{{ __('Tax Percentage') }} (%)<span>*</span></label>
                         <input type="number" name="percentage" class="form--control"
                             placeholder="{{ __('Enter tax percentage') }}"
-                            value="{{ old('percentage', $tax_setting->tax_percentage ?? 15) }}" step="0.01" min="0"
-                            max="100" required>
+                            value="{{ old('percentage', $tax_setting->tax_percentage ?? 15) }}" step="0.01"
+                            min="0" max="100" required>
                     </div>
                     <div class="col-xl-12 col-lg-12 form-group">
                         <div class="alert alert-info">
@@ -67,7 +67,9 @@
                         </div>
                         <div class="col-xl-6 col-lg-6 form-group">
                             <label>{{ __('Last Updated By') }}</label>
-                            <p class="form-text">{{ optional(\App\Models\Admin\Admin::find($tax_setting->tax_last_edit_by))->full_name ?? '-' }} {{ __('at') }}
+                            <p class="form-text">
+                                {{ optional(\App\Models\Admin\Admin::find($tax_setting->tax_last_edit_by))->full_name ?? '-' }}
+                                {{ __('at') }}
                                 {{ $tax_setting->updated_at->format('d M Y H:i') }}</p>
                         </div>
                     @endif

@@ -86,4 +86,3 @@ class TaxSettingController extends Controller
         return Response::success(['success' => [__('Tax status updated successfully!')]]);
     }
 }
-
