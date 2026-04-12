@@ -38,6 +38,7 @@ use App\Providers\Admin\CurrencyProvider;
 use function PHPUnit\Framework\returnSelf;
 
 use App\Providers\Admin\BasicSettingsProvider;
+use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
 use Pusher\PushNotifications\PushNotifications;
 use App\Notifications\User\Auth\SendAuthorizationCode;
@@ -110,6 +111,31 @@ function get_all_timezones()
     }, $countries);
 
     return json_decode(json_encode($timezones));
+}
+
+function format_vendor_booking_datetime($dateTime, $format = 'd M Y, h:i A', $timezone = null)
+{
+    if (!$dateTime) {
+        return '';
+    }
+
+    $target_timezone = $timezone ?? (BasicSettingsProvider::get()->timezone ?? env('APP_TIMEZONE', 'UTC'));
+
+    try {
+        if ($dateTime instanceof \Carbon\CarbonInterface) {
+            $carbon = $dateTime->copy();
+        } else {
+            $carbon = Carbon::parse($dateTime, 'UTC');
+        }
+
+        return $carbon->setTimezone($target_timezone)->diffForHumans();
+    } catch (Exception $e) {
+        if ($dateTime instanceof \Carbon\CarbonInterface) {
+            return $dateTime->diffForHumans();
+        }
+
+        return (string) $dateTime;
+    }
 }
 
 function get_country_states($country_id)
@@ -332,30 +358,30 @@ function get_files_path($slug)
     $path = $data->path;
     create_asset_dir($path);
 
-    return public_path($path);
+    return storage_path('app/public/' . $path);
 }
 
 function create_asset_dir($path)
 {
-    $path = "public/" . $path;
-    if (file_exists($path)) return true;
-    return mkdir($path, 0755, true);
+    $full_path = storage_path('app/public/') . $path;
+    if (file_exists($full_path)) return true;
+    return mkdir($full_path, 0755, true);
 }
 
 function get_image($image_name, $path_type = null, $image_type = null, $size = null)
 {
 
     if ($image_type == 'profile') {
-        $image =  asset('public/' . files_path('profile-default')->path);
+        $image =  asset('storage/' . files_path('profile-default')->path);
     } else {
-        $image =  asset('public/' . files_path('default')->path);
+        $image =  asset('storage/' . files_path('default')->path);
     }
     if ($image_name != null) {
         if ($path_type != null) {
             $image_path = files_path($path_type)->path;
             $image_link = $image_path . "/" . $image_name;
-            if (file_exists(public_path($image_link))) {
-                $image = asset('public/' . $image_link);
+            if (file_exists(storage_path('app/public/' . $image_link))) {
+                $image = asset('storage/' . $image_link);
             }
         }
     }
@@ -367,18 +393,17 @@ function get_storage_image($image_name, $path_type = null, $image_type = null, $
 {
 
     if ($image_type == 'profile') {
-        $image =  asset(files_path('profile-default')->path);
+        $image =  asset('storage/' . files_path('profile-default')->path);
     } else {
-        $image =  asset(files_path('default')->path);
+        $image =  asset('storage/' . files_path('default')->path);
     }
     if ($image_name != null) {
         if ($path_type != null) {
             $image_path = files_path($path_type)->path;
             $image_link = $image_path . "/" . $image_name;
 
-            if (file_exists(storage_path($image_link))) {
-                // if(file_exists(public_path($image_link))) {
-                $image = asset($image_link);
+            if (file_exists(storage_path('app/public/' . $image_link))) {
+                $image = asset('storage/' . $image_link);
             }
         }
     }
@@ -453,6 +478,12 @@ function files_path($slug)
         'car-models'        => [
             'path'          => 'backend/images/car-models',
         ],
+        'user-national-id'  => [
+            'path'          => 'frontend/user-national-id',
+        ],
+        'user-driving-license' => [
+            'path'          => 'frontend/user-driving-license',
+        ],
     ];
 
     return (object) $data[$slug];
@@ -461,7 +492,7 @@ function files_path($slug)
 function files_asset_path($slug)
 {
     $files_path = files_path($slug)->path;
-    return asset('public/' . $files_path);
+    return asset('storage/' . $files_path);
 }
 
 function get_amount($amount, $currency = null, $precision = null)
@@ -1438,30 +1469,33 @@ function generate_unique_string($table, $column, $length = 10)
     return $unique_string;
 }
 
-function generate_unique_code($length = 8)
+function generate_unique_code()
 {
-    $numbers = '123456789';
-    $numbersLength = strlen($numbers);
-    $randNumber = '';
-    for ($i = 0; $i < $length; $i++) {
-        $randNumber .= $numbers[rand(0, $numbersLength - 1)];
-    }
-    return $randNumber;
+    // Format: 2-digit year + 5 random digits → 7-digit numeric string (e.g., 2614837)
+    $yearPrefix = date('y');
+
+    do {
+        $code = $yearPrefix . str_pad(random_int(0, 99999), 5, '0', STR_PAD_LEFT);
+        $exists = DB::table('car_bookings')->where('trip_id', $code)->exists();
+    } while ($exists);
+
+    return $code;
 }
 
 function upload_file($file, $destination_path, $old_file = null)
 {
-    if (File::isFile($file)) {
-        $save_path = get_files_path($destination_path);
+    $save_path = get_files_path($destination_path);
+
+    if ($file instanceof \Illuminate\Http\UploadedFile) {
+        if (!$file->isValid()) {
+            return false;
+        }
+
         $file_extension = $file->getClientOriginalExtension();
-        $file_type = File::mimeType($file);
-        $file_size = File::size($file);
+        $file_type = $file->getMimeType();
+        $file_size = $file->getSize();
         $file_original_name = $file->getClientOriginalName();
-
-        $file_base_name = explode(".", $file_original_name);
-        array_pop($file_base_name);
-        $file_base_name = implode("-", $file_base_name);
-
+        $file_base_name = pathinfo($file_original_name, PATHINFO_FILENAME);
         $file_name = Str::uuid() . "." . $file_extension;
 
         $file_public_link   = $save_path . "/" . $file_name;
@@ -1479,7 +1513,42 @@ function upload_file($file, $destination_path, $old_file = null)
         ];
 
         try {
+            if ($old_file) {
+                $old_file_link = $save_path . "/" . $old_file;
+                delete_file($old_file_link);
+            }
 
+            $file->move($save_path, $file_name);
+        } catch (Exception $e) {
+            return false;
+        }
+
+        return $file_info;
+    }
+
+    if (File::isFile($file)) {
+        $file_extension = File::extension($file);
+        $file_type = File::mimeType($file);
+        $file_size = File::size($file);
+        $file_original_name = basename($file);
+        $file_base_name = pathinfo($file_original_name, PATHINFO_FILENAME);
+        $file_name = Str::uuid() . "." . $file_extension;
+
+        $file_public_link   = $save_path . "/" . $file_name;
+        $file_asset_link    = files_asset_path($destination_path) . "/" . $file_name;
+
+        $file_info = [
+            'name'                  => $file_name,
+            'type'                  => $file_type,
+            'extension'             => $file_extension,
+            'size'                  => $file_size,
+            'file_link'             => $file_asset_link,
+            'dev_path'              => $file_public_link,
+            'original_name'         => $file_original_name,
+            'original_base_name'    => $file_base_name,
+        ];
+
+        try {
             if ($old_file) {
                 $old_file_link = $save_path . "/" . $old_file;
                 delete_file($old_file_link);
@@ -1698,7 +1767,7 @@ function google_two_factor_verification_vendor_template($user)
 
 function files_asset_path_basename($slug)
 {
-    return "public/" . files_path($slug)->path;
+    return "storage/" . files_path($slug)->path;
 }
 
 function get_only_numeric_data($string)
@@ -1748,7 +1817,10 @@ function get_full_url_host()
 
 function make_user_id_for_pusher($user_type, $user_id)
 {
-    return remove_special_char(get_full_url_host(), "-") . '-' . $user_type . '-' . $user_id;
+    // Simple format as per Pusher Beams documentation: {user_type}-{user_id}
+    // This must match the format used in PushNotificationHelper::make_publishable_id()
+    // Examples: "user-4", "vendor-2", "admin-1"
+    return $user_type . '-' . $user_id;
 }
 
 function pusher_unsubscribe($user_type, $user_id)
@@ -1770,7 +1842,8 @@ function pusher_unsubscribe($user_type, $user_id)
                 ]);
 
                 try {
-                    $pusher_instance->deleteUser("" . make_user_id_for_pusher($user_type, $user_id) . "");
+                    // Simple format: {user_type}-{user_id}
+                    $pusher_instance->deleteUser($user_type . "-" . $user_id);
                 } catch (Exception $e) {
                     // Handle Error
                 }

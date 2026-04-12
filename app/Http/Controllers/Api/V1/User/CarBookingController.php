@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\User;
 use Exception;
 use Carbon\Carbon;
 use App\Models\CarBooking;
+use App\Models\CarBookingTransaction;
 use App\Models\Transaction;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -13,6 +14,8 @@ use App\Constants\GlobalConst;
 use App\Http\Helpers\Response;
 use App\Models\Vendor\Cars\Car;
 use App\Constants\CarBookingConst;
+use App\Constants\NotificationConst;
+use App\Models\UserNotification;
 use App\Models\Admin\Cars\CarArea;
 use App\Models\Admin\Cars\CarType;
 use Illuminate\Support\Facades\DB;
@@ -34,13 +37,17 @@ use App\Http\Helpers\PushNotificationHelper;
 use App\Models\Admin\PaymentGatewayCurrency;
 use Illuminate\Support\Facades\Notification;
 use net\authorize\api\contract\v1 as AnetAPI;
-use App\Notifications\User\carBookingNotification;
+use App\Notifications\User\CarBookingNotification;
 use net\authorize\api\controller as AnetController;
 use App\Http\Helpers\PaymentGateway as PaymentGatewayHelper;
 use App\Services\BookingBalanceService;
+use App\Services\CarBookingExtensionService;
 use App\Models\BranchDeliverySetting;
+use App\Models\BranchWorkingHour;
 use App\Http\Resources\Api\CarBookingResource;
+use App\Http\Resources\Api\CarBookingExtensionResource;
 use App\Http\Resources\Api\CarResource;
+use App\Notifications\User\BookingExtendedNotification;
 
 class CarBookingController extends Controller
 {
@@ -52,7 +59,7 @@ class CarBookingController extends Controller
             $user = Auth::guard('api')->user();
 
             $bookings = CarBooking::where('user_id', $user->id)
-                ->with(['cars'])
+                ->with(['cars.vendor'])
                 ->orderBy('created_at', 'desc')
                 ->get();
 
@@ -115,6 +122,24 @@ class CarBookingController extends Controller
         return Response::success([__('Types fetch successfully')], ['area' => $area], 200);
     }
 
+    /**
+     * Convert time to 24-hour format (HH:mm) if it's in 12-hour format (h:i A)
+     */
+    private function convertTo24HourFormat($time)
+    {
+        try {
+            // If time contains AM/PM, convert it to 24-hour format
+            if (preg_match('/(AM|PM|am|pm)/', $time)) {
+                return Carbon::parse($time)->format('H:i');
+            }
+            // Already in 24-hour format, return as-is
+            return $time;
+        } catch (\Exception $e) {
+            // If parsing fails, return original
+            return $time;
+        }
+    }
+
     public function searchCar(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -130,6 +155,12 @@ class CarBookingController extends Controller
             return Response::error($validator->errors()->all());
         }
         $validated = $validator->validate();
+
+        // Convert time to 24-hour format if needed
+        $validated['pickup_time'] = $this->convertTo24HourFormat($validated['pickup_time']);
+        if (!empty($validated['round_pickup_time'])) {
+            $validated['round_pickup_time'] = $this->convertTo24HourFormat($validated['round_pickup_time']);
+        }
 
         $pickupDateTime = Carbon::parse($validated['pickup_date'] . ' ' . $validated['pickup_time']);
 
@@ -516,7 +547,7 @@ class CarBookingController extends Controller
                         'balance' => (float) ($validated_user->balance ?? 0),
                     ],
                     'user_balance' => [
-                        'balance' => number_format($validated_user->balance ?? 0, 2),
+                        'balance' => (float) round($validated_user->balance ?? 0, 2),
                         'has_sufficient_balance' => ($validated_user->balance ?? 0) >= $pricingBreakdown['total'],
                     ],
                     'delivery_info' => $deliveryInfo,
@@ -576,6 +607,14 @@ class CarBookingController extends Controller
 
         $validated = $validator->validate();
         $validated['user_id'] = auth()->guard('api')->user()->id;
+
+        // Convert time to 24-hour format if needed (from formatted preview response)
+        if (isset($request->pickup_time)) {
+            $request->merge(['pickup_time' => $this->convertTo24HourFormat($request->pickup_time)]);
+        }
+        if (isset($request->round_pickup_time) && !empty($request->round_pickup_time)) {
+            $request->merge(['round_pickup_time' => $this->convertTo24HourFormat($request->round_pickup_time)]);
+        }
 
         // If token not provided, create TemporaryData with booking info so downstream flows (payment)
         // can still use a booking token. We create it before handling payment type.
@@ -676,8 +715,64 @@ class CarBookingController extends Controller
         }
         $temp_data = json_decode(json_encode($temp_booking->data), true);
 
+        // Convert time formats to 24-hour format if needed
+        if (isset($temp_data['pickup_time'])) {
+            $temp_data['pickup_time'] = $this->convertTo24HourFormat($temp_data['pickup_time']);
+        }
+        if (isset($temp_data['round_pickup_time']) && !empty($temp_data['round_pickup_time'])) {
+            $temp_data['round_pickup_time'] = $this->convertTo24HourFormat($temp_data['round_pickup_time']);
+        }
+        if (isset($data['pickup_time'])) {
+            $data['pickup_time'] = $this->convertTo24HourFormat($data['pickup_time']);
+        }
+        if (isset($data['round_pickup_time']) && !empty($data['round_pickup_time'])) {
+            $data['round_pickup_time'] = $this->convertTo24HourFormat($data['round_pickup_time']);
+        }
+
         // GOLDEN RULE: Recalculate everything in backend - NEVER trust frontend values
-        $car = Car::findOrFail($data['car_id']);
+        $car = Car::with('carModel')->findOrFail($data['car_id']);
+
+        // ── Delivery radius enforcement (server-side security guard) ──────────────
+        // This runs before any pricing so that pickup coords and delivery flag are
+        // authoritative before the booking record is written.
+        $branch = $car->branch;
+        if ($branch) {
+            if (!$branch->delivery_enabled) {
+                // Branch does not offer delivery: force pickup at the branch itself.
+                $data['pickup_location'] = [
+                    'latitude'  => (float) $branch->latitude,
+                    'longitude' => (float) $branch->longitude,
+                    'address'   => (string) ($branch->address ?? ''),
+                ];
+                if ($request) {
+                    $request->merge(['include_delivery' => false]);
+                }
+            } elseif ($request && $request->include_delivery) {
+                // Branch allows delivery — validate the user's chosen location.
+                $deliveryLat = isset($data['pickup_location']['latitude'])
+                    ? floatval($data['pickup_location']['latitude']) : null;
+                $deliveryLng = isset($data['pickup_location']['longitude'])
+                    ? floatval($data['pickup_location']['longitude']) : null;
+
+                if ($deliveryLat !== null && $deliveryLng !== null) {
+                    $radiusCheck = app(\App\Services\DeliveryRadiusService::class)
+                        ->checkDeliveryEligibility($branch->id, $deliveryLat, $deliveryLng);
+
+                    if (!$radiusCheck['allowed']) {
+                        return Response::error(
+                            [__('Selected location is outside the branch delivery area.')],
+                            [
+                                'distance_km'   => $radiusCheck['distance_km'],
+                                'max_radius_km' => $radiusCheck['max_radius'],
+                            ],
+                            422
+                        );
+                    }
+                }
+            }
+        }
+        // ─────────────────────────────────────────────────────────────────────────
+
         $balanceService = new BookingBalanceService();
 
         // Calculate rental fees based on tiered pricing
@@ -711,6 +806,8 @@ class CarBookingController extends Controller
                 'slug' => $data['car_slug'],
                 'trx_id' => $trx_id,
                 'payment_type' => $type,
+                'car_model' => $car->carModel?->name ?? $car->car_model,
+                'car_number' => $car->car_number,
                 'phone' => $data['mobile'],
                 'email' => $data['credentials'],
                 'location' => $data['location'],
@@ -737,6 +834,34 @@ class CarBookingController extends Controller
                 'message' => $data['message'] ?? '',
                 'status' => 1,
             ]);
+
+            // Record rental transaction with effective daily rate
+            $rentalDailyRate = $rentalDays > 0 ? round($rentalFees / $rentalDays, 2) : null;
+            CarBookingTransaction::create([
+                'car_booking_id'           => $booking_data->id,
+                'type'                     => CarBookingTransaction::TYPE_RENTAL,
+                'description'              => "{$rentalDays} days rental",
+                'amount'                   => $rentalFees,
+                'tax_percentage'           => $pricingBreakdown['tax_percentage'],
+                'tax_amount'               => $pricingBreakdown['tax_amount'],
+                'total'                    => $pricingBreakdown['total'],
+                'daily_rate'               => $rentalDailyRate,
+                'transacted_at'            => now(),
+            ]);
+
+            if ($deliveryPrice > 0) {
+                CarBookingTransaction::create([
+                    'car_booking_id'           => $booking_data->id,
+                    'type'                     => CarBookingTransaction::TYPE_DELIVERY,
+                    'description'              => 'Delivery service',
+                    'amount'                   => $deliveryPrice,
+                    'tax_percentage'           => 0,
+                    'tax_amount'               => 0,
+                    'total'                    => $deliveryPrice,
+                    'daily_rate'               => null,
+                    'transacted_at'            => now(),
+                ]);
+            }
 
             $confirm_booking = CarBooking::with('cars')
                 ->where('slug', $booking_data->slug)
@@ -796,8 +921,60 @@ class CarBookingController extends Controller
         }
         $temp_data = json_decode(json_encode($temp_booking->data), true);
 
+        // Convert time formats to 24-hour format if needed
+        if (isset($temp_data['pickup_time'])) {
+            $temp_data['pickup_time'] = $this->convertTo24HourFormat($temp_data['pickup_time']);
+        }
+        if (isset($temp_data['round_pickup_time']) && !empty($temp_data['round_pickup_time'])) {
+            $temp_data['round_pickup_time'] = $this->convertTo24HourFormat($temp_data['round_pickup_time']);
+        }
+        if (isset($data['pickup_time'])) {
+            $data['pickup_time'] = $this->convertTo24HourFormat($data['pickup_time']);
+        }
+        if (isset($data['round_pickup_time']) && !empty($data['round_pickup_time'])) {
+            $data['round_pickup_time'] = $this->convertTo24HourFormat($data['round_pickup_time']);
+        }
+
         // GOLDEN RULE: Recalculate everything in backend - NEVER trust frontend values
-        $car = Car::findOrFail($data['car_id']);
+        $car = Car::with('carModel')->findOrFail($data['car_id']);
+
+        // ── Delivery radius enforcement (server-side security guard) ──────────────
+        $branch = $car->branch;
+        if ($branch) {
+            if (!$branch->delivery_enabled) {
+                // Branch does not offer delivery: force pickup at the branch itself.
+                $data['pickup_location'] = [
+                    'latitude'  => (float) $branch->latitude,
+                    'longitude' => (float) $branch->longitude,
+                    'address'   => (string) ($branch->address ?? ''),
+                ];
+                $request->merge(['include_delivery' => false]);
+            } elseif ($request->include_delivery) {
+                // Branch allows delivery — validate the user's chosen location.
+                $deliveryLat = isset($data['pickup_location']['latitude'])
+                    ? floatval($data['pickup_location']['latitude']) : null;
+                $deliveryLng = isset($data['pickup_location']['longitude'])
+                    ? floatval($data['pickup_location']['longitude']) : null;
+
+                if ($deliveryLat !== null && $deliveryLng !== null) {
+                    $radiusCheck = app(\App\Services\DeliveryRadiusService::class)
+                        ->checkDeliveryEligibility($branch->id, $deliveryLat, $deliveryLng);
+
+                    if (!$radiusCheck['allowed']) {
+                        return Response::error(
+                            [__('Selected location is outside the branch delivery area.')],
+                            [
+                                'distance_km'   => $radiusCheck['distance_km'],
+                                'max_radius_km' => $radiusCheck['max_radius'],
+                            ],
+                            422
+                        );
+                    }
+                }
+            }
+        }
+        // ─────────────────────────────────────────────────────────────────────────
+
         $balanceService = new BookingBalanceService();
 
         // Calculate rental fees based on tiered pricing
@@ -814,13 +991,13 @@ class CarBookingController extends Controller
         if (!$balanceService->hasSufficientBalance($user, $totalAmount)) {
             return Response::error([
                 __('Insufficient balance. Your balance is :balance, required amount is :required', [
-                    'balance' => number_format($user->balance, 2),
+                    'balance'  => number_format($user->balance, 2),
                     'required' => number_format($totalAmount, 2),
                 ])
             ], [
-                'current_balance' => $user->balance,
-                'required_amount' => $totalAmount,
-                'shortfall' => $totalAmount - $user->balance,
+                'current_balance' => (float) round($user->balance, 2),
+                'required_amount' => (float) round($totalAmount, 2),
+                'shortfall'       => (float) round($totalAmount - $user->balance, 2),
             ], 400);
         }
 
@@ -838,6 +1015,8 @@ class CarBookingController extends Controller
                 'slug' => $data['car_slug'],
                 'trx_id' => $trx_id,
                 'payment_type' => 'balance',
+                'car_model' => $car->carModel?->name ?? $car->car_model,
+                'car_number' => $car->car_number,
                 'phone' => $data['mobile'],
                 'email' => $data['credentials'],
                 'location' => $data['location'],
@@ -867,6 +1046,34 @@ class CarBookingController extends Controller
                 'status' => 1,
             ]);
 
+            // Record rental transaction with effective daily rate
+            $rentalDailyRate = $rentalDays > 0 ? round($rentalFees / $rentalDays, 2) : null;
+            CarBookingTransaction::create([
+                'car_booking_id'           => $booking_data->id,
+                'type'                     => CarBookingTransaction::TYPE_RENTAL,
+                'description'              => "{$rentalDays} days rental",
+                'amount'                   => $rentalFees,
+                'tax_percentage'           => $pricingBreakdown['tax_percentage'],
+                'tax_amount'               => $pricingBreakdown['tax_amount'],
+                'total'                    => $totalAmount,
+                'daily_rate'               => $rentalDailyRate,
+                'transacted_at'            => now(),
+            ]);
+
+            if ($deliveryPrice > 0) {
+                CarBookingTransaction::create([
+                    'car_booking_id'           => $booking_data->id,
+                    'type'                     => CarBookingTransaction::TYPE_DELIVERY,
+                    'description'              => 'Delivery service',
+                    'amount'                   => $deliveryPrice,
+                    'tax_percentage'           => 0,
+                    'tax_amount'               => 0,
+                    'total'                    => $deliveryPrice,
+                    'daily_rate'               => null,
+                    'transacted_at'            => now(),
+                ]);
+            }
+
             // Deduct balance
             $balanceService->deductBalanceForBooking($user, $booking_data, $totalAmount);
 
@@ -877,12 +1084,13 @@ class CarBookingController extends Controller
                 ->first();
 
             $this->bookingNotification($confirm_booking, $basic_setting);
+            $this->notifyUserOnBookingConfirmed($user, $confirm_booking, $basic_setting);
 
             return Response::success([__('Booking Successful! Amount deducted from your balance.')], [
                 'booking_id' => $booking_data->id,
                 'trx_id' => $trx_id,
                 'amount_deducted' => $totalAmount,
-                'new_balance' => $user->fresh()->balance,
+                'new_balance' => (float) round($user->fresh()->balance, 2),
             ], 200);
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -930,8 +1138,13 @@ class CarBookingController extends Controller
     {
         if (auth()->check()) {
             $notification_content = [
-                'title' => __('Booking'),
-                'message' => __('Your have a incoming booking request (Car Model: ') . $confirm_booking->cars->car_model . __(', Car Number: ') . $confirm_booking->cars->car_number . __(', Pick-up Date: ') . ($confirm_booking->pickup_date ? Carbon::parse($confirm_booking->pickup_date)->format('d-m-Y') : '') . __(', Pick-up Time: ') . ($confirm_booking->pickup_time ? Carbon::parse($confirm_booking->pickup_time)->format('h:i A') : '') . __(').'),
+                'title' => __('Booking', [], 'ar'),
+                'message' => __('Your have a incoming booking request (Car Model: :model, Car Number: :number, Pick-up Date: :date, Pick-up Time: :time).', [
+                    'model'  => $confirm_booking->cars->car_model,
+                    'number' => $confirm_booking->cars->car_number,
+                    'date'   => $confirm_booking->pickup_date ? Carbon::parse($confirm_booking->pickup_date)->format('d-m-Y') : '',
+                    'time'   => $confirm_booking->pickup_time ? Carbon::parse($confirm_booking->pickup_time)->format('h:i A') : '',
+                ], 'ar'),
             ];
             VendorNotification::create([
                 'vendor_id' => $confirm_booking->cars->vendor_id,
@@ -939,7 +1152,7 @@ class CarBookingController extends Controller
             ]);
             try {
                 if ($basic_setting->email_notification) {
-                    Notification::route('mail', $confirm_booking->email)->notify(new carBookingNotification($confirm_booking));
+                    Notification::route('mail', $confirm_booking->email)->notify(new CarBookingNotification($confirm_booking));
                 }
                 if ($basic_setting->vendor_push_notification) {
                     (new PushNotificationHelper())
@@ -1552,6 +1765,7 @@ class CarBookingController extends Controller
         } else {
             $environment = \net\authorize\api\constants\ANetEnvironment::PRODUCTION;
         }
+        /** @var \net\authorize\api\contract\v1\CreateTransactionResponse $response */
         $response   = $controller->executeWithApiResponse($environment);
         if ($response != null) {
             // Check to see if the API request was successfully received and acted upon
@@ -1616,5 +1830,440 @@ class CarBookingController extends Controller
         }
 
         return $missingFields;
+    }
+
+    // =========================================================================
+    // Rental Extension
+    // =========================================================================
+
+    /**
+     * POST /api/v1/user/car-booking/extend
+     *
+     * Extend an ONGOING rental by paying from wallet balance.
+     * Auto-approved when the car has no conflicting bookings.
+     */
+    public function extendBooking(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'booking_id'     => 'required|integer|exists:car_bookings,id',
+            'extension_days' => 'required|integer|min:1|max:90',
+            'payment_type'   => 'sometimes|in:cash,balance',
+        ]);
+
+        if ($validator->fails()) {
+            return Response::error($validator->errors()->all(), [], 422);
+        }
+
+        $user        = auth()->user();
+        $paymentType = $request->input('payment_type', 'cash');
+
+        $booking = CarBooking::with(['cars', 'user'])
+            ->where('id', $request->booking_id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$booking) {
+            return Response::error([__('Booking not found.')], [], 404);
+        }
+
+        try {
+            $extensionService = app(CarBookingExtensionService::class);
+            $extension = $extensionService->processExtension(
+                $booking,
+                (int) $request->extension_days,
+                (int) $user->id,
+                $paymentType,
+                $user
+            );
+
+            // Reload booking with fresh extension data
+            $booking->refresh();
+            $booking->load(['cars', 'bookingExtensions']);
+
+            // Notify user
+            try {
+                $user->notify(new BookingExtendedNotification($booking, $extension));
+            } catch (\Throwable $e) {
+                Log::warning('Extension notification failed: ' . $e->getMessage());
+            }
+
+            // Push notification to user
+            try {
+                (new PushNotificationHelper())
+                    ->prepare(
+                        [$user->id],
+                        [
+                            'title'     => __('Booking Extended', [], 'ar'),
+                            'desc'      => __('Your booking has been extended by :days day(s). New return date: :date.', [
+                                'days' => $extension->extension_days,
+                                'date' => $extension->new_return_date->toDateString(),
+                            ], 'ar'),
+                            'user_type' => 'user',
+                        ]
+                    )
+                    ->send();
+            } catch (\Throwable $e) {
+                Log::warning('Push notification for extension failed: ' . $e->getMessage());
+            }
+
+            $successMessage = $paymentType === 'balance'
+                ? __('Booking extended successfully. Extension cost deducted from your wallet.')
+                : __('Booking extended successfully. Extension cost will be collected on car return.');
+
+            return Response::success([$successMessage], [
+                'booking'   => new CarBookingResource($booking),
+                'extension' => new CarBookingExtensionResource($extension),
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('CarBooking Extension Error: ' . $e->getMessage(), [
+                'booking_id'     => $request->booking_id,
+                'extension_days' => $request->extension_days,
+                'user_id'        => $user->id,
+            ]);
+
+            return Response::error([$e->getMessage()], [], 400);
+        }
+    }
+
+    /**
+     * GET /api/v1/user/car-booking/{bookingId}/extensions
+     *
+     * Return the full extension history for a specific booking.
+     */
+    public function extensionHistory(Request $request, $bookingId)
+    {
+        $user    = auth()->user();
+        $booking = CarBooking::where('id', $bookingId)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$booking) {
+            return Response::error([__('Booking not found.')], [], 404);
+        }
+
+        $extensions = $booking->bookingExtensions()->get();
+
+        return Response::success([__('Extension history retrieved.')], [
+            'booking_id'           => (int) $booking->id,
+            'trx_id'               => (string) $booking->trx_id,
+            'extension_count'      => (int) $booking->extension_count,
+            'total_extension_days' => (int) $booking->total_extension_days,
+            'current_return_date'  => $booking->return_date ? $booking->return_date->toDateString() : null,
+            'extensions'           => CarBookingExtensionResource::collection($extensions),
+        ], 200);
+    }
+
+    /**
+     * GET /api/v1/user/car-booking/extend/preview
+     *
+     * Preview the cost and dates for a rental extension without committing any changes.
+     * Query params: booking_id, extension_days
+     */
+    public function previewExtension(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'booking_id'     => 'required|integer|exists:car_bookings,id',
+            'extension_days' => 'required|integer|min:1|max:90',
+        ]);
+
+        if ($validator->fails()) {
+            return Response::error($validator->errors()->all(), [], 422);
+        }
+
+        $user    = auth()->user();
+        $booking = CarBooking::with('cars')
+            ->where('id', $request->booking_id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$booking) {
+            return Response::error([__('Booking not found.')], [], 404);
+        }
+
+        $extensionDays = (int) $request->extension_days;
+
+        if ((int) $booking->status !== CarBookingConst::STATUONGOING) {
+            return Response::error([__('Only ongoing bookings can be extended.')], [], 422);
+        }
+
+        $newTotalDays = (int) $booking->rental_days + $extensionDays;
+        if ($newTotalDays > 365) {
+            return Response::error([__('Total rental duration cannot exceed 365 days.')], [], 422);
+        }
+
+        $currentReturnDate = $booking->calculateReturnDate();
+        $newReturnDate = $currentReturnDate->copy()->addDays($extensionDays);
+
+        // Availability check (read-only — no lock needed for preview)
+        $hasConflict = CarBooking::hasConflictForExtension(
+            (int) $booking->car_id,
+            $currentReturnDate->toDateString(),
+            $newReturnDate->toDateString(),
+            (int) $booking->id
+        );
+
+        // Pricing calculation
+        $car            = $booking->cars;
+        $balanceService = app(BookingBalanceService::class);
+        $rentalFeeData  = $balanceService->calculateRentalFees($car, $extensionDays);
+        $taxCalc        = $balanceService->calculateTax($rentalFeeData['rental_fees']);
+
+        return Response::success([__('Extension preview calculated.')], [
+            'booking_id'            => (int) $booking->id,
+            'trx_id'                => (string) $booking->trx_id,
+            'car_model'             => (string) $booking->car_model,
+            'current_rental_days'   => (int) $booking->rental_days,
+            'extension_days'        => $extensionDays,
+            'new_total_rental_days' => $newTotalDays,
+            'current_return_date'   => $currentReturnDate->toDateString(),
+            'new_return_date'       => $newReturnDate->toDateString(),
+            'is_available'          => !$hasConflict,
+            'availability_message'  => $hasConflict
+                ? __('Car is not available for the requested extension period.')
+                : __('Car is available for extension.'),
+            'pricing' => [
+                'price_rule_applied' => (string) $rentalFeeData['price_rule_applied'],
+                'base_price'         => (float)  $rentalFeeData['base_price'],
+                'extension_days'     => $extensionDays,
+                'rental_fees'        => (float)  $rentalFeeData['rental_fees'],
+                'tax_percentage'     => (float)  $taxCalc['tax_percentage'],
+                'tax_amount'         => (float)  $taxCalc['tax_amount'],
+                'total_cost'         => (float)  $taxCalc['total'],
+            ],
+        ], 200);
+    }
+
+    /**
+     * Cancel a pending booking and auto-refund wallet balance.
+     *
+     * POST /api/v1/user/car-booking/cancel
+     * Body: { "booking_id": 123 }
+     */
+    public function cancelBooking(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'booking_id' => 'required|integer',
+        ]);
+
+        if ($validator->fails()) {
+            return Response::error($validator->errors()->all(), [], 400);
+        }
+
+        $user = Auth::guard('api')->user();
+
+        $booking = CarBooking::where('id', $request->booking_id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$booking) {
+            return Response::error([__('Booking not found.')], [], 404);
+        }
+
+        // Only pending (status=0) or booked (status=1) bookings can be cancelled by the user
+        if (!in_array((int) $booking->status, [0, 1])) {
+            return Response::error([__('Only pending or unstarted bookings can be cancelled.')], [], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            $booking->update(['status' => 5]); // 5 = user_cancelled
+
+            // Auto-refund if paid from wallet balance
+            if ($booking->paid_from_balance && $booking->balance_deducted > 0) {
+                $balanceService = new BookingBalanceService();
+                $balanceService->refundBalance(
+                    $user,
+                    $booking,
+                    (float) $booking->balance_deducted,
+                    __('Booking cancelled by user', [], 'ar'),
+                );
+            }
+
+            DB::commit();
+
+            // Send booking-cancelled notification to user
+            $this->notifyUserOnBookingCancelled($user, $booking);
+
+            return Response::success([__('Booking cancelled successfully.')], [
+                'booking_id' => $booking->id,
+                'refunded'   => $booking->paid_from_balance ? number_format($booking->balance_deducted, 2) : '0.00',
+            ], 200);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('Booking cancellation failed', [
+                'booking_id' => $request->booking_id,
+                'user_id'    => $user->id,
+                'error'      => $e->getMessage(),
+            ]);
+
+            return Response::error([__('Failed to cancel booking. Please try again.')], [], 500);
+        }
+    }
+
+    /**
+     * POST /api/v1/user/car-booking/validate-datetime
+     *
+     * Check if a pickup date/time falls within the working hours of a car's branch.
+     */
+    public function validatePickupDateTime(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'car_id'      => 'required|integer|exists:cars,id',
+            'pickup_date' => 'required|date',
+            'pickup_time' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return Response::error($validator->errors()->all(), [], 422);
+        }
+
+        $pickupTime = $this->convertTo24HourFormat($request->pickup_time);
+        $pickupDate = Carbon::parse($request->pickup_date);
+        $dayOfWeek  = $pickupDate->dayOfWeek; // 0=Sunday, 6=Saturday
+
+        $car = Car::with(['branch'])->find($request->car_id);
+
+        if (!$car) {
+            return Response::error([__('Car not found.')], [], 404);
+        }
+
+        $branch = $car->branch;
+
+        if (!$branch) {
+            return Response::error([__('Car branch not found.')], [], 404);
+        }
+
+        $workingHour = $branch->workingHours()
+            ->enabled()
+            ->forDay($dayOfWeek)
+            ->first();
+
+        $dayName = BranchWorkingHour::DAY_NAMES_EN[$dayOfWeek] ?? '';
+
+        if (!$workingHour) {
+            return Response::error(
+                [__('Branch is closed on :day.', ['day' => $dayName])],
+                [
+                    'is_valid'    => false,
+                    'day_of_week' => $dayOfWeek,
+                    'day_name'    => $dayName,
+                ],
+                422
+            );
+        }
+
+        $timeFormatted = Carbon::parse($pickupTime)->format('H:i:s');
+
+        if ($timeFormatted < $workingHour->open_time || $timeFormatted >= $workingHour->close_time) {
+            return Response::error(
+                [__('Pickup time must be between :open and :close on :day.', [
+                    'open'  => Carbon::parse($workingHour->open_time)->format('h:i A'),
+                    'close' => Carbon::parse($workingHour->close_time)->format('h:i A'),
+                    'day'   => $dayName,
+                ])],
+                [
+                    'is_valid'   => false,
+                    'day_name'   => $dayName,
+                    'open_time'  => Carbon::parse($workingHour->open_time)->format('h:i A'),
+                    'close_time' => Carbon::parse($workingHour->close_time)->format('h:i A'),
+                ],
+                422
+            );
+        }
+
+        return Response::success(
+            [__('Pickup date and time are within branch working hours.')],
+            [
+                'is_valid'    => true,
+                'day_name'    => $dayName,
+                'open_time'   => Carbon::parse($workingHour->open_time)->format('h:i A'),
+                'close_time'  => Carbon::parse($workingHour->close_time)->format('h:i A'),
+                'pickup_date' => $pickupDate->format('d-m-Y'),
+                'pickup_time' => Carbon::parse($pickupTime)->format('h:i A'),
+            ],
+            200
+        );
+    }
+
+    private function notifyUserOnBookingConfirmed($user, CarBooking $booking, $basic_setting): void
+    {
+        $booking->loadMissing('cars');
+
+        $content = [
+            'title'   => __('Booking Confirmed', [], 'ar'),
+            'message' => __('Your booking is confirmed. Car: :model, Pickup: :date, Ref: :trx', [
+                'model' => $booking->car_model ?? $booking->cars?->car_model ?? '',
+                'date'  => $booking->pickup_date,
+                'trx'   => $booking->trip_id,
+            ], 'ar'),
+            'time'    => now()->diffForHumans(),
+            'image'   => files_asset_path('profile-default'),
+        ];
+
+        try {
+            UserNotification::create([
+                'type'    => NotificationConst::BOOKING_CONFIRMED,
+                'user_id' => $user->id,
+                'message' => $content,
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('notifyUserOnBookingConfirmed: UserNotification failed', ['error' => $e->getMessage()]);
+        }
+
+        try {
+            if ($basic_setting && $basic_setting->push_notification) {
+                (new PushNotificationHelper())
+                    ->prepare([$user->id], [
+                        'title'     => $content['title'],
+                        'desc'      => $content['message'],
+                        'user_type' => 'user',
+                    ])
+                    ->send();
+            }
+        } catch (\Throwable $e) {
+            Log::warning('notifyUserOnBookingConfirmed: Push failed', ['error' => $e->getMessage()]);
+        }
+    }
+
+    private function notifyUserOnBookingCancelled($user, CarBooking $booking): void
+    {
+        $booking->loadMissing('cars');
+        $basic_setting = BasicSettings::first();
+
+        $content = [
+            'title'   => __('Booking Cancelled', [], 'ar'),
+            'message' => __('Your booking :trx has been cancelled.:refund', [
+                'trx'    => $booking->trip_id,
+                'refund' => $booking->paid_from_balance
+                    ? ' ' . __(':amount SAR refunded to your wallet.', ['amount' => number_format($booking->balance_deducted, 2)], 'ar')
+                    : '',
+            ], 'ar'),
+            'time'    => now()->diffForHumans(),
+            'image'   => files_asset_path('profile-default'),
+        ];
+
+        try {
+            UserNotification::create([
+                'type'    => NotificationConst::BOOKING_CANCELLED,
+                'user_id' => $user->id,
+                'message' => $content,
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('notifyUserOnBookingCancelled: UserNotification failed', ['error' => $e->getMessage()]);
+        }
+
+        try {
+            if ($basic_setting && $basic_setting->push_notification) {
+                (new PushNotificationHelper())
+                    ->prepare([$user->id], [
+                        'title'     => $content['title'],
+                        'desc'      => $content['message'],
+                        'user_type' => 'user',
+                    ])
+                    ->send();
+            }
+        } catch (\Throwable $e) {
+            Log::warning('notifyUserOnBookingCancelled: Push failed', ['error' => $e->getMessage()]);
+        }
     }
 }

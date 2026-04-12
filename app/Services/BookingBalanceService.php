@@ -6,12 +6,18 @@ use Exception;
 use App\Models\User;
 use App\Models\CarBooking;
 use App\Models\BalanceTransaction;
-use App\Models\Admin\TaxSetting;
+use App\Models\Admin\BasicSettings;
 use App\Models\Vendor\Cars\Car;
-use Illuminate\Support\Facades\DB;
+use App\DTO\WalletTransactionDTO;
 
 class BookingBalanceService
 {
+    protected WalletService $walletService;
+
+    public function __construct(?WalletService $walletService = null)
+    {
+        $this->walletService = $walletService ?? app(WalletService::class);
+    }
     /**
      * Calculate rental fees based on tiered pricing (daily/weekly/monthly)
      * Golden Rule: Price is decided ONLY by rental_days
@@ -50,8 +56,11 @@ class BookingBalanceService
      */
     public function getTaxPercentage(): float
     {
-        $taxSetting = TaxSetting::where('status', true)->first();
-        return $taxSetting ? floatval($taxSetting->percentage) : 15.00;
+        $basicSettings = BasicSettings::first();
+        if ($basicSettings && $basicSettings->tax_status) {
+            return floatval($basicSettings->tax_percentage);
+        }
+        return 15.00;
     }
 
     /**
@@ -103,37 +112,38 @@ class BookingBalanceService
      */
     public function deductBalanceForBooking(User $user, CarBooking $booking, float $amount): BalanceTransaction
     {
-        if (!$this->hasSufficientBalance($user, $amount)) {
-            throw new Exception(__('Insufficient balance. Please recharge your account.'));
-        }
+        $dto = WalletTransactionDTO::forWithdrawal(
+            amount: $amount,
+            description: __('Payment successfully: :amount SAR for booking #:trx', ['amount' => number_format($amount, 2), 'trx' => $booking->trip_id], 'ar'),
+            bookingId: $booking->id,
+            idempotencyKey: 'booking-deduct-' . $booking->id,
+        );
 
-        $balanceBefore = $user->balance;
-        $balanceAfter = $balanceBefore - $amount;
+        return $this->walletService->withdraw($user, $amount, $dto);
+    }
 
-        DB::beginTransaction();
-        try {
-            // Update user balance
-            $user->update(['balance' => $balanceAfter]);
+    /**
+     * Deduct balance from user account for a booking extension.
+     * Uses a unique idempotency key per extension attempt (timestamp-based).
+     * @throws Exception
+     */
+    public function deductBalanceForExtension(User $user, CarBooking $booking, float $amount, int $extensionDays = 0): BalanceTransaction
+    {
+        $arabicDays = match (true) {
+            $extensionDays === 1                                      => 'يوم واحد',
+            $extensionDays === 2                                      => 'يومَين',
+            $extensionDays >= 3 && $extensionDays <= 10              => $extensionDays . ' أيام',
+            default                                                   => $extensionDays . ' يوماً',
+        };
 
-            // Create balance transaction record
-            $transaction = BalanceTransaction::create([
-                'user_id' => $user->id,
-                'type' => 'booking_deduction',
-                'amount' => $amount,
-                'balance_before' => $balanceBefore,
-                'balance_after' => $balanceAfter,
-                'booking_id' => $booking->id,
-                'description' => __('Booking payment') . ' - ' . $booking->trx_id,
-                'payment_gateway' => 'balance',
-                'reference' => $booking->trx_id,
-            ]);
+        $dto = WalletTransactionDTO::forWithdrawal(
+            amount: $amount,
+            description: __('Booking #:trx has been extended by :days', ['trx' => $booking->trip_id, 'days' => $arabicDays], 'ar'),
+            bookingId: $booking->id,
+            idempotencyKey: 'extension-deduct-' . $booking->id . '-' . now()->timestamp,
+        );
 
-            DB::commit();
-            return $transaction;
-        } catch (Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+        return $this->walletService->withdraw($user, $amount, $dto);
     }
 
     /**
@@ -142,33 +152,20 @@ class BookingBalanceService
      */
     public function refundBalance(User $user, CarBooking $booking, float $amount, string $reason = ''): BalanceTransaction
     {
-        $balanceBefore = $user->balance;
-        $balanceAfter = $balanceBefore + $amount;
+        $dto = WalletTransactionDTO::forRefund(
+            amount: $amount,
+            description: __(':amount SAR has been refunded for booking #:trx due to :reason', [
+                'amount' => number_format($amount, 2),
+                'trx'    => $booking->trip_id,
+                'reason' => $reason ?: __('cancellation', [], 'ar'),
+            ], 'ar'),
+            referenceType: 'App\\Models\\CarBooking',
+            referenceId: $booking->id,
+            bookingId: $booking->id,
+            idempotencyKey: 'booking-refund-' . $booking->id,
+        );
 
-        DB::beginTransaction();
-        try {
-            // Update user balance
-            $user->update(['balance' => $balanceAfter]);
-
-            // Create balance transaction record
-            $transaction = BalanceTransaction::create([
-                'user_id' => $user->id,
-                'type' => 'refund',
-                'amount' => $amount,
-                'balance_before' => $balanceBefore,
-                'balance_after' => $balanceAfter,
-                'booking_id' => $booking->id,
-                'description' => $reason ?: __('Booking refund') . ' - ' . $booking->trx_id,
-                'payment_gateway' => 'balance',
-                'reference' => 'REFUND-' . $booking->trx_id,
-            ]);
-
-            DB::commit();
-            return $transaction;
-        } catch (Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+        return $this->walletService->refund($user, $amount, $dto);
     }
 
     /**

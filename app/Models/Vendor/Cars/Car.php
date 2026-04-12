@@ -95,12 +95,22 @@ class Car extends Model
     }
 
     /**
-     * Check if delivery is available for this car
+     * Check if delivery is available for this car.
+     * Delivery requires: setting enabled + branch currently open.
      */
     public function isDeliveryAvailable()
     {
         $setting = $this->delivery_setting;
-        return $setting && $setting->delivery_available;
+        if (!$setting || !$setting->delivery_available) {
+            return false;
+        }
+
+        // If the branch has working hours defined, delivery is only available during open hours
+        if ($this->branch && $this->branch->workingHours()->exists()) {
+            return $this->branch->isCurrentlyOpen();
+        }
+
+        return true;
     }
 
     /**

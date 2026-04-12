@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class carBookingNotification extends Notification
+class CarBookingNotification extends Notification
 {
     use Queueable;
     protected $form_data;
@@ -41,9 +41,8 @@ class carBookingNotification extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->subject('Booking Confirmation.')
-                    ->view('user.email.booking-confirmation',['data' => $this->form_data]);
-
+            ->subject('Booking Confirmation.')
+            ->view('user.email.booking-confirmation', ['data' => $this->form_data]);
     }
 
     /**

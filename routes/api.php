@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\OtpController;
 use App\Http\Controllers\Webhooks\TwilioWebhookController;
+use App\Http\Controllers\Webhooks\MoyasarWebhookController;
 
 
 /*
@@ -34,3 +35,6 @@ Route::prefix('webhooks/twilio')->group(function () {
     Route::post('/status', [TwilioWebhookController::class, 'statusCallback']);
     Route::post('/pricing', [TwilioWebhookController::class, 'pricingCallback']);
 });
+
+// Moyasar Webhook (no auth required - called by Moyasar servers)
+Route::post('/webhooks/moyasar', [MoyasarWebhookController::class, 'handle'])->name('moyasar.webhook');

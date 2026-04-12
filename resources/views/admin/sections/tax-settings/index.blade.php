@@ -30,14 +30,14 @@
                         <label>{{ __('Tax Name') }}<span>*</span></label>
                         <input type="text" name="name" class="form--control"
                             placeholder="{{ __('e.g., VAT, Sales Tax') }}"
-                            value="{{ old('name', $tax_setting->name ?? 'VAT') }}" required>
+                            value="{{ old('name', $tax_setting->tax_name ?? 'VAT') }}" required>
                     </div>
                     <div class="col-xl-6 col-lg-6 form-group">
                         <label>{{ __('Tax Percentage') }} (%)<span>*</span></label>
                         <input type="number" name="percentage" class="form--control"
                             placeholder="{{ __('Enter tax percentage') }}"
-                            value="{{ old('percentage', $tax_setting->percentage ?? 15) }}" step="0.01" min="0"
-                            max="100" required>
+                            value="{{ old('percentage', $tax_setting->tax_percentage ?? 15) }}" step="0.01"
+                            min="0" max="100" required>
                     </div>
                     <div class="col-xl-12 col-lg-12 form-group">
                         <div class="alert alert-info">
@@ -51,13 +51,13 @@
                             <div class="d-flex align-items-center gap-3">
                                 @include('admin.components.form.switcher', [
                                     'name' => 'tax_status',
-                                    'value' => $tax_setting->status,
+                                    'value' => $tax_setting->tax_status,
                                     'options' => [__('Enable') => 1, __('Disable') => 0],
                                     'onload' => true,
                                     'data_target' => $tax_setting->id,
                                 ])
                                 <span class="ms-2">
-                                    @if ($tax_setting->status)
+                                    @if ($tax_setting->tax_status)
                                         <span class="badge badge--success">{{ __('Tax is Active') }}</span>
                                     @else
                                         <span class="badge badge--danger">{{ __('Tax is Disabled') }}</span>
@@ -67,7 +67,9 @@
                         </div>
                         <div class="col-xl-6 col-lg-6 form-group">
                             <label>{{ __('Last Updated By') }}</label>
-                            <p class="form-text">{{ $tax_setting->admin->full_name ?? '-' }} {{ __('at') }}
+                            <p class="form-text">
+                                {{ optional(\App\Models\Admin\Admin::find($tax_setting->tax_last_edit_by))->full_name ?? '-' }}
+                                {{ __('at') }}
                                 {{ $tax_setting->updated_at->format('d M Y H:i') }}</p>
                         </div>
                     @endif
@@ -98,7 +100,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
-                        <label>{{ __('Tax Amount') }} ({{ $tax_setting->percentage ?? 15 }}%)</label>
+                        <label>{{ __('Tax Amount') }} ({{ $tax_setting->tax_percentage ?? 15 }}%)</label>
                         <input type="text" id="tax-amount" class="form--control" readonly>
                     </div>
                 </div>
@@ -120,7 +122,7 @@
             switcherAjax("{{ setRoute('admin.tax.settings.status.update') }}");
 
             // Tax calculation preview
-            const taxPercentage = parseFloat('{{ $tax_setting->percentage ?? 15 }}');
+            const taxPercentage = parseFloat('{{ $tax_setting->tax_percentage ?? 15 }}');
 
             function calculateTax() {
                 const amount = parseFloat($('#sample-amount').val()) || 0;

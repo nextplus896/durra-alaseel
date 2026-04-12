@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use Exception;
 use Illuminate\Http\Request;
 use App\Http\Helpers\Response;
-use App\Models\Admin\TaxSetting;
+use App\Models\Admin\BasicSettings;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 
@@ -17,17 +17,7 @@ class TaxSettingController extends Controller
     public function index()
     {
         $page_title = __("Tax Settings");
-        $tax_setting = TaxSetting::first();
-
-        // Create default if not exists
-        if (!$tax_setting) {
-            $tax_setting = TaxSetting::create([
-                'name' => 'VAT',
-                'percentage' => 15.00,
-                'status' => true,
-                'last_edit_by' => auth()->user()->id,
-            ]);
-        }
+        $tax_setting = BasicSettings::first();
 
         return view('admin.sections.tax-settings.index', compact(
             'page_title',
@@ -41,7 +31,7 @@ class TaxSettingController extends Controller
     public function update(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:100',
+            'name'       => 'required|string|max:100',
             'percentage' => 'required|numeric|min:0|max:100',
         ]);
 
@@ -49,17 +39,17 @@ class TaxSettingController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
-        $validated = $validator->validate();
-        $validated['last_edit_by'] = auth()->user()->id;
+        $tax_setting = BasicSettings::first();
+        if (!$tax_setting) {
+            return back()->with(['error' => [__('Basic settings not found!')]]);
+        }
 
         try {
-            $tax_setting = TaxSetting::first();
-            if ($tax_setting) {
-                $tax_setting->update($validated);
-            } else {
-                $validated['status'] = true;
-                TaxSetting::create($validated);
-            }
+            $tax_setting->update([
+                'tax_name'         => $request->name,
+                'tax_percentage'   => $request->percentage,
+                'tax_last_edit_by' => auth()->user()->id,
+            ]);
         } catch (Exception $e) {
             return back()->with(['error' => [__('Something went wrong! Please try again.')]]);
         }
@@ -73,8 +63,8 @@ class TaxSettingController extends Controller
     public function statusUpdate(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'data_target' => 'required|numeric|exists:tax_settings,id',
-            'status' => 'required|boolean',
+            'data_target' => 'required|numeric|exists:basic_settings,id',
+            'status'      => 'required|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -82,12 +72,12 @@ class TaxSettingController extends Controller
         }
 
         $validated = $validator->validate();
-        $tax_setting = TaxSetting::find($validated['data_target']);
+        $tax_setting = BasicSettings::find($validated['data_target']);
 
         try {
             $tax_setting->update([
-                'status' => ($validated['status']) ? false : true,
-                'last_edit_by' => auth()->user()->id,
+                'tax_status'       => ($validated['status']) ? false : true,
+                'tax_last_edit_by' => auth()->user()->id,
             ]);
         } catch (Exception $e) {
             return Response::error(['error' => [__('Something went wrong! Please try again.')]], null, 500);

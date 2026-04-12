@@ -138,11 +138,11 @@ class PushNotificationController extends Controller
 
         // Get all users/admins ids
         $admins_id = Admin::all()->map(function($data) {
-            return make_user_id_for_pusher("admin", $data->id);
+            return "admin-" . $data->id;
         })->toArray();
 
         $users_id = User::all()->map(function($data){
-            return make_user_id_for_pusher("user", $data->id);
+            return "user-" . $data->id;
         })->toArray();
 
         $publisher_ids = array_merge($users_id,$admins_id);

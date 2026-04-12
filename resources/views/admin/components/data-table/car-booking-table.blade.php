@@ -1,7 +1,7 @@
 <table class="custom-table booking-search-table">
     <thead>
         <tr>
-            <th>{{ __('Trip ID') }}</th>
+            <th>{{ __('Booking ID') }}</th>
             <th>{{ __('Vendor') }}</th>
             <th>{{ __('User') }}</th>
             <th>{{ __('Car Type') }}</th>
@@ -21,7 +21,8 @@
                 <td>{{ $booking->user->firstname }} {{ $booking->user->lastname }}</td>
                 <td>{{ $booking->cars->type->name }}</td>
                 <td>{{ $booking->cars->car_number }}</td>
-                <td>{{ get_amount($booking->amount) }} {{ get_default_currency_code() }}</td>
+                <td>{{ get_amount($booking->total_amount ?? $booking->amount) }} {{ get_default_currency_code() }}
+                </td>
                 <td>{{ get_amount($booking->distance) }} {{ __('Km') }}</td>
                 <td>
                     @if ($booking->status === 1)
@@ -35,7 +36,8 @@
                     @endif
                 </td>
                 <td>
-                    <a href="{{ setRoute('admin.booking.details',$booking->trip_id) }}" class="btn btn--base reply-button modal-btn"><i class="las la-info-circle"></i></a>
+                    <a href="{{ setRoute('admin.booking.details', $booking->trip_id) }}"
+                        class="btn btn--base reply-button modal-btn"><i class="las la-info-circle"></i></a>
                 </td>
                 <td></td>
             </tr>

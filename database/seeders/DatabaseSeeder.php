@@ -31,6 +31,7 @@ use Database\Seeders\Car\CarSeeder;
 use Database\Seeders\Car\TypeSeeder;
 use Database\Seeders\Vendor\VendorSeeder;
 use Database\Seeders\Vendor\VendorWalletSeeder;
+use Database\Seeders\BranchSeeder;
 use Database\Seeders\FreshSeeder\BasicSettingsSeeder as FreshBasicSettings;
 
 class DatabaseSeeder extends Seeder
@@ -97,6 +98,7 @@ class DatabaseSeeder extends Seeder
             VendorAppOnBoardScreenSeeder::class,
             SystemMaintenanceSeeder::class,
             SectionHasPageSeeder::class,
+            BranchSeeder::class,
         ]);
     }
 }

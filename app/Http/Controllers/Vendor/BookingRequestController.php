@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Stripe\Balance;
 use Illuminate\Support\Str;
@@ -25,9 +26,8 @@ class BookingRequestController extends Controller
     public function index(Request $request)
     {
         $page_title = __('Booking Request');
-        $query = CarBooking::with(['cars', 'user'])
-            ->where('status', '!=', 3)
-            ->Where('status', '!=', 4)
+        $display_timezone = BasicSettings::first()?->timezone ?? config('app.timezone', 'UTC');
+        $query = CarBooking::with(['cars.type', 'cars.carModel', 'user'])
             ->where(function ($q) {
                 $q->whereHas('cars', function ($subquery) {
                     $subquery->where('vendor_id', '=', auth()->guard('vendor')->user()->id);
@@ -49,23 +49,29 @@ class BookingRequestController extends Controller
         }
 
         // Status Filter
-        if ($request->filled('status') && in_array($request->status, [CarBookingConst::STATUSPENDING, CarBookingConst::STATUSSUCCESS, CarBookingConst::STATUONGOING])) {
-            $query->where('status', $request->status);
+        if ($request->filled('status')) {
+            if ($request->status == '0') {
+                // Show both status 0 and 1 for Pending
+                $query->whereIn('status', [0, 1]);
+            } elseif (in_array($request->status, [2, 3, 4])) {
+                $query->where('status', $request->status);
+            }
         }
 
         $car_bookings = $query->orderByDesc('id')->paginate(7);
 
-        return view('vendor-end.sections.booking.booking-request', compact('car_bookings', 'page_title'));
+        return view('vendor-end.sections.booking.booking-request', compact('car_bookings', 'page_title', 'display_timezone'));
     }
 
     public function details($id)
     {
         $page_title = __('Booking Details');
-        $booking = CarBooking::with(['cars', 'user'])->where('id', $id)->whereHas('cars', function ($subquery) {
+        $display_timezone = BasicSettings::first()?->timezone ?? config('app.timezone', 'UTC');
+        $booking = CarBooking::with(['cars', 'user', 'bookingTransactions'])->where('id', $id)->whereHas('cars', function ($subquery) {
             $subquery->where('vendor_id', '=', auth()->guard('vendor')->user()->id);
         })->firstOrFail();
 
-        return view('vendor-end.sections.booking.details', compact('booking', 'page_title'));
+        return view('vendor-end.sections.booking.details', compact('booking', 'page_title', 'display_timezone'));
     }
 
     public function accept($id)
@@ -82,8 +88,8 @@ class BookingRequestController extends Controller
         try {
             $info->update(['status' => 2]);
             $notification_content = [
-                'title'   => "Request Accepted",
-                'message' => "Vendor accepted your request",
+                'title'   => __('Request Accepted', [], 'ar'),
+                'message' => __('Vendor accepted your request', [], 'ar'),
                 'time'    => Carbon::now()->diffForHumans(),
                 'image'   => files_asset_path('profile-default'),
             ];
@@ -114,8 +120,19 @@ class BookingRequestController extends Controller
         return back()->with(['success' => [__('Request Accepted Successfully')]]);
     }
 
-    public function reject($id)
+    public function reject(Request $request, $id)
     {
+        // Validate rejection reason
+        $request->validate([
+            'reason' => 'required|string',
+            'custom_reason' => 'nullable|required_if:reason,other|string|max:1000',
+        ]);
+
+        // Determine the final rejection reason
+        $rejectionReason = $request->reason === 'other'
+            ? $request->custom_reason
+            : $request->reason;
+
         $booking_info = CarBooking::where('id', $id)->first();
         $basic_setting = BasicSettings::first();
         try {
@@ -125,10 +142,16 @@ class BookingRequestController extends Controller
                     'refundable' => PaymentGatewayConst::STATUSPENDING,
                 ]);
             };
-            $booking_info->update(['status' => 4]);
+
+            // Update booking status and store rejection reason
+            $booking_info->update([
+                'status' => 4,
+                'rejection_reason' => $rejectionReason,
+            ]);
+
             $notification_content = [
-                'title'   => "Request Rejected",
-                'message' => "Vendor rejected your request",
+                'title'   => __('Booking Rejected', [], 'ar'),
+                'message' => __('Your booking #:trx was rejected. Reason: :reason', ['trx' => $booking_info->trip_id, 'reason' => $rejectionReason], 'ar'),
                 'time'    => Carbon::now()->diffForHumans(),
                 'image'   => files_asset_path('profile-default'),
             ];
@@ -140,7 +163,13 @@ class BookingRequestController extends Controller
 
             try {
                 if ($basic_setting->push_notification) {
-                    (new PushNotificationHelper())
+                    Log::info('Attempting to send push notification', [
+                        'user_id' => $booking_info->user_id,
+                        'title' => $notification_content['title'],
+                        'message' => $notification_content['message'],
+                    ]);
+
+                    $result = (new PushNotificationHelper())
                         ->prepare(
                             [$booking_info->user_id],
                             [
@@ -150,8 +179,17 @@ class BookingRequestController extends Controller
                             ],
                         )
                         ->send();
+
+                    Log::info('Push notification sent successfully', ['result' => $result]);
+                } else {
+                    Log::info('Push notification is disabled in settings');
                 }
             } catch (Exception $e) {
+                // Log the error for debugging
+                Log::error('Push notification failed: ' . $e->getMessage(), [
+                    'exception' => $e,
+                    'trace' => $e->getTraceAsString(),
+                ]);
             }
         } catch (Exception $e) {
             return back()->with(['danger' => [__('Oops! Something went wrong! Please try again')]]);
@@ -215,8 +253,8 @@ class BookingRequestController extends Controller
                 'status' => CarBookingConst::STATUSCOMPLETE,
             ]);
             $notification_content = [
-                'title'   => "Ride Complete",
-                'message' => "You have completed your ride",
+                'title'   => __('Ride Complete', [], 'ar'),
+                'message' => __('You have completed your ride', [], 'ar'),
                 'time'    => Carbon::now()->diffForHumans(),
                 'image'   => files_asset_path('profile-default'),
             ];

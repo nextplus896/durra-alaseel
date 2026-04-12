@@ -121,10 +121,10 @@ class VendorCareController extends Controller
         $page_title = __('Vendor Details');
         $user = Vendor::where('username', $username)->first();
         $round_trips = CarBooking::whereNotNull('round_pickup_date')
-        ->whereHas('cars', function ($query) use ($user) {
-            $query->where('vendor_id', $user->id);
-        })
-        ->count();
+            ->whereHas('cars', function ($query) use ($user) {
+                $query->where('vendor_id', $user->id);
+            })
+            ->count();
         $booking_rejects = CarBooking::where('status', CarBookingConst::STATUSREJECTED)
             ->whereHas('cars', function ($query) use ($user) {
                 $query->where('vendor_id', $user->id);
@@ -385,29 +385,30 @@ class VendorCareController extends Controller
         return view('admin.components.search.user-search', compact('users'));
     }
 
-    public function walletBalanceUpdate(Request $request,$username) {
-        $validator = Validator::make($request->all(),[
+    public function walletBalanceUpdate(Request $request, $username)
+    {
+        $validator = Validator::make($request->all(), [
             'type'      => "required|string|in:add,subtract",
             'wallet'    => "required|numeric|exists:user_wallets,id",
             'amount'    => "required|numeric",
             'remark'    => "required|string|max:200",
         ]);
 
-        if($validator->fails()) {
-            return back()->withErrors($validator)->withInput()->with('modal','wallet-balance-update-modal');
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput()->with('modal', 'wallet-balance-update-modal');
         }
 
         $validated = $validator->validate();
-        $user_wallet = VendorWallet::whereHas('vendor',function($q) use ($username){
-            $q->where('username',$username);
+        $user_wallet = VendorWallet::whereHas('vendor', function ($q) use ($username) {
+            $q->where('username', $username);
         })->find($validated['wallet']);
-        if(!$user_wallet) return back()->with(['error' => [__("Vendor wallet not found!")]]);
+        if (!$user_wallet) return back()->with(['error' => [__("Vendor wallet not found!")]]);
         DB::beginTransaction();
-        try{
+        try {
 
             $user_wallet_balance = 0;
 
-            switch($validated['type']){
+            switch ($validated['type']) {
                 case "add":
                     $type = "Added";
                     $user_wallet_balance = $user_wallet->balance + $validated['amount'];
@@ -416,10 +417,10 @@ class VendorCareController extends Controller
 
                 case "subtract":
                     $type = "Subtracted";
-                    if($user_wallet->balance >= $validated['amount']) {
+                    if ($user_wallet->balance >= $validated['amount']) {
                         $user_wallet_balance = $user_wallet->balance - $validated['amount'];
                         $user_wallet->balance -= $validated['amount'];
-                    }else {
+                    } else {
                         return back()->with(['error' => [__("Vendor do not have sufficient balance")]]);
                     }
                     break;
@@ -430,7 +431,7 @@ class VendorCareController extends Controller
                 'user_id'           => $user_wallet->vendor->id,
                 'wallet_id'         => $user_wallet->id,
                 'type'              => PaymentGatewayConst::TYPEADDSUBTRACTBALANCE,
-                'trx_id'            => generate_unique_string("transactions","trx_id",16),
+                'trx_id'            => generate_unique_string("transactions", "trx_id", 16),
                 'request_amount'    => $validated['amount'],
                 'total_charge'      => $validated['amount'],
                 'available_balance' => $user_wallet_balance,
@@ -450,7 +451,7 @@ class VendorCareController extends Controller
             $mac = "";
 
             DB::table("transaction_devices")->insert([
-                'transaction_id'=> $inserted_id,
+                'transaction_id' => $inserted_id,
                 'ip'            => $client_ip,
                 'mac'           => $mac,
                 'city'          => $location['city'] ?? "",
@@ -465,8 +466,8 @@ class VendorCareController extends Controller
             $user_wallet->save();
 
             $notification_content = [
-                'title'         => "Update Balance",
-                'message'       => "Your Wallet (".$user_wallet->currency->code.") Balance Has Been ". $type??"",
+                'title'         => __('Update Balance', [], 'ar'),
+                'message'       => __('Update Balance', [], 'ar') . " (" . $user_wallet->currency->code . ") " . ($type ?? ""),
                 'time'          => Carbon::now()->diffForHumans(),
                 'image'         => files_asset_path('profile-default'),
             ];
@@ -476,25 +477,26 @@ class VendorCareController extends Controller
                 'vendor_id'  => $user_wallet->vendor->id,
                 'message'   => $notification_content,
             ]);
-             //push notification
-           try{
-                (new PushNotificationHelper())->prepare([$user_wallet->vendor->id],[
+            //push notification
+            try {
+                (new PushNotificationHelper())->prepare([$user_wallet->vendor->id], [
                     'title' => $notification_content['title'],
                     'desc'  => $notification_content['message'],
                     'user_type' => 'user',
                 ])->send();
-            }catch(Exception $e) {}
+            } catch (Exception $e) {
+            }
 
 
             //admin notification
-             $notification_content['title'] = $user_wallet->vendor->username."'s  Wallet (".$user_wallet->currency->code.") Balance Has Been ". $type??"";
+            $notification_content['title'] = $user_wallet->vendor->username . "'s  Wallet (" . $user_wallet->currency->code . ") Balance Has Been " . $type ?? "";
             AdminNotification::create([
                 'type'      => NotificationConst::BALANCE_UPDATE,
                 'admin_id'  => 1,
                 'message'   => $notification_content,
             ]);
             DB::commit();
-        }catch(Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             return back()->with(['error' => [__("Transaction Failed!")]]);
         }
@@ -502,14 +504,15 @@ class VendorCareController extends Controller
         return back()->with(['success' => [__("Transaction success")]]);
     }
 
-     /**
+    /**
      * Method for view create new user page
      * @return view
      */
-    public function create(){
+    public function create()
+    {
         $page_title             = "Create New Vendor";
 
-        return view('admin.sections.vendor-care.create',compact(
+        return view('admin.sections.vendor-care.create', compact(
             'page_title'
         ));
     }
@@ -517,10 +520,11 @@ class VendorCareController extends Controller
      * Method for store agent information
      * @param Illuminate\Http\Request $request
      */
-    public function store(Request $request){
+    public function store(Request $request)
+    {
         $basic_settings         = BasicSettings::first();
 
-        $validator      = Validator::make($request->all(),[
+        $validator      = Validator::make($request->all(), [
             'firstname'         => 'required|string',
             'lastname'          => 'required|string',
             'country'           => 'required|string',
@@ -529,28 +533,28 @@ class VendorCareController extends Controller
             'email_verified'    => 'nullable',
             'kyc_verified'      => 'nullable'
         ]);
-        if($validator->fails()){
+        if ($validator->fails()) {
             return back()->withErrors($validator)->withInput($request->all());
         }
         $validated              = $validator->validate();
 
-        $user_name              = make_username(Str::slug($validated['firstname']),Str::slug($validated['lastname']),'users');
+        $user_name              = make_username(Str::slug($validated['firstname']), Str::slug($validated['lastname']), 'users');
 
         $validated['username']      = $user_name;
         $validated['password']      = Hash::make($validated['password']);
         $validated['address']['country']    = $validated['country'];
         $validated['status']        = true;
 
-        try{
+        try {
             $vendor = Vendor::create($validated);
             $this->createUserWallets($vendor);
-            if($basic_settings->email_notification){
-                try{
-                    Notification::route('mail',$validated['email'])->notify(new NewVendorNotification($data = $validated,$request->password));
-                }catch(Exception $e){
+            if ($basic_settings->email_notification) {
+                try {
+                    Notification::route('mail', $validated['email'])->notify(new NewVendorNotification($data = $validated, $request->password));
+                } catch (Exception $e) {
                 }
             }
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return back()->with(['error' => [__("Something went wrong! Please try again.")]]);
         }
         return redirect()->route('admin.vendor.index')->with(['success' => [__('Vendor created successfully.')]]);

@@ -234,7 +234,7 @@
                                         <div class="alert alert-info" role="alert"
                                             style="direction: rtl; text-align: justify;">
                                             <span id="allowance-text">الكيلومترات المسموح بها هي 0 كم، وفي حال تجاوزها يتم
-                                                احتساب 0 هللة لكل كيلومتر إضافي</span>
+                                                احتساب 0 {{ __(get_default_currency_code($default_currency ?? 'SAR')) }} لكل كيلومتر إضافي</span>
                                         </div>
                                     </div>
                                 </div>
@@ -252,14 +252,14 @@
 
 @push('script')
     <script>
+        var currencyCode = '{{ __(get_default_currency_code($default_currency ?? "SAR")) }}';
+
         $(document).ready(function() {
             function updateAllowanceText() {
                 var km = $('#allowance_km').val() || 0;
                 var amount = $('#allowance_price_per_km').val() || 0;
-
-                // Assuming 'هللة' is hardcoded as per request, otherwise use currency symbol
                 var text =
-                    `الكيلومترات المسموح بها هي ${km} كم، وفي حال تجاوزها يتم احتساب ${amount} هللة لكل كيلومتر إضافي`;
+                    `الكيلومترات المسموح بها هي ${km} كم، وفي حال تجاوزها يتم احتساب ${amount} ${currencyCode} لكل كيلومتر إضافي`;
                 $('#allowance-text').text(text);
             }
 

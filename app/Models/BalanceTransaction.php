@@ -13,8 +13,16 @@ class BalanceTransaction extends Model
 
     protected $guarded = ['id'];
 
+    protected $hidden = [
+        'idempotency_key',
+        'reference_type',
+        'reference_id',
+        'moyasar_invoice_id',
+    ];
+
     // Transaction types
     const TYPE_RECHARGE = 'recharge';
+    const TYPE_DEPOSIT = 'recharge'; // Alias for recharge (wallet top-up)
     const TYPE_BOOKING_DEDUCTION = 'booking_deduction';
     const TYPE_REFUND = 'refund';
     const TYPE_ADJUSTMENT = 'adjustment';
@@ -37,6 +45,10 @@ class BalanceTransaction extends Model
         'description' => 'string',
         'status' => 'integer',
         'details' => 'object',
+        'reference_type' => 'string',
+        'reference_id' => 'integer',
+        'moyasar_invoice_id' => 'string',
+        'idempotency_key' => 'string',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -55,6 +67,14 @@ class BalanceTransaction extends Model
     public function booking()
     {
         return $this->belongsTo(CarBooking::class, 'booking_id');
+    }
+
+    /**
+     * Polymorphic reference (CarBooking, PaymentTransaction, etc.)
+     */
+    public function reference()
+    {
+        return $this->morphTo('reference', 'reference_type', 'reference_id');
     }
 
     /**

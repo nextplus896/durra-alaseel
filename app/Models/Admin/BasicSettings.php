@@ -59,6 +59,10 @@ class BasicSettings extends Model
         'country_code'                  => 'string',
         'google_api_key'                => 'string',
         'location'                      => 'string',
+        'tax_name'                      => 'string',
+        'tax_percentage'                => 'decimal:2',
+        'tax_status'                    => 'boolean',
+        'tax_last_edit_by'              => 'integer',
     ];
 
 

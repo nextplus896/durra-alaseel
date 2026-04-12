@@ -17,24 +17,25 @@ use App\Providers\Admin\BasicSettingsProvider;
 
 class SettingController extends Controller
 {
-    public function basicSettings() {
-        $basic_settings = BasicSettingsProvider::get()->only(['id','site_name','site_title','timezone','site_logo','site_logo_dark','site_fav','site_fav_dark']);
+    public function basicSettings()
+    {
+        $basic_settings = BasicSettingsProvider::get()->only(['id', 'site_name', 'site_title', 'timezone', 'site_logo', 'site_logo_dark', 'site_fav', 'site_fav_dark', 'tax_name', 'tax_percentage', 'tax_status']);
 
         $user_kyc_settings = SetupKyc::UserKyc()->first() ?? false;
-        if($user_kyc_settings != false) {
+        if ($user_kyc_settings != false) {
             $user_kyc_settings = $user_kyc_settings->status;
         }
 
-        $basic_settings['user_kyc_status'] = (boolean) $user_kyc_settings;
+        $basic_settings['user_kyc_status'] = (bool) $user_kyc_settings;
 
-        $languages = Language::select(['id','name','code','status'])->get();
+        $languages = Language::select(['id', 'name', 'code', 'status'])->get();
 
-        $app_settings = AppSettings::select('splash_screen_image as image','version')->first();
-        $onboard_screens = AppOnboardScreens::select("title","sub_title","image","status")->where("status",GlobalConst::ACTIVE)->orderByDesc('id')->get();
+        $app_settings = AppSettings::select('splash_screen_image as image', 'version')->first();
+        $onboard_screens = AppOnboardScreens::select("title", "sub_title", "image", "status")->where("status", GlobalConst::ACTIVE)->orderByDesc('id')->get();
         $onboard_screens->makeHidden(['editData']);
 
         $base_cur = CurrencyProvider::default()->first();
-        $base_cur->makeHidden(['admin_id','country','name','created_at','updated_at','type','flag','sender','receiver','default','status','editData']);
+        $base_cur->makeHidden(['admin_id', 'country', 'name', 'created_at', 'updated_at', 'type', 'flag', 'sender', 'receiver', 'default', 'status', 'editData']);
 
         $app_image_paths = [
             'base_url'          => url("/"),
@@ -42,11 +43,11 @@ class SettingController extends Controller
             'default_image'     => files_asset_path_basename("default"),
         ];
 
-        return Response::success([__("Basic settings fetch successfully!")],[
+        return Response::success([__("Basic settings fetch successfully!")], [
             'basic_settings'    => $basic_settings,
             'base_cur'          => $base_cur,
             'web_links'         => [
-                'privacy-policy'    => setRoute('frontend.useful.links',UsefulLink::where('type',GlobalConst::USEFUL_LINK_PRIVACY_POLICY)->first()?->slug),
+                'privacy-policy'    => setRoute('frontend.useful.links', UsefulLink::where('type', GlobalConst::USEFUL_LINK_PRIVACY_POLICY)->first()?->slug),
                 'about-us'          => Route::has('frontend.about') ? route('frontend.about') : url('/'),
                 'contact-us'        => Route::has('frontend.contact') ? route('frontend.contact') : url('/'),
             ],
@@ -59,11 +60,12 @@ class SettingController extends Controller
                 'default_image'     => files_asset_path_basename("default"),
             ],
             'app_image_paths'   => $app_image_paths,
-        ],200);
+        ], 200);
     }
 
-    public function splashScreen() {
-        $app_settings = AppSettings::select('splash_screen_image as image','version')->first();
+    public function splashScreen()
+    {
+        $app_settings = AppSettings::select('splash_screen_image as image', 'version')->first();
 
         $image_paths = [
             'base_url'          => url("/"),
@@ -71,14 +73,15 @@ class SettingController extends Controller
             'default_image'     => files_asset_path_basename("default"),
         ];
 
-        return Response::success([__('Splash screen data fetch successfully!')],[
+        return Response::success([__('Splash screen data fetch successfully!')], [
             'splash_screen' => $app_settings,
             'image_paths'   => $image_paths,
-        ],200);
+        ], 200);
     }
 
-    public function onboardScreens() {
-        $onboard_screens = AppOnboardScreens::select("title","sub_title","image","status")->where("status",GlobalConst::ACTIVE)->orderByDesc('id')->get();
+    public function onboardScreens()
+    {
+        $onboard_screens = AppOnboardScreens::select("title", "sub_title", "image", "status")->where("status", GlobalConst::ACTIVE)->orderByDesc('id')->get();
         $onboard_screens->makeHidden(['editData']);
 
         $image_paths = [
@@ -87,21 +90,22 @@ class SettingController extends Controller
             'default_image'     => files_asset_path_basename("default"),
         ];
 
-        return Response::success([__('Onboard screen data fetch successfully!')],[
+        return Response::success([__('Onboard screen data fetch successfully!')], [
             'onboard_screens'   => $onboard_screens,
             'image_paths'       => $image_paths,
-        ],200);
+        ], 200);
     }
 
-    public function getLanguages() {
-        try{
+    public function getLanguages()
+    {
+        try {
             $api_languages = get_api_languages();
-        }catch(Exception $e) {
-            return Response::error([$e->getMessage()],[],500);
+        } catch (Exception $e) {
+            return Response::error([$e->getMessage()], [], 500);
         }
 
-        return Response::success([__("Language data fetch successfully!")],[
+        return Response::success([__("Language data fetch successfully!")], [
             'languages' => $api_languages,
-        ],200);
+        ], 200);
     }
 }

@@ -1,0 +1,2608 @@
+{
+    "info": {
+        "_postman_id": "afaf82de-6d0f-4463-a30a-631ca703355c",
+        "name": "Dorra Alaseel - Complete API v1 Collection",
+        "description": "Complete API v1 endpoints for Dorra Alaseel Car Rental System - All /api/v1/ routes",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "_exporter_id": "4815740"
+    },
+    "item": [
+        {
+            "name": "Authentication",
+            "item": [
+                {
+                    "name": "User Auth",
+                    "item": [
+                        {
+                            "name": "User Register",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "var jsonData = pm.response.json();",
+                                            "if (jsonData.success && jsonData.data && jsonData.data.token) {",
+                                            "    pm.environment.set('user_token', jsonData.data.token);",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"firstname\": \"John\",\n  \"lastname\": \"Doe\",\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"mobile\": \"+966555123456\",\n  \"country\": \"Saudi Arabia\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/register",
+                                    "host": ["{{base_url}}"],
+                                    "path": ["api", "v1", "register"]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "User Login",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "var jsonData = pm.response.json();",
+                                            "if (jsonData.success && jsonData.data && jsonData.data.token) {",
+                                            "    pm.environment.set('user_token', jsonData.data.token);",
+                                            "    pm.environment.set('user_id', jsonData.data.user.id);",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/login",
+                                    "host": ["{{base_url}}"],
+                                    "path": ["api", "v1", "login"]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "User Forgot Password - Find User",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"email\": \"user@example.com\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/password/forgot/find/user",
+                                    "host": ["{{base_url}}"],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "password",
+                                        "forgot",
+                                        "find",
+                                        "user"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "User Forgot Password - Verify Code",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"code\": \"123456\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/password/forgot/verify/code",
+                                    "host": ["{{base_url}}"],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "password",
+                                        "forgot",
+                                        "verify",
+                                        "code"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "User Forgot Password - Reset",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"password\": \"newpassword123\",\n  \"password_confirmation\": \"newpassword123\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/password/forgot/reset",
+                                    "host": ["{{base_url}}"],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "password",
+                                        "forgot",
+                                        "reset"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        }
+                    ]
+                },
+                {
+                    "name": "Vendor Auth",
+                    "item": [
+                        {
+                            "name": "Vendor Register",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "var jsonData = pm.response.json();",
+                                            "if (jsonData.success && jsonData.data && jsonData.data.token) {",
+                                            "    pm.environment.set('vendor_token', jsonData.data.token);",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"firstname\": \"Vendor\",\n  \"lastname\": \"Name\",\n  \"email\": \"vendor@example.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"mobile\": \"+966555123456\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/vendor/register",
+                                    "host": ["{{base_url}}"],
+                                    "path": ["api", "v1", "vendor", "register"]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Vendor Login",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "var jsonData = pm.response.json();",
+                                            "if (jsonData.success && jsonData.data && jsonData.data.token) {",
+                                            "    pm.environment.set('vendor_token', jsonData.data.token);",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"email\": \"vendor@example.com\",\n  \"password\": \"password123\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/vendor/login",
+                                    "host": ["{{base_url}}"],
+                                    "path": ["api", "v1", "vendor", "login"]
+                                }
+                            },
+                            "response": []
+                        }
+                    ]
+                },
+                {
+                    "name": "User Authorization",
+                    "item": [
+                        {
+                            "name": "Send Mail Verification Code",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{user_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/authorize/mail/send/code",
+                                    "host": ["{{base_url}}"],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "authorize",
+                                        "mail",
+                                        "send",
+                                        "code"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Verify Mail Code",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{user_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"code\": \"123456\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/authorize/mail/verify/code",
+                                    "host": ["{{base_url}}"],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "authorize",
+                                        "mail",
+                                        "verify",
+                                        "code"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        }
+                    ]
+                },
+                {
+                    "name": "Vendor Authorization",
+                    "item": [
+                        {
+                            "name": "Get KYC Input Fields",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{vendor_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/vendor-authorize/kyc/input-fields",
+                                    "host": ["{{base_url}}"],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "vendor-authorize",
+                                        "kyc",
+                                        "input-fields"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Submit KYC",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{vendor_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"kyc_data\": {}\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/vendor-authorize/kyc/submit",
+                                    "host": ["{{base_url}}"],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "vendor-authorize",
+                                        "kyc",
+                                        "submit"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Get 2FA Status",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{vendor_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/vendor-authorize/google/2fa/status",
+                                    "host": ["{{base_url}}"],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "vendor-authorize",
+                                        "google",
+                                        "2fa",
+                                        "status"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Update 2FA Status",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{vendor_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"status\": true\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/vendor-authorize/google/2fa/status-update",
+                                    "host": ["{{base_url}}"],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "vendor-authorize",
+                                        "google",
+                                        "2fa",
+                                        "status-update"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Verify 2FA",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{vendor_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"code\": \"123456\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/vendor-authorize/google/2fa/verify",
+                                    "host": ["{{base_url}}"],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "vendor-authorize",
+                                        "google",
+                                        "2fa",
+                                        "verify"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "User - Profile",
+            "item": [
+                {
+                    "name": "Get Profile Info",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/profile/info",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "user", "profile", "info"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Profile Info",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"firstname\": \"John\",\n  \"lastname\": \"Doe\",\n  \"mobile\": \"+966555123456\",\n  \"address\": \"Riyadh, Saudi Arabia\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/profile/info/update",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "user",
+                                "profile",
+                                "info",
+                                "update"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"current_password\": \"oldpassword123\",\n  \"password\": \"newpassword123\",\n  \"password_confirmation\": \"newpassword123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/profile/password/update",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "user",
+                                "profile",
+                                "password",
+                                "update"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Account",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/profile/delete-account",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "user",
+                                "profile",
+                                "delete-account"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Logout",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/logout",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "user", "logout"]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "User - Dashboard",
+            "item": [
+                {
+                    "name": "Get Dashboard",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/dashboard",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "user", "dashboard"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Notifications",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/notifications",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "user", "notifications"]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "User - Transactions",
+            "item": [
+                {
+                    "name": "Transaction Log",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/transaction/log",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "user", "transaction", "log"]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "User - Balance Management",
+            "item": [
+                {
+                    "name": "Get Balance",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/balance",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "user", "balance"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Transaction History",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/balance/history",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "user", "balance", "history"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Initiate Recharge",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"amount\": 500,\n  \"gateway\": \"stripe\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/balance/recharge",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "user", "balance", "recharge"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Tax Settings",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/balance/tax-settings",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "user",
+                                "balance",
+                                "tax-settings"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Calculate Tax",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"amount\": 500\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/balance/calculate-tax",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "user",
+                                "balance",
+                                "calculate-tax"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Check Balance",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"amount\": 500\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/balance/check",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "user", "balance", "check"]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "User - Branches & Delivery",
+            "item": [
+                {
+                    "name": "List Branches",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/branches",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "user", "branches"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Branch Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/branches/:id",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "user", "branches", ":id"],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Check Service Area",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"latitude\": 24.7136,\n  \"longitude\": 46.6753\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/branches/check-service-area",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "user",
+                                "branches",
+                                "check-service-area"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Cars with Delivery",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"latitude\": 24.7136,\n  \"longitude\": 46.6753\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/branches/cars-with-delivery",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "user",
+                                "branches",
+                                "cars-with-delivery"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Delivery Price",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"latitude\": 24.7136,\n  \"longitude\": 46.6753,\n  \"car_id\": 1\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/branches/delivery-price",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "user",
+                                "branches",
+                                "delivery-price"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "User - Car Booking",
+            "item": [
+                {
+                    "name": "Booking History",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/car-booking/booking/history",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "user",
+                                "car-booking",
+                                "booking",
+                                "history"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Car Areas",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/car-booking/area",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "user", "car-booking", "area"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Car Types",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/car-booking/type",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "user", "car-booking", "type"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Types by Area",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"car_area_id\": 1\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/car-booking/area/types",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "user",
+                                "car-booking",
+                                "area",
+                                "types"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Search Car",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"car_area_id\": 1,\n  \"car_type_id\": 2,\n  \"start_date\": \"2026-02-01\",\n  \"end_date\": \"2026-02-05\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/car-booking/search/car",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "user",
+                                "car-booking",
+                                "search",
+                                "car"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "View Car Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/car-booking/car/details?car_id=1",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "user",
+                                "car-booking",
+                                "car",
+                                "details"
+                            ],
+                            "query": [
+                                {
+                                    "key": "car_id",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Temporary Booking",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.success && jsonData.data) {",
+                                    "    pm.environment.set('booking_id', jsonData.data.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"car_id\": 1,\n  \"start_date\": \"2026-02-01\",\n  \"end_date\": \"2026-02-05\",\n  \"pickup_location\": \"Riyadh Airport\",\n  \"dropoff_location\": \"Riyadh City Center\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/car-booking/temp/store",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "user",
+                                "car-booking",
+                                "temp",
+                                "store"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Preview Booking",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/car-booking/preview?booking_id={{booking_id}}",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "user",
+                                "car-booking",
+                                "preview"
+                            ],
+                            "query": [
+                                {
+                                    "key": "booking_id",
+                                    "value": "{{booking_id}}"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Confirm Booking",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"booking_id\": {{booking_id}},\n  \"payment_gateway\": \"stripe\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/car-booking/confirm",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "user",
+                                "car-booking",
+                                "confirm"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Manual Input Fields",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/car-booking/manual/input-fields",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "user",
+                                "car-booking",
+                                "manual",
+                                "input-fields"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Submit Manual Payment",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"booking_id\": {{booking_id}},\n  \"payment_data\": {}\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/car-booking/manual/submit",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "user",
+                                "car-booking",
+                                "manual",
+                                "submit"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Gateway Additional Fields",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/car-booking/payment-gateway/additional-fields",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "user",
+                                "car-booking",
+                                "payment-gateway",
+                                "additional-fields"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Preview Extension",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/car-booking/extend/preview?booking_id={{booking_id}}&extension_days=3",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "user",
+                                "car-booking",
+                                "extend",
+                                "preview"
+                            ],
+                            "query": [
+                                {
+                                    "key": "booking_id",
+                                    "value": "{{booking_id}}"
+                                },
+                                {
+                                    "key": "extension_days",
+                                    "value": "3",
+                                    "description": "Number of days to extend (1–90)"
+                                }
+                            ]
+                        },
+                        "description": "Preview the cost and new return date for a rental extension without committing any changes. Booking must be in ONGOING status."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Extend Booking",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"booking_id\": {{booking_id}},\n  \"extension_days\": 3\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/car-booking/extend",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "user",
+                                "car-booking",
+                                "extend"
+                            ]
+                        },
+                        "description": "Extend an ONGOING rental. Extension cost is collected on car return. Requires booking_id (ongoing booking owned by user) and extension_days (1–90)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Extension History",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/car-booking/{{booking_id}}/extensions",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "user",
+                                "car-booking",
+                                "{{booking_id}}",
+                                "extensions"
+                            ]
+                        },
+                        "description": "Retrieve the full extension history for a specific booking, including extension count, total extension days, current return date, and per-extension cost breakdown."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Cancel Booking",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"booking_id\": {{booking_id}}\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/user/car-booking/cancel",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "user",
+                                "car-booking",
+                                "cancel"
+                            ]
+                        },
+                        "description": "Cancel a pending (status=0) or booked (status=1) booking. Balance paid bookings are automatically refunded to the user's wallet."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Vendor - Profile",
+            "item": [
+                {
+                    "name": "Get Profile Info",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{vendor_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/vendor/profile/info",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "vendor", "profile", "info"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Profile Info",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{vendor_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"firstname\": \"Vendor\",\n  \"lastname\": \"Name\",\n  \"mobile\": \"+966555123456\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/vendor/profile/info/update",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "vendor",
+                                "profile",
+                                "info",
+                                "update"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{vendor_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"current_password\": \"oldpassword\",\n  \"password\": \"newpassword\",\n  \"password_confirmation\": \"newpassword\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/vendor/profile/password/update",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "vendor",
+                                "profile",
+                                "password",
+                                "update"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Logout",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{vendor_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/vendor/logout",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "vendor", "logout"]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Vendor - Dashboard",
+            "item": [
+                {
+                    "name": "Get Dashboard",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{vendor_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/vendor/dashboard",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "vendor", "dashboard"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Notifications",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{vendor_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/vendor/notifications",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "vendor", "notifications"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Pay Due Amount",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{vendor_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"amount\": 1000\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/vendor/due/pay",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "vendor", "due", "pay"]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Vendor - Cars Management",
+            "item": [
+                {
+                    "name": "List My Cars",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{vendor_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/vendor/car/list",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "vendor", "car", "list"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Car Areas",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{vendor_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/vendor/car/area",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "vendor", "car", "area"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Car Types",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{vendor_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/vendor/car/type",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "vendor", "car", "type"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Types by Area",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{vendor_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"car_area_id\": 1\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/vendor/car/area/types",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "vendor",
+                                "car",
+                                "area",
+                                "types"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Add Car",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{vendor_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"car_area_id\": 1,\n  \"car_type_id\": 2,\n  \"car_model_id\": 3,\n  \"car_number\": \"ABC-1234\",\n  \"fees\": 150,\n  \"seat\": 5,\n  \"doors\": 4\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/vendor/car/store",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "vendor", "car", "store"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Car Status",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{vendor_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"car_id\": 1,\n  \"status\": 1\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/vendor/car/status",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "vendor", "car", "status"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Car Details",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{vendor_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"car_id\": 1\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/vendor/car/details",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "vendor", "car", "details"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Car",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{vendor_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"car_id\": 1,\n  \"fees\": 200,\n  \"seat\": 5\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/vendor/car/update",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "vendor", "car", "update"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Car",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{vendor_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"car_id\": 1\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/vendor/car/delete",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "vendor", "car", "delete"]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Vendor - Bookings",
+            "item": [
+                {
+                    "name": "Get Booking Requests",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{vendor_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/vendor/booking/requests",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "vendor",
+                                "booking",
+                                "requests"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Accept Booking",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{vendor_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/vendor/booking/accept?booking_id=1",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "vendor",
+                                "booking",
+                                "accept"
+                            ],
+                            "query": [
+                                {
+                                    "key": "booking_id",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Reject Booking",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{vendor_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/vendor/booking/reject?booking_id=1",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "vendor",
+                                "booking",
+                                "reject"
+                            ],
+                            "query": [
+                                {
+                                    "key": "booking_id",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Complete Booking",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{vendor_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/vendor/booking/complete?booking_id=1",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "vendor",
+                                "booking",
+                                "complete"
+                            ],
+                            "query": [
+                                {
+                                    "key": "booking_id",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "View Booking History",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{vendor_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/vendor/history/view",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "vendor", "history", "view"]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Vendor - Withdraw",
+            "item": [
+                {
+                    "name": "Get Wallet Gateways",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{vendor_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/vendor/withdraw/wallet-gateways",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "vendor",
+                                "withdraw",
+                                "wallet-gateways"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Gateway Input Fields",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{vendor_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/vendor/withdraw/gateway/input-fields?gateway=bank_transfer",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "vendor",
+                                "withdraw",
+                                "gateway",
+                                "input-fields"
+                            ],
+                            "query": [
+                                {
+                                    "key": "gateway",
+                                    "value": "bank_transfer"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Submit Withdraw Request",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{vendor_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"gateway\": \"bank_transfer\",\n  \"amount\": 5000,\n  \"bank_details\": {}\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/vendor/withdraw/submit",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "vendor",
+                                "withdraw",
+                                "submit"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Vendor - Transactions",
+            "item": [
+                {
+                    "name": "Transaction Log",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{vendor_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/vendor/transaction/log",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "vendor",
+                                "transaction",
+                                "log"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Settings & Global",
+            "item": [
+                {
+                    "name": "Get Basic Settings",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/settings/basic-settings",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "settings", "basic-settings"]
+                        },
+                        "description": "Get basic app settings"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Splash Screen",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/settings/splash-screen",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "settings", "splash-screen"]
+                        },
+                        "description": "Get splash screen configuration"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Onboard Screens",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/settings/onboard-screens",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "settings", "onboard-screens"]
+                        },
+                        "description": "Get onboarding screens"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Languages",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/settings/languages",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "settings", "languages"]
+                        },
+                        "description": "Get available languages"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Countries",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/settings/countries",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "settings", "countries"]
+                        },
+                        "description": "Get available countries"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Cars (Public)",
+            "item": [
+                {
+                    "name": "List All Cars",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/cars?sort=price_asc&per_page=15",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "cars"],
+                            "query": [
+                                {
+                                    "key": "sort",
+                                    "value": "price_asc",
+                                    "description": "price_asc, price_desc, name_asc, name_desc"
+                                },
+                                {
+                                    "key": "car_type_id",
+                                    "value": "",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "car_model_id",
+                                    "value": "",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "15"
+                                }
+                            ]
+                        },
+                        "description": "Get all available cars with filtering and sorting"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Car Types",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/cars/types",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "cars", "types"]
+                        },
+                        "description": "Get all car types"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Car Models",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/cars/models?car_type_id=1",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "cars", "models"],
+                            "query": [
+                                {
+                                    "key": "car_type_id",
+                                    "value": "1"
+                                }
+                            ]
+                        },
+                        "description": "Get car models, optionally filtered by car type"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Cars by Vendor",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/cars/vendor/:vendorId?sort=price_desc",
+                            "host": ["{{base_url}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "cars",
+                                "vendor",
+                                ":vendorId"
+                            ],
+                            "query": [
+                                {
+                                    "key": "sort",
+                                    "value": "price_desc"
+                                }
+                            ],
+                            "variable": [
+                                {
+                                    "key": "vendorId",
+                                    "value": "5"
+                                }
+                            ]
+                        },
+                        "description": "Get all cars from a specific vendor"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Car Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/cars/:carId",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "cars", ":carId"],
+                            "variable": [
+                                {
+                                    "key": "carId",
+                                    "value": "123"
+                                }
+                            ]
+                        },
+                        "description": "Get details of a specific car"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "OTP Verification",
+            "item": [
+                {
+                    "name": "Request OTP via SMS",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.success) {",
+                                    "    pm.environment.set('verification_id', jsonData.data.verification_id);",
+                                    "    pm.environment.set('phone_tested', jsonData.data.to);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"phone\": \"+966555123456\",\n  \"channel\": \"sms\",\n  \"locale\": \"ar\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/otp/request",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "otp", "request"]
+                        },
+                        "description": "Send OTP code via SMS to the provided phone number"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Request OTP via WhatsApp",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.success) {",
+                                    "    pm.environment.set('verification_id_wa', jsonData.data.verification_id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"phone\": \"+966555123456\",\n  \"channel\": \"whatsapp\",\n  \"locale\": \"ar\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/otp/request",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "otp", "request"]
+                        },
+                        "description": "Send OTP code via WhatsApp to the provided phone number"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Verify OTP Code",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"phone\": \"+966555123456\",\n  \"code\": \"123456\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/otp/verify",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "otp", "verify"]
+                        },
+                        "description": "Verify the OTP code sent to the phone number"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Webhooks",
+            "item": [
+                {
+                    "name": "Twilio Status Callback",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/x-www-form-urlencoded"
+                            }
+                        ],
+                        "body": {
+                            "mode": "urlencoded",
+                            "urlencoded": [
+                                {
+                                    "key": "MessageSid",
+                                    "value": "SM1234567890abcdef1234567890abcdef"
+                                },
+                                {
+                                    "key": "AccountSid",
+                                    "value": "AC46cac1e17737ef6a1a33402b7ba83868"
+                                },
+                                {
+                                    "key": "To",
+                                    "value": "+966555123456"
+                                },
+                                {
+                                    "key": "From",
+                                    "value": "+1234567890"
+                                },
+                                {
+                                    "key": "MessageStatus",
+                                    "value": "delivered"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/webhooks/twilio/status",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "webhooks", "twilio", "status"]
+                        },
+                        "description": "Twilio webhook for message status updates"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Twilio Pricing Callback",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/x-www-form-urlencoded"
+                            }
+                        ],
+                        "body": {
+                            "mode": "urlencoded",
+                            "urlencoded": [
+                                {
+                                    "key": "MessageSid",
+                                    "value": "SM1234567890abcdef1234567890abcdef"
+                                },
+                                {
+                                    "key": "Price",
+                                    "value": "-0.0075"
+                                },
+                                {
+                                    "key": "PriceUnit",
+                                    "value": "USD"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/webhooks/twilio/pricing",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "webhooks", "twilio", "pricing"]
+                        },
+                        "description": "Twilio webhook for pricing information"
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{user_token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [""]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [""]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "https://durraalaseel.nextoneplus.com"
+        },
+        {
+            "key": "user_token",
+            "value": ""
+        },
+        {
+            "key": "vendor_token",
+            "value": ""
+        },
+        {
+            "key": "booking_id",
+            "value": ""
+        },
+        {
+            "key": "user_id",
+            "value": ""
+        },
+        {
+            "key": "verification_id",
+            "value": ""
+        },
+        {
+            "key": "verification_id_wa",
+            "value": ""
+        },
+        {
+            "key": "phone_tested",
+            "value": ""
+        }
+    ]
+}

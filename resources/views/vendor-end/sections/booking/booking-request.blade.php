@@ -1,5 +1,39 @@
 @extends('vendor-end.layouts.master')
 
+@push('css')
+    <style>
+        .status-badge-pending {
+            background-color: #fff3cd !important;
+            color: #7d4e00 !important;
+            font-size: 1rem !important;
+        }
+
+        .status-badge-ongoing {
+            background-color: #d1e7dd !important;
+            color: #0b4d1e !important;
+            font-size: 1rem !important;
+        }
+
+        .status-badge-completed {
+            background-color: #cfe2ff !important;
+            color: #09447a !important;
+            font-size: 1rem !important;
+        }
+
+        .status-badge-rejected {
+            background-color: #f8d7da !important;
+            color: #7d0d0d !important;
+            font-size: 1rem !important;
+        }
+
+        .status-badge-unknown {
+            background-color: #e2e3e5 !important;
+            color: #2b2f33 !important;
+            font-size: 1rem !important;
+        }
+    </style>
+@endpush
+
 @section('content')
     <div class="booking-request pt-40">
         {{-- Header & Toolbar --}}
@@ -26,19 +60,26 @@
                 <table class="custom-table table">
                     <thead>
                         <tr>
-                            <th>{{ __('Trx ID') }}</th>
+                            <th>{{ __('Booking ID') }}</th>
+                            <th>{{ __('Date') }}</th>
                             <th>{{ __('Customer') }}</th>
+                            <th>{{ __('Car Type') }}</th>
                             <th>{{ __('Car Model') }}</th>
                             <th>{{ __('Status') }}</th>
-                            <th>{{ __('Date') }}</th>
                             <th>{{ __('Action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($car_bookings ?? [] as $item)
                             <tr>
-                                <td data-label="{{ __('Trx ID') }}">
-                                    <span class="text-primary fw-bold">#{{ $item->trx_id ?? $item->id }}</span>
+                                <td data-label="{{ __('Booking ID') }}">
+                                    <span class="text-primary fw-bold">{{ $item->trip_id ?? $item->id }}</span>
+                                </td>
+                                <td data-label="{{ __('Date') }}">
+                                    <span class="text-muted small"
+                                        title="{{ $item->created_at->timezone($display_timezone)->format('d M Y h:i A') }}">
+                                        {{ $item->created_at->diffForHumans() }}
+                                    </span>
                                 </td>
                                 <td data-label="{{ __('Customer') }}">
                                     <div class="d-flex align-items-center gap-2">
@@ -62,14 +103,21 @@
                                         </div>
                                     </div>
                                 </td>
+                                <td data-label="{{ __('Car Type') }}">
+                                    <span class="fw-medium small text-dark">
+                                        {{ $item->cars->type->name ?? __('N/A') }}
+                                    </span>
+                                </td>
                                 <td data-label="{{ __('Car Model') }}">
                                     <div class="d-flex align-items-center gap-2">
                                         <div class="rounded-1 overflow-hidden border flex-shrink-0"
                                             style="width: 40px; height: 30px;">
-                                            <img src="{{ get_image($item->cars->image ?? '', 'site-section') ?? '' }}"
+                                            <img src="{{ get_image($item->cars->image ?? null, 'car-models') }}"
                                                 class="w-100 h-100 object-fit-cover">
                                         </div>
-                                        <span class="fw-medium small text-dark">{{ $item->cars->car_model }}</span>
+                                        <span class="fw-medium small text-dark">
+                                            {{ $item->cars->carModel->name ?? ($item->cars->car_model ?? __('N/A')) }}
+                                        </span>
                                     </div>
                                 </td>
                                 <td data-label="{{ __('Status') }}">
@@ -77,29 +125,23 @@
                                         $statusClass = '';
                                         $statusText = '';
                                         if ($item->status == 1) {
-                                            $statusClass = 'badge bg-warning text-dark';
+                                            $statusClass = 'badge status-badge-pending';
                                             $statusText = __('Pending');
                                         } elseif ($item->status == 2) {
-                                            $statusClass = 'badge bg-success';
+                                            $statusClass = 'badge status-badge-ongoing';
                                             $statusText = __('Ongoing');
                                         } elseif ($item->status == 3) {
-                                            $statusClass = 'badge bg-primary';
+                                            $statusClass = 'badge status-badge-completed';
                                             $statusText = __('Completed');
                                         } elseif ($item->status == 4) {
-                                            $statusClass = 'badge bg-danger';
+                                            $statusClass = 'badge status-badge-rejected';
                                             $statusText = __('Rejected');
                                         } else {
-                                            $statusClass = 'badge bg-secondary';
+                                            $statusClass = 'badge status-badge-unknown';
                                             $statusText = __('Unknown');
                                         }
                                     @endphp
                                     <span class="{{ $statusClass }} rounded-pill px-3 py-1">{{ $statusText }}</span>
-                                </td>
-                                <td data-label="{{ __('Date') }}">
-                                    <span class="text-muted small">{{ $item->created_at->format('d M Y') }}</span>
-                                    <br>
-                                    <span class="text-muted small"
-                                        style="font-size: 10px;">{{ $item->created_at->format('h:i A') }}</span>
                                 </td>
                                 <td data-label="{{ __('Action') }}">
                                     <a href="{{ route('vendor.booking.details', $item->id) }}"

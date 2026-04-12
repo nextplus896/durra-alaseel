@@ -1,0 +1,921 @@
+openapi: 3.0.3
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  Dorra Alaseel – Cars API  (OpenAPI 3.0.3)
+#  Version  : 1.0.0
+#  Base path: /api/v1
+#  Entities : Car (list, create)
+# ══════════════════════════════════════════════════════════════════════════════
+
+info:
+  title: Dorra Alaseel – Cars API
+  version: 1.0.0
+  description: |
+    Mobile-first RESTful API for **Car** resource management in the
+    Dorra Alaseel Car Rental Platform.
+
+    ## Authentication
+    Protected endpoints require a **Bearer JWT** token issued on vendor login:
+    ```
+    Authorization: Bearer <token>
+    ```
+
+    ## Standard Response Envelope
+    Every response — success or error — is wrapped in a consistent envelope:
+    ```json
+    {
+      "status": true | false,
+      "message": "Human-readable description",
+      "data": { ... } | [ ... ]
+    }
+    ```
+
+    ## Pagination
+    List endpoints use **offset pagination** via `page` and `per_page` query
+    parameters.  Metadata is returned in the `meta` key; hypermedia navigation
+    links in the `links` key.
+
+    ## Filtering & Sorting
+    All filter parameters are optional and may be combined freely.
+
+    ## Status Codes
+    | Code | Meaning |
+    |------|---------|
+    | 200  | OK – read operation succeeded |
+    | 201  | Created – resource created |
+    | 401  | Unauthorized – missing / expired token |
+    | 403  | Forbidden – insufficient role/permission |
+    | 422  | Unprocessable Entity – validation failed |
+    | 500  | Internal Server Error |
+
+servers:
+  - url: https://api.dorra-alaseel.com/api/v1
+    description: Production
+  - url: https://staging.dorra-alaseel.com/api/v1
+    description: Staging
+  - url: http://localhost:8000/api/v1
+    description: Local Development
+
+# ── Global security (overridden per-operation where needed) ──────────────────
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Cars
+    description: |
+      Car inventory operations.
+      - **List** is public (no auth required).
+      - **Create** requires a valid vendor JWT.
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  PATHS
+# ══════════════════════════════════════════════════════════════════════════════
+paths:
+  # ── GET /cars ───────────────────────────────────────────────────────────────
+  /cars:
+    get:
+      operationId: listCars
+      summary: List Cars
+      tags: [Cars]
+      description: |
+        Returns a **paginated, filterable** list of approved and active cars.
+
+        **Access:** Public — no authentication required.
+
+        ### Filtering
+        All filter parameters are optional and combinable.
+
+        ### Sorting
+        Use `sort_by` + `sort_direction` to control ordering.
+      security: [] # Public — no JWT required
+      parameters:
+        # ── Pagination ──────────────────────────────────────────────────────
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PerPageParam"
+
+        # ── Filters ─────────────────────────────────────────────────────────
+        - name: car_type_id
+          in: query
+          description: Filter by car type (vehicle category) ID
+          required: false
+          schema:
+            type: integer
+            example: 2
+
+        - name: car_model_id
+          in: query
+          description: Filter by car model FK ID
+          required: false
+          schema:
+            type: integer
+            example: 5
+
+        - name: branch_id
+          in: query
+          description: Filter by pickup branch ID
+          required: false
+          schema:
+            type: integer
+            example: 1
+
+        - name: min_price
+          in: query
+          description: Minimum `price_per_day` (SAR), inclusive
+          required: false
+          schema:
+            type: number
+            format: float
+            minimum: 0
+            example: 50.00
+
+        - name: max_price
+          in: query
+          description: Maximum `price_per_day` (SAR), inclusive
+          required: false
+          schema:
+            type: number
+            format: float
+            minimum: 0
+            example: 500.00
+
+        - name: seat
+          in: query
+          description: Minimum seat count
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            example: 5
+
+        - name: year
+          in: query
+          description: Filter by manufacture year
+          required: false
+          schema:
+            type: integer
+            minimum: 1990
+            example: 2022
+
+        # ── Sorting ──────────────────────────────────────────────────────────
+        - name: sort_by
+          in: query
+          description: Field to sort by
+          required: false
+          schema:
+            type: string
+            enum: [price_per_day, year, created_at]
+            default: created_at
+
+        - name: sort_direction
+          in: query
+          description: Sort direction
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+
+      responses:
+        "200":
+          description: Paginated car list returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CarListResponse"
+              example:
+                status: true
+                message: Cars fetched successfully
+                data:
+                  - id: 42
+                    vendor_id: 10
+                    car_type_id: 2
+                    car_model_id: 5
+                    branch_id: 1
+                    slug: suv-camry-2022-abc123
+                    car_title:
+                      en:
+                        car_title: "2022 Toyota Camry"
+                      ar:
+                        car_title: "تويوتا كامري 2022"
+                    image_url: "https://api.dorra-alaseel.com/storage/car-models/camry.jpg"
+                    car_type: SUV
+                    car_model: Camry
+                    car_number: ABC-1234
+                    seat: 5
+                    year: 2022
+                    experience: 2
+                    fees: 15.00
+                    price_per_day: 250.00
+                    price_per_week: 1500.00
+                    price_per_month: 5000.00
+                    allowance_km: 200.0
+                    allowance_price_per_km: 2.50
+                    status: 1
+                    approval: 1
+                    branch_name: "Riyadh Central Branch"
+                    branch_latitude: 24.6877
+                    branch_longitude: 46.7219
+                    delivery_enabled: true
+                    delivery_radius_km: 20.0
+                    created_at: "2024-11-25T13:45:00+03:00"
+                    updated_at: "2025-01-10T08:30:00+03:00"
+                meta:
+                  current_page: 1
+                  per_page: 15
+                  total: 87
+                  last_page: 6
+                  from: 1
+                  to: 15
+                links:
+                  first: "https://api.dorra-alaseel.com/api/v1/cars?page=1"
+                  last: "https://api.dorra-alaseel.com/api/v1/cars?page=6"
+                  prev: null
+                  next: "https://api.dorra-alaseel.com/api/v1/cars?page=2"
+
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+    # ── POST /cars ──────────────────────────────────────────────────────────────
+    post:
+      operationId: createCar
+      summary: Create Car
+      tags: [Cars]
+      description: |
+        Creates a new car listing under the **authenticated vendor's** account.
+
+        **Access:** Requires a vendor-level Bearer JWT.
+
+        **Approval flow:**
+        A newly created car has `approval = 0` (pending admin review) and
+        will not appear in the public listing until approved.
+
+        **Content-Type:** `multipart/form-data` is required to support
+        the car image file upload.
+      security:
+        - BearerAuth: []
+
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/CarCreateRequest"
+            encoding:
+              image:
+                contentType: image/jpeg, image/png, image/webp
+
+      responses:
+        "201":
+          description: Car created successfully — pending admin approval
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CarCreateResponse"
+              example:
+                status: true
+                message: Car created successfully
+                data:
+                  id: 99
+                  vendor_id: 10
+                  car_type_id: 2
+                  car_model_id: 5
+                  branch_id: 1
+                  slug: suv-camry-2023-xyz789
+                  image_url: "https://api.dorra-alaseel.com/storage/cars/suv-camry-2023-xyz789.jpg"
+                  car_type: SUV
+                  car_model: Camry
+                  seat: 5
+                  year: 2023
+                  fees: 15.00
+                  price_per_day: 275.00
+                  price_per_week: null
+                  price_per_month: null
+                  allowance_km: 200.0
+                  allowance_price_per_km: 2.50
+                  status: 1
+                  approval: 0
+                  created_at: "2026-03-11T10:00:00+03:00"
+                  updated_at: "2026-03-11T10:00:00+03:00"
+
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  COMPONENTS
+# ══════════════════════════════════════════════════════════════════════════════
+components:
+  # ── Security schemes ────────────────────────────────────────────────────────
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT issued by `POST /api/v1/vendor/login`.
+        Include as: `Authorization: Bearer <token>`
+
+  # ── Reusable parameters ─────────────────────────────────────────────────────
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      description: 1-indexed page number
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+        example: 1
+
+    PerPageParam:
+      name: per_page
+      in: query
+      description: Items per page (max 100)
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 15
+        example: 15
+
+  # ── Schemas ─────────────────────────────────────────────────────────────────
+  schemas:
+    # ── DTO: CarType ────────────────────────────────────────────────────────
+    CarTypeDTO:
+      type: object
+      description: Vehicle category (e.g. SUV, Sedan, Luxury)
+      required: [id, name, slug]
+      properties:
+        id:
+          type: integer
+          example: 2
+        name:
+          type: string
+          example: SUV
+        slug:
+          type: string
+          example: suv
+
+    # ── DTO: CarModel ───────────────────────────────────────────────────────
+    CarModelDTO:
+      type: object
+      description: Specific car model under a category (e.g. Toyota Camry)
+      required: [id, name, car_type_id]
+      properties:
+        id:
+          type: integer
+          example: 5
+        name:
+          type: string
+          example: Camry
+        car_type_id:
+          type: integer
+          example: 2
+        image_url:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://api.dorra-alaseel.com/storage/car-models/camry.jpg"
+
+    # ── DTO: Branch ─────────────────────────────────────────────────────────
+    BranchDTO:
+      type: object
+      description: Car pickup / drop-off branch
+      required: [id, name, latitude, longitude]
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Riyadh Central Branch
+        address:
+          type: string
+          nullable: true
+          example: "King Fahd Rd, Riyadh 12271"
+        latitude:
+          type: number
+          format: double
+          example: 24.6877
+        longitude:
+          type: number
+          format: double
+          example: 46.7219
+        service_radius_km:
+          type: number
+          format: float
+          nullable: true
+          example: 20.0
+        delivery_enabled:
+          type: boolean
+          example: true
+
+    # ── DTO: Vendor ─────────────────────────────────────────────────────────
+    VendorDTO:
+      type: object
+      description: Abbreviated vendor / car owner info
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+          example: 10
+        name:
+          type: string
+          example: Ahmed Al-Rashid
+
+    # ── DTO: Car (full representation) ─────────────────────────────────────
+    CarDTO:
+      type: object
+      description: |
+        Complete car resource returned from all read endpoints.
+        Relationship objects (`type`, `car_model_relation`, `branch`, `vendor`)
+        are only present when the server eagerly loaded them; otherwise omitted.
+      required:
+        - id
+        - vendor_id
+        - slug
+        - seat
+        - price_per_day
+        - fees
+        - status
+        - approval
+        - created_at
+        - updated_at
+      properties:
+        # ── Identity ─────────────────────────────────────────────────────
+        id:
+          type: integer
+          readOnly: true
+          example: 42
+        vendor_id:
+          type: integer
+          example: 10
+        car_type_id:
+          type: integer
+          nullable: true
+          example: 2
+        car_model_id:
+          type: integer
+          nullable: true
+          example: 5
+        branch_id:
+          type: integer
+          nullable: true
+          example: 1
+        slug:
+          type: string
+          readOnly: true
+          example: suv-camry-2022-abc123
+
+        # ── Localised title ──────────────────────────────────────────────
+        car_title:
+          type: object
+          description: |
+            Locale-keyed title map.  Each key is an ISO-639-1 locale code;
+            the value is an object with a `car_title` string.
+          nullable: true
+          additionalProperties:
+            type: object
+            properties:
+              car_title:
+                type: string
+          example:
+            en:
+              car_title: "2022 Toyota Camry"
+            ar:
+              car_title: "تويوتا كامري 2022"
+
+        # ── Media ────────────────────────────────────────────────────────
+        image_url:
+          type: string
+          format: uri
+          readOnly: true
+          example: "https://api.dorra-alaseel.com/storage/car-models/camry.jpg"
+
+        # ── Denormalized resolved names ──────────────────────────────────
+        car_type:
+          type: string
+          description: Resolved car type name (denormalized for convenience)
+          example: SUV
+        car_model:
+          type: string
+          description: Resolved car model name (denormalized for convenience)
+          example: Camry
+        car_number:
+          type: string
+          nullable: true
+          example: ABC-1234
+
+        # ── Physical attributes ──────────────────────────────────────────
+        seat:
+          type: integer
+          minimum: 1
+          example: 5
+        year:
+          type: integer
+          nullable: true
+          minimum: 1990
+          example: 2022
+        experience:
+          type: integer
+          description: Minimum driving experience required (years)
+          example: 2
+
+        # ── Pricing ──────────────────────────────────────────────────────
+        fees:
+          type: number
+          format: float
+          description: Platform service fee (SAR) charged on top of the rental price
+          example: 15.00
+        price_per_day:
+          type: number
+          format: float
+          example: 250.00
+        price_per_week:
+          type: number
+          format: float
+          nullable: true
+          example: 1500.00
+        price_per_month:
+          type: number
+          format: float
+          nullable: true
+          example: 5000.00
+
+        # ── Distance / allowance ─────────────────────────────────────────
+        allowance_km:
+          type: number
+          format: float
+          nullable: true
+          description: Daily km allowance included in the base rental price
+          example: 200.0
+        allowance_price_per_km:
+          type: number
+          format: float
+          nullable: true
+          description: Surcharge per km exceeding the daily allowance (SAR)
+          example: 2.50
+
+        # ── State ────────────────────────────────────────────────────────
+        status:
+          type: integer
+          description: "Listing visibility: 0 = inactive, 1 = active"
+          enum: [0, 1]
+          example: 1
+        approval:
+          type: integer
+          description: "Admin approval gate: 0 = pending, 1 = approved"
+          enum: [0, 1]
+          example: 1
+
+        # ── Branch (flat scalars — always present) ───────────────────────
+        branch_name:
+          type: string
+          nullable: true
+          example: "Riyadh Central Branch"
+        branch_latitude:
+          type: number
+          format: double
+          nullable: true
+          example: 24.6877
+        branch_longitude:
+          type: number
+          format: double
+          nullable: true
+          example: 46.7219
+        delivery_enabled:
+          type: boolean
+          example: true
+        delivery_radius_km:
+          type: number
+          format: float
+          nullable: true
+          example: 20.0
+
+        # ── Timestamps ───────────────────────────────────────────────────
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2024-11-25T13:45:00+03:00"
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2025-01-10T08:30:00+03:00"
+
+        # ── Eager-loaded relationships (conditionally present) ───────────
+        type:
+          allOf:
+            - $ref: "#/components/schemas/CarTypeDTO"
+          nullable: true
+          description: Present only when the `type` relationship is loaded
+        car_model_relation:
+          allOf:
+            - $ref: "#/components/schemas/CarModelDTO"
+          nullable: true
+          description: Present only when the `carModel` relationship is loaded
+        branch:
+          allOf:
+            - $ref: "#/components/schemas/BranchDTO"
+          nullable: true
+          description: Present only when the `branch` relationship is loaded
+        vendor:
+          allOf:
+            - $ref: "#/components/schemas/VendorDTO"
+          nullable: true
+          description: Present only when the `vendor` relationship is loaded
+
+    # ── Request: CarCreate ──────────────────────────────────────────────────
+    CarCreateRequest:
+      type: object
+      description: |
+        Payload for creating a new car listing.
+        Sent as `multipart/form-data` to support image file upload.
+      required:
+        - car_type_id
+        - car_model_id
+        - seat
+        - price_per_day
+        - fees
+        - image
+      properties:
+        car_type_id:
+          type: integer
+          description: "FK → car_types.id"
+          example: 2
+        car_model_id:
+          type: integer
+          description: "FK → car_models.id — must belong to the given car_type_id"
+          example: 5
+        branch_id:
+          type: integer
+          description: "FK → branches.id — pickup location"
+          nullable: true
+          example: 1
+        car_title:
+          type: string
+          description: |
+            JSON-encoded locale map.
+            ```json
+            {"en":{"car_title":"2022 Toyota Camry"},"ar":{"car_title":"تويوتا كامري 2022"}}
+            ```
+          nullable: true
+          example: '{"en":{"car_title":"2022 Toyota Camry"},"ar":{"car_title":"تويوتا كامري 2022"}}'
+        seat:
+          type: integer
+          minimum: 1
+          maximum: 20
+          example: 5
+        year:
+          type: integer
+          minimum: 1990
+          nullable: true
+          example: 2022
+        fees:
+          type: number
+          format: float
+          minimum: 0
+          description: Platform service fee (SAR)
+          example: 15.00
+        price_per_day:
+          type: number
+          format: float
+          minimum: 0.01
+          description: Daily rental price (SAR)
+          example: 250.00
+        price_per_week:
+          type: number
+          format: float
+          minimum: 0
+          nullable: true
+          description: Weekly rental price (SAR) — optional
+          example: 1500.00
+        price_per_month:
+          type: number
+          format: float
+          minimum: 0
+          nullable: true
+          description: Monthly rental price (SAR) — optional
+          example: 5000.00
+        allowance_km:
+          type: number
+          format: float
+          minimum: 0
+          nullable: true
+          description: Daily km included in the base price
+          example: 200.0
+        allowance_price_per_km:
+          type: number
+          format: float
+          minimum: 0
+          nullable: true
+          description: Extra charge per km beyond the daily allowance (SAR)
+          example: 2.50
+        image:
+          type: string
+          format: binary
+          description: Car image file — JPEG, PNG, or WebP, max 5 MB
+
+    # ── Response wrappers ───────────────────────────────────────────────────
+
+    ApiSuccessEnvelope:
+      type: object
+      description: Base success envelope shared by all successful responses
+      required: [status, message]
+      properties:
+        status:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Operation successful
+
+    PaginationMeta:
+      type: object
+      description: Offset-pagination metadata
+      required: [current_page, per_page, total, last_page]
+      properties:
+        current_page:
+          type: integer
+          example: 1
+        per_page:
+          type: integer
+          example: 15
+        total:
+          type: integer
+          description: Total number of matching records across all pages
+          example: 87
+        last_page:
+          type: integer
+          example: 6
+        from:
+          type: integer
+          nullable: true
+          description: Ordinal position of the first record on this page
+          example: 1
+        to:
+          type: integer
+          nullable: true
+          description: Ordinal position of the last record on this page
+          example: 15
+
+    PaginationLinks:
+      type: object
+      description: Hypermedia navigation links for paginated responses
+      required: [first, last, prev, next]
+      properties:
+        first:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://api.dorra-alaseel.com/api/v1/cars?page=1"
+        last:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://api.dorra-alaseel.com/api/v1/cars?page=6"
+        prev:
+          type: string
+          format: uri
+          nullable: true
+          example: null
+        next:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://api.dorra-alaseel.com/api/v1/cars?page=2"
+
+    CarListResponse:
+      description: Successful paginated car list response
+      allOf:
+        - $ref: "#/components/schemas/ApiSuccessEnvelope"
+        - type: object
+          required: [data, meta, links]
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/CarDTO"
+            meta:
+              $ref: "#/components/schemas/PaginationMeta"
+            links:
+              $ref: "#/components/schemas/PaginationLinks"
+
+    CarCreateResponse:
+      description: Successful car creation response
+      allOf:
+        - $ref: "#/components/schemas/ApiSuccessEnvelope"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: "#/components/schemas/CarDTO"
+
+    # ── Error schemas ───────────────────────────────────────────────────────
+
+    ErrorEnvelope:
+      type: object
+      description: |
+        Standard error response envelope.
+        The `errors` object is only present on **422 Validation** responses.
+      required: [status, message]
+      properties:
+        status:
+          type: boolean
+          example: false
+        message:
+          type: string
+          description: Human-readable error summary
+          example: The given data was invalid
+        error_code:
+          type: string
+          description: Machine-readable error identifier
+          nullable: true
+          enum:
+            - UNAUTHENTICATED
+            - FORBIDDEN
+            - VALIDATION_FAILED
+            - RESOURCE_NOT_FOUND
+            - INTERNAL_SERVER_ERROR
+          example: VALIDATION_FAILED
+        errors:
+          type: object
+          description: |
+            Field-level validation messages.
+            Keys are dot-notation field names; values are arrays of error strings.
+          nullable: true
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          example:
+            price_per_day:
+              - "The price per day field is required."
+            seat:
+              - "The seat must be at least 1."
+
+  # ── Reusable responses ───────────────────────────────────────────────────
+  responses:
+    Unauthorized:
+      description: "401 – Authentication token missing, invalid, or expired"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+          example:
+            status: false
+            message: Unauthenticated
+            error_code: UNAUTHENTICATED
+            errors: null
+
+    Forbidden:
+      description: "403 – Authenticated user lacks the required role or permission"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+          example:
+            status: false
+            message: You are not authorized to perform this action
+            error_code: FORBIDDEN
+            errors: null
+
+    ValidationError:
+      description: "422 – Request payload failed server-side validation"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+          example:
+            status: false
+            message: The given data was invalid
+            error_code: VALIDATION_FAILED
+            errors:
+              price_per_day:
+                - The price per day field is required.
+              seat:
+                - The seat must be at least 1.
+              image:
+                - The image must not exceed 5 MB.
+
+    ServerError:
+      description: "500 – Unexpected server-side failure"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+          example:
+            status: false
+            message: An unexpected error occurred. Please try again later.
+            error_code: INTERNAL_SERVER_ERROR
+            errors: null

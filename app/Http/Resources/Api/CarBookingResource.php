@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Api;
 
+use App\Http\Resources\Api\CarBookingExtensionResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class CarBookingResource extends JsonResource
@@ -17,7 +18,7 @@ class CarBookingResource extends JsonResource
     {
         return [
             'id' => (int) $this->id,
-            'trip_id' => $this->trip_id ? (int) $this->trip_id : null,
+            'booking_id' => $this->trip_id ? (string) $this->trip_id : null,
             'car_id' => (int) $this->car_id,
             'user_id' => (int) $this->user_id,
             'branch_id' => $this->branch_id ? (int) $this->branch_id : null,
@@ -53,11 +54,20 @@ class CarBookingResource extends JsonResource
             'balance_deducted' => $this->balance_deducted ? (float) $this->balance_deducted : null,
             'is_delivery' => (bool) $this->is_delivery,
             'paid_from_balance' => (bool) $this->paid_from_balance,
+            // Extension fields
+            'return_date'           => $this->return_date ? $this->return_date->toDateString() : null,
+            'extension_count'       => (int) ($this->extension_count ?? 0),
+            'total_extension_days'  => (int) ($this->total_extension_days ?? 0),
+            'is_extendable'         => (bool) $this->is_extendable,
+            'days_remaining'        => (int) $this->days_remaining,
+            'total_extension_cost'  => (float) $this->total_extension_cost,
+            'rejection_reason'      => $this->rejection_reason ? (string) $this->rejection_reason : null,
             'created_at' => $this->created_at ? $this->created_at->toIso8601String() : null,
             'updated_at' => $this->updated_at ? $this->updated_at->toIso8601String() : null,
             'cars' => $this->whenLoaded('cars', function () {
                 return new CarResource($this->cars);
             }),
+            'booking_extensions' => CarBookingExtensionResource::collection($this->whenLoaded('bookingExtensions')),
         ];
     }
 }

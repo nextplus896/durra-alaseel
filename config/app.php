@@ -189,6 +189,9 @@ return [
          * Package Service Providers...
          */
 
+        // Swagger / OpenAPI documentation (darkaonline/l5-swagger)
+        L5Swagger\L5SwaggerServiceProvider::class,
+
         /*
          * Application Service Providers...
          */

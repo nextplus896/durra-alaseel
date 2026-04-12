@@ -8,6 +8,8 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use App\Models\Admin\Language;
+use App\Models\User;
+use App\Observers\UserObserver;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 
@@ -39,6 +41,9 @@ class AppServiceProvider extends ServiceProvider
 
         Paginator::useBootstrapFive();
         Schema::defaultStringLength(191);
+
+        // Register model observers
+        User::observe(UserObserver::class);
         // Share active languages with all views (guarded against DB errors during migrations)
         try {
             $languages = Language::where('status', 1)->select(['id', 'name', 'code', 'dir'])->get();

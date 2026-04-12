@@ -4,6 +4,7 @@ namespace App\Http\Helpers;
 
 use App\Providers\Admin\BasicSettingsProvider;
 use Exception;
+use Illuminate\Support\Facades\Log;
 use Pusher\PushNotifications\PushNotifications;
 
 
@@ -161,44 +162,72 @@ class PushNotificationHelper {
 
         $publishable_ids = [];
         foreach($user_ids as $id) {
-            array_push($publishable_ids, $this->make_publishable_id($id, $this->user_type));
+            $publishable_id = $this->make_publishable_id($id, $this->user_type);
+            array_push($publishable_ids, $publishable_id);
         }
 
-        $response = $provider->publishToUsers(
-            $publishable_ids,
-            [
-                "web"   => [
-                    "notification"      => [
-                        'title'     => $this->n_title,
-                        'body'      => $this->n_desc,
-                        'icon'      => $this->n_icon,
-                    ],
-                ],
-                "fcm" => [
-                    "notification" => [
-                        'title'     => $this->n_title,
-                        'body'      => $this->n_desc,
-                        'icon'      => $this->n_icon,
-                    ]
-                ]
-            ],
-        );
+        // Debug log: What we're sending
+        Log::info('Pusher: Preparing to send notification', [
+            'user_ids' => $user_ids,
+            'user_type' => $this->user_type,
+            'publishable_ids' => $publishable_ids,
+            'title' => $this->n_title,
+            'body' => $this->n_desc,
+        ]);
 
-        return $response;
+        try {
+            $response = $provider->publishToUsers(
+                $publishable_ids,
+                [
+                    "web"   => [
+                        "notification"      => [
+                            'title'     => $this->n_title,
+                            'body'      => $this->n_desc,
+                            'icon'      => $this->n_icon,
+                        ],
+                    ],
+                    "fcm" => [
+                        "notification" => [
+                            'title'     => $this->n_title,
+                            'body'      => $this->n_desc,
+                            'icon'      => $this->n_icon,
+                        ]
+                    ],
+                    "apns" => [
+                        "aps" => [
+                            "alert" => [
+                                'title'     => $this->n_title,
+                                'body'      => $this->n_desc,
+                            ],
+                            "sound" => "default",
+                            "badge" => 1,
+                        ]
+                    ]
+                ],
+            );
+
+            // Debug log: Response from Pusher
+            Log::info('Pusher: Notification sent successfully', [
+                'response' => $response,
+                'publishable_ids' => $publishable_ids,
+            ]);
+
+            return $response;
+        } catch (Exception $e) {
+            // Debug log: Error details
+            Log::error('Pusher: Failed to send notification', [
+                'error' => $e->getMessage(),
+                'publishable_ids' => $publishable_ids,
+                'trace' => $e->getTraceAsString(),
+            ]);
+            throw $e;
+        }
     }
 
     public function make_publishable_id($user_id, $user_type):string
     {
-        $base_url = url('/');
-        $parse_base_url = parse_url($base_url);
-
-        $host = $parse_base_url['host'] ?? "";
-        $path = $parse_base_url['path'] ?? "";
-
-        $full_url_host = $host . '' . $path;
-        $full_url_host = preg_replace("/[^A-Za-z0-9]/","-",$full_url_host);
-
-        return $full_url_host . "-" . $user_type . "-" . $user_id;
+        // Simple format: {user_type}-{user_id}
+        return $user_type . "-" . $user_id;
     }
 
     public function unsubscribe()
