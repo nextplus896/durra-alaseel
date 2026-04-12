@@ -358,30 +358,30 @@ function get_files_path($slug)
     $path = $data->path;
     create_asset_dir($path);
 
-    return public_path($path);
+    return storage_path('app/public/' . $path);
 }
 
 function create_asset_dir($path)
 {
-    $path = "public/" . $path;
-    if (file_exists($path)) return true;
-    return mkdir($path, 0755, true);
+    $full_path = storage_path('app/public/') . $path;
+    if (file_exists($full_path)) return true;
+    return mkdir($full_path, 0755, true);
 }
 
 function get_image($image_name, $path_type = null, $image_type = null, $size = null)
 {
 
     if ($image_type == 'profile') {
-        $image =  asset('public/' . files_path('profile-default')->path);
+        $image =  asset('storage/' . files_path('profile-default')->path);
     } else {
-        $image =  asset('public/' . files_path('default')->path);
+        $image =  asset('storage/' . files_path('default')->path);
     }
     if ($image_name != null) {
         if ($path_type != null) {
             $image_path = files_path($path_type)->path;
             $image_link = $image_path . "/" . $image_name;
-            if (file_exists(public_path($image_link))) {
-                $image = asset('public/' . $image_link);
+            if (file_exists(storage_path('app/public/' . $image_link))) {
+                $image = asset('storage/' . $image_link);
             }
         }
     }
@@ -393,18 +393,17 @@ function get_storage_image($image_name, $path_type = null, $image_type = null, $
 {
 
     if ($image_type == 'profile') {
-        $image =  asset(files_path('profile-default')->path);
+        $image =  asset('storage/' . files_path('profile-default')->path);
     } else {
-        $image =  asset(files_path('default')->path);
+        $image =  asset('storage/' . files_path('default')->path);
     }
     if ($image_name != null) {
         if ($path_type != null) {
             $image_path = files_path($path_type)->path;
             $image_link = $image_path . "/" . $image_name;
 
-            if (file_exists(storage_path($image_link))) {
-                // if(file_exists(public_path($image_link))) {
-                $image = asset($image_link);
+            if (file_exists(storage_path('app/public/' . $image_link))) {
+                $image = asset('storage/' . $image_link);
             }
         }
     }
@@ -493,7 +492,7 @@ function files_path($slug)
 function files_asset_path($slug)
 {
     $files_path = files_path($slug)->path;
-    return asset('public/' . $files_path);
+    return asset('storage/' . $files_path);
 }
 
 function get_amount($amount, $currency = null, $precision = null)
@@ -1768,7 +1767,7 @@ function google_two_factor_verification_vendor_template($user)
 
 function files_asset_path_basename($slug)
 {
-    return "public/" . files_path($slug)->path;
+    return "storage/" . files_path($slug)->path;
 }
 
 function get_only_numeric_data($string)
