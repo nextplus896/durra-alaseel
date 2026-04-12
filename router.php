@@ -25,7 +25,29 @@ require $public . '/index.php';
  */
 function serveStatic(string $fullPath): void
 {
-    $mime = mime_content_type($fullPath) ?: 'application/octet-stream';
+    $ext = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
+    $mimeMap = [
+        'css'  => 'text/css',
+        'js'   => 'application/javascript',
+        'mjs'  => 'application/javascript',
+        'svg'  => 'image/svg+xml',
+        'png'  => 'image/png',
+        'jpg'  => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'gif'  => 'image/gif',
+        'webp' => 'image/webp',
+        'ico'  => 'image/x-icon',
+        'woff' => 'font/woff',
+        'woff2' => 'font/woff2',
+        'ttf'  => 'font/ttf',
+        'otf'  => 'font/otf',
+        'eot'  => 'application/vnd.ms-fontobject',
+        'json' => 'application/json',
+        'map'  => 'application/json',
+        'html' => 'text/html; charset=UTF-8',
+        'txt'  => 'text/plain',
+    ];
+    $mime = $mimeMap[$ext] ?? (mime_content_type($fullPath) ?: 'application/octet-stream');
     header('Content-Type: ' . $mime);
     header('Content-Length: ' . filesize($fullPath));
     readfile($fullPath);
