@@ -43,6 +43,7 @@ use App\Http\Helpers\PaymentGateway as PaymentGatewayHelper;
 use App\Services\BookingBalanceService;
 use App\Services\CarBookingExtensionService;
 use App\Models\BranchDeliverySetting;
+use App\Models\BranchWorkingHour;
 use App\Http\Resources\Api\CarBookingResource;
 use App\Http\Resources\Api\CarBookingExtensionResource;
 use App\Http\Resources\Api\CarResource;
@@ -58,7 +59,7 @@ class CarBookingController extends Controller
             $user = Auth::guard('api')->user();
 
             $bookings = CarBooking::where('user_id', $user->id)
-                ->with(['cars'])
+                ->with(['cars.vendor'])
                 ->orderBy('created_at', 'desc')
                 ->get();
 
@@ -729,7 +730,7 @@ class CarBookingController extends Controller
         }
 
         // GOLDEN RULE: Recalculate everything in backend - NEVER trust frontend values
-        $car = Car::findOrFail($data['car_id']);
+        $car = Car::with('carModel')->findOrFail($data['car_id']);
 
         // ── Delivery radius enforcement (server-side security guard) ──────────────
         // This runs before any pricing so that pickup coords and delivery flag are
@@ -805,6 +806,8 @@ class CarBookingController extends Controller
                 'slug' => $data['car_slug'],
                 'trx_id' => $trx_id,
                 'payment_type' => $type,
+                'car_model' => $car->carModel?->name ?? $car->car_model,
+                'car_number' => $car->car_number,
                 'phone' => $data['mobile'],
                 'email' => $data['credentials'],
                 'location' => $data['location'],
@@ -933,7 +936,7 @@ class CarBookingController extends Controller
         }
 
         // GOLDEN RULE: Recalculate everything in backend - NEVER trust frontend values
-        $car = Car::findOrFail($data['car_id']);
+        $car = Car::with('carModel')->findOrFail($data['car_id']);
 
         // ── Delivery radius enforcement (server-side security guard) ──────────────
         $branch = $car->branch;
@@ -1012,6 +1015,8 @@ class CarBookingController extends Controller
                 'slug' => $data['car_slug'],
                 'trx_id' => $trx_id,
                 'payment_type' => 'balance',
+                'car_model' => $car->carModel?->name ?? $car->car_model,
+                'car_number' => $car->car_number,
                 'phone' => $data['mobile'],
                 'email' => $data['credentials'],
                 'location' => $data['location'],
@@ -1842,13 +1847,16 @@ class CarBookingController extends Controller
         $validator = Validator::make($request->all(), [
             'booking_id'     => 'required|integer|exists:car_bookings,id',
             'extension_days' => 'required|integer|min:1|max:90',
+            'payment_type'   => 'sometimes|in:cash,balance',
         ]);
 
         if ($validator->fails()) {
             return Response::error($validator->errors()->all(), [], 422);
         }
 
-        $user    = auth()->user();
+        $user        = auth()->user();
+        $paymentType = $request->input('payment_type', 'cash');
+
         $booking = CarBooking::with(['cars', 'user'])
             ->where('id', $request->booking_id)
             ->where('user_id', $user->id)
@@ -1863,12 +1871,14 @@ class CarBookingController extends Controller
             $extension = $extensionService->processExtension(
                 $booking,
                 (int) $request->extension_days,
-                (int) $user->id
+                (int) $user->id,
+                $paymentType,
+                $user
             );
 
             // Reload booking with fresh extension data
             $booking->refresh();
-            $booking->load(['cars', 'extensions']);
+            $booking->load(['cars', 'bookingExtensions']);
 
             // Notify user
             try {
@@ -1896,7 +1906,11 @@ class CarBookingController extends Controller
                 Log::warning('Push notification for extension failed: ' . $e->getMessage());
             }
 
-            return Response::success([__('Booking extended successfully. Extension cost will be collected on car return.')], [
+            $successMessage = $paymentType === 'balance'
+                ? __('Booking extended successfully. Extension cost deducted from your wallet.')
+                : __('Booking extended successfully. Extension cost will be collected on car return.');
+
+            return Response::success([$successMessage], [
                 'booking'   => new CarBookingResource($booking),
                 'extension' => new CarBookingExtensionResource($extension),
             ], 200);
@@ -1927,7 +1941,7 @@ class CarBookingController extends Controller
             return Response::error([__('Booking not found.')], [], 404);
         }
 
-        $extensions = $booking->extensions()->get();
+        $extensions = $booking->bookingExtensions()->get();
 
         return Response::success([__('Extension history retrieved.')], [
             'booking_id'           => (int) $booking->id,
@@ -1977,14 +1991,7 @@ class CarBookingController extends Controller
             return Response::error([__('Total rental duration cannot exceed 365 days.')], [], 422);
         }
 
-        $currentReturnDate = $booking->return_date
-            ? Carbon::parse($booking->return_date)
-            : $booking->calculateReturnDate();
-
-        if ($currentReturnDate->lessThanOrEqualTo(now()->addHours(2))) {
-            return Response::error([__('Extensions must be requested at least 2 hours before the return date.')], [], 422);
-        }
-
+        $currentReturnDate = $booking->calculateReturnDate();
         $newReturnDate = $currentReturnDate->copy()->addDays($extensionDays);
 
         // Availability check (read-only — no lock needed for preview)
@@ -2068,7 +2075,7 @@ class CarBookingController extends Controller
                     $user,
                     $booking,
                     (float) $booking->balance_deducted,
-                    __('Auto-refund: Booking cancelled by user'),
+                    __('Booking cancelled by user', [], 'ar'),
                 );
             }
 
@@ -2093,6 +2100,91 @@ class CarBookingController extends Controller
         }
     }
 
+    /**
+     * POST /api/v1/user/car-booking/validate-datetime
+     *
+     * Check if a pickup date/time falls within the working hours of a car's branch.
+     */
+    public function validatePickupDateTime(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'car_id'      => 'required|integer|exists:cars,id',
+            'pickup_date' => 'required|date',
+            'pickup_time' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return Response::error($validator->errors()->all(), [], 422);
+        }
+
+        $pickupTime = $this->convertTo24HourFormat($request->pickup_time);
+        $pickupDate = Carbon::parse($request->pickup_date);
+        $dayOfWeek  = $pickupDate->dayOfWeek; // 0=Sunday, 6=Saturday
+
+        $car = Car::with(['branch'])->find($request->car_id);
+
+        if (!$car) {
+            return Response::error([__('Car not found.')], [], 404);
+        }
+
+        $branch = $car->branch;
+
+        if (!$branch) {
+            return Response::error([__('Car branch not found.')], [], 404);
+        }
+
+        $workingHour = $branch->workingHours()
+            ->enabled()
+            ->forDay($dayOfWeek)
+            ->first();
+
+        $dayName = BranchWorkingHour::DAY_NAMES_EN[$dayOfWeek] ?? '';
+
+        if (!$workingHour) {
+            return Response::error(
+                [__('Branch is closed on :day.', ['day' => $dayName])],
+                [
+                    'is_valid'    => false,
+                    'day_of_week' => $dayOfWeek,
+                    'day_name'    => $dayName,
+                ],
+                422
+            );
+        }
+
+        $timeFormatted = Carbon::parse($pickupTime)->format('H:i:s');
+
+        if ($timeFormatted < $workingHour->open_time || $timeFormatted >= $workingHour->close_time) {
+            return Response::error(
+                [__('Pickup time must be between :open and :close on :day.', [
+                    'open'  => Carbon::parse($workingHour->open_time)->format('h:i A'),
+                    'close' => Carbon::parse($workingHour->close_time)->format('h:i A'),
+                    'day'   => $dayName,
+                ])],
+                [
+                    'is_valid'   => false,
+                    'day_name'   => $dayName,
+                    'open_time'  => Carbon::parse($workingHour->open_time)->format('h:i A'),
+                    'close_time' => Carbon::parse($workingHour->close_time)->format('h:i A'),
+                ],
+                422
+            );
+        }
+
+        return Response::success(
+            [__('Pickup date and time are within branch working hours.')],
+            [
+                'is_valid'    => true,
+                'day_name'    => $dayName,
+                'open_time'   => Carbon::parse($workingHour->open_time)->format('h:i A'),
+                'close_time'  => Carbon::parse($workingHour->close_time)->format('h:i A'),
+                'pickup_date' => $pickupDate->format('d-m-Y'),
+                'pickup_time' => Carbon::parse($pickupTime)->format('h:i A'),
+            ],
+            200
+        );
+    }
+
     private function notifyUserOnBookingConfirmed($user, CarBooking $booking, $basic_setting): void
     {
         $booking->loadMissing('cars');
@@ -2100,9 +2192,9 @@ class CarBookingController extends Controller
         $content = [
             'title'   => __('Booking Confirmed', [], 'ar'),
             'message' => __('Your booking is confirmed. Car: :model, Pickup: :date, Ref: :trx', [
-                'model' => $booking->cars?->car_model ?? '',
+                'model' => $booking->car_model ?? $booking->cars?->car_model ?? '',
                 'date'  => $booking->pickup_date,
-                'trx'   => $booking->trx_id,
+                'trx'   => $booking->trip_id,
             ], 'ar'),
             'time'    => now()->diffForHumans(),
             'image'   => files_asset_path('profile-default'),
@@ -2141,7 +2233,7 @@ class CarBookingController extends Controller
         $content = [
             'title'   => __('Booking Cancelled', [], 'ar'),
             'message' => __('Your booking :trx has been cancelled.:refund', [
-                'trx'    => $booking->trx_id,
+                'trx'    => $booking->trip_id,
                 'refund' => $booking->paid_from_balance
                     ? ' ' . __(':amount SAR refunded to your wallet.', ['amount' => number_format($booking->balance_deducted, 2)], 'ar')
                     : '',

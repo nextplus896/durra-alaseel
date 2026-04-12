@@ -1788,5 +1788,17 @@
     "appLCardNumber",
     "appLExpirationDate",
     "appLDebitCardPayment",
-    "appLPaymentSuccessful"
+    "appLPaymentSuccessful",
+    "Booking Confirmed",
+    "Your booking is confirmed. Car: :model, Pickup: :date, Ref: :trx",
+    "Booking Cancelled",
+    ":amount SAR refunded to your wallet.",
+    "Your booking :trx has been cancelled.:refund",
+    "Payment refund — Moyasar invoice :id",
+    "Payment refund reversal — Moyasar invoice :id",
+    "Payment successfully: :amount SAR for booking #:trx",
+    "Booking #:trx has been extended by :days days",
+    "Booking #:trx has been extended by :days",
+    ":amount SAR has been refunded for booking #:trx due to :reason",
+    "cancellation"
 ]

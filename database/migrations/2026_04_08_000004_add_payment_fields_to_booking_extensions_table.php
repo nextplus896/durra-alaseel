@@ -1,0 +1,24 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('booking_extensions', function (Blueprint $table) {
+            $table->string('payment_type', 20)->default('cash')->after('total_cost')
+                ->comment('cash or balance');
+            $table->boolean('paid_from_balance')->default(false)->after('payment_type');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('booking_extensions', function (Blueprint $table) {
+            $table->dropColumn(['payment_type', 'paid_from_balance']);
+        });
+    }
+};

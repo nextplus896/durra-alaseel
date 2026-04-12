@@ -56,7 +56,6 @@ class CarBookingResource extends JsonResource
             'paid_from_balance' => (bool) $this->paid_from_balance,
             // Extension fields
             'return_date'           => $this->return_date ? $this->return_date->toDateString() : null,
-            'original_rental_days'  => $this->original_rental_days ? (int) $this->original_rental_days : null,
             'extension_count'       => (int) ($this->extension_count ?? 0),
             'total_extension_days'  => (int) ($this->total_extension_days ?? 0),
             'is_extendable'         => (bool) $this->is_extendable,
@@ -68,7 +67,7 @@ class CarBookingResource extends JsonResource
             'cars' => $this->whenLoaded('cars', function () {
                 return new CarResource($this->cars);
             }),
-            'extensions' => CarBookingExtensionResource::collection($this->whenLoaded('extensions')),
+            'booking_extensions' => CarBookingExtensionResource::collection($this->whenLoaded('bookingExtensions')),
         ];
     }
 }

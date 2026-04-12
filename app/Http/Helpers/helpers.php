@@ -1470,17 +1470,13 @@ function generate_unique_string($table, $column, $length = 10)
     return $unique_string;
 }
 
-function generate_unique_code($length = 6)
+function generate_unique_code()
 {
-    // Alphanumeric charset — ambiguous characters (0/O, 1/I/L) excluded
-    $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    $charsLength = strlen($chars);
+    // Format: 2-digit year + 5 random digits → 7-digit numeric string (e.g., 2614837)
+    $yearPrefix = date('y');
 
     do {
-        $code = '';
-        for ($i = 0; $i < $length; $i++) {
-            $code .= $chars[random_int(0, $charsLength - 1)];
-        }
+        $code = $yearPrefix . str_pad(random_int(0, 99999), 5, '0', STR_PAD_LEFT);
         $exists = DB::table('car_bookings')->where('trip_id', $code)->exists();
     } while ($exists);
 

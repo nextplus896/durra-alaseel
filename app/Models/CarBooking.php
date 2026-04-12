@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Vendor\Cars\Car;
 use App\Models\Admin\Branch;
+use App\Models\BookingExtension;
 use App\Models\CarBookingTransaction;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -53,7 +54,6 @@ class CarBooking extends Model
         'is_delivery'          => 'boolean',
         'paid_from_balance'    => 'boolean',
         'return_date'          => 'date',
-        'original_rental_days' => 'integer',
         'extension_count'      => 'integer',
         'total_extension_days' => 'integer',
         'created_at'           => 'datetime',
@@ -80,11 +80,9 @@ class CarBooking extends Model
         return $this->hasOne(BalanceTransaction::class, 'booking_id');
     }
 
-    public function extensions()
+    public function bookingExtensions()
     {
-        return $this->hasMany(CarBookingTransaction::class, 'car_booking_id')
-            ->where('type', CarBookingTransaction::TYPE_EXTENSION)
-            ->latest('transacted_at');
+        return $this->hasMany(BookingExtension::class, 'car_booking_id')->latest();
     }
 
     public function bookingTransactions()
@@ -97,12 +95,18 @@ class CarBooking extends Model
     // -----------------------------------------------------------------
 
     /**
-     * Calculate the computed return date from pickup_date + rental_days.
-     * Useful before return_date column is populated.
+     * Calculate the computed return date.
+     * Formula: pickup_date + pickup_time + rental_days + total_extension_days
      */
     public function calculateReturnDate(): Carbon
     {
-        return Carbon::parse($this->pickup_date)->addDays((int) $this->rental_days);
+        $date = Carbon::parse($this->pickup_date);
+
+        if ($this->pickup_time) {
+            $date->setTimeFromTimeString($this->pickup_time);
+        }
+
+        return $date->addDays((int) $this->rental_days + (int) $this->total_extension_days);
     }
 
     /**
@@ -114,9 +118,7 @@ class CarBooking extends Model
             return false;
         }
 
-        $returnDate = $this->return_date
-            ? Carbon::parse($this->return_date)
-            : $this->calculateReturnDate();
+        $returnDate = $this->calculateReturnDate();
 
         // Must have at least 2 hours remaining
         return $returnDate->isAfter(now()->addHours(2));
@@ -127,20 +129,18 @@ class CarBooking extends Model
      */
     public function getDaysRemainingAttribute(): int
     {
-        $returnDate = $this->return_date
-            ? Carbon::parse($this->return_date)
-            : $this->calculateReturnDate();
+        $returnDate = $this->calculateReturnDate();
 
         $diff = (int) now()->diffInDays($returnDate, false);
         return max(0, $diff);
     }
 
     /**
-     * Total cost of all approved extensions (sourced from booking transactions).
+     * Total cost of all approved extensions.
      */
     public function getTotalExtensionCostAttribute(): float
     {
-        return (float) $this->bookingTransactions()->where('type', CarBookingTransaction::TYPE_EXTENSION)->sum('total');
+        return (float) $this->bookingExtensions()->sum('total_cost');
     }
 
     /**

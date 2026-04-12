@@ -114,9 +114,33 @@ class BookingBalanceService
     {
         $dto = WalletTransactionDTO::forWithdrawal(
             amount: $amount,
-            description: __('Booking payment') . ' - ' . $booking->trx_id,
+            description: __('Payment successfully: :amount SAR for booking #:trx', ['amount' => number_format($amount, 2), 'trx' => $booking->trip_id], 'ar'),
             bookingId: $booking->id,
             idempotencyKey: 'booking-deduct-' . $booking->id,
+        );
+
+        return $this->walletService->withdraw($user, $amount, $dto);
+    }
+
+    /**
+     * Deduct balance from user account for a booking extension.
+     * Uses a unique idempotency key per extension attempt (timestamp-based).
+     * @throws Exception
+     */
+    public function deductBalanceForExtension(User $user, CarBooking $booking, float $amount, int $extensionDays = 0): BalanceTransaction
+    {
+        $arabicDays = match (true) {
+            $extensionDays === 1                                      => 'يوم واحد',
+            $extensionDays === 2                                      => 'يومَين',
+            $extensionDays >= 3 && $extensionDays <= 10              => $extensionDays . ' أيام',
+            default                                                   => $extensionDays . ' يوماً',
+        };
+
+        $dto = WalletTransactionDTO::forWithdrawal(
+            amount: $amount,
+            description: __('Booking #:trx has been extended by :days', ['trx' => $booking->trip_id, 'days' => $arabicDays], 'ar'),
+            bookingId: $booking->id,
+            idempotencyKey: 'extension-deduct-' . $booking->id . '-' . now()->timestamp,
         );
 
         return $this->walletService->withdraw($user, $amount, $dto);
@@ -130,7 +154,11 @@ class BookingBalanceService
     {
         $dto = WalletTransactionDTO::forRefund(
             amount: $amount,
-            description: $reason ?: __('Booking refund') . ' - ' . $booking->trx_id,
+            description: __(':amount SAR has been refunded for booking #:trx due to :reason', [
+                'amount' => number_format($amount, 2),
+                'trx'    => $booking->trip_id,
+                'reason' => $reason ?: __('cancellation', [], 'ar'),
+            ], 'ar'),
             referenceType: 'App\\Models\\CarBooking',
             referenceId: $booking->id,
             bookingId: $booking->id,

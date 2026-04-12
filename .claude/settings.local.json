@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(find 'C:\\\\DATA\\\\Dora Alaseel\\\\Source Code\\\\durra-alaseel-web\\\\resources\\\\js' -type f -name *.js -o -name *.vue)"
+      "Bash(find 'C:\\\\DATA\\\\Dora Alaseel\\\\Source Code\\\\durra-alaseel-web\\\\resources\\\\js' -type f -name *.js -o -name *.vue)",
+      "Bash(sed 's/\"name\": //g')",
+      "Read(//c/DATA/Dora Alaseel/Source Code/durra-alaseel-web/**)",
+      "Bash(grep -l \"image\\\\|logo\\\\|photo\\\\|avatar\\\\|file\\\\|document\\\\|banner\" database/migrations/*.php)"
     ]
   }
 }

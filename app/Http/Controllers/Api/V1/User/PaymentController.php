@@ -67,7 +67,7 @@ class PaymentController extends Controller
                 // Reverse wallet credit (withdraw the refunded amount)
                 $dto = WalletTransactionDTO::forRefund(
                     amount: $amount,
-                    description: __('Payment refund — Moyasar invoice :id', ['id' => $paymentTx->invoice_id]),
+                    description: __('Payment refund — Moyasar invoice :id', ['id' => $paymentTx->invoice_id], 'ar'),
                     referenceType: 'App\\Models\\PaymentTransaction',
                     referenceId: $paymentTx->id,
                     idempotencyKey: 'payment-refund-' . $paymentTx->id,
@@ -77,7 +77,7 @@ class PaymentController extends Controller
                 $this->walletService->withdraw($user, $amount, new WalletTransactionDTO(
                     type: 'refund',
                     amount: $amount,
-                    description: __('Payment refund reversal — Moyasar invoice :id', ['id' => $paymentTx->invoice_id]),
+                    description: __('Payment refund reversal — Moyasar invoice :id', ['id' => $paymentTx->invoice_id], 'ar'),
                     referenceType: 'App\\Models\\PaymentTransaction',
                     referenceId: $paymentTx->id,
                     paymentMethod: 'moyasar',

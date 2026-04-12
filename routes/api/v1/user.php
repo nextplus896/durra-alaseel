@@ -253,6 +253,7 @@ Route::prefix('user')
             Route::post('extend', 'extendBooking')->name('extend');
             Route::get('{bookingId}/extensions', 'extensionHistory')->name('extension.history');
             Route::post('cancel', 'cancelBooking')->name('cancel');
+            Route::post('validate-datetime', 'validatePickupDateTime')->name('validate.datetime');
         });
 
         // Wallet Management Routes

@@ -41,7 +41,7 @@ The app uses **three distinct role systems** with separate authentication guards
 
 ### Booking System
 
-- booking Id must be 6 digits, unique, and non-sequential (e.g. `5G7H2K`)
+- booking Id must be 7 digits, unique, and non-sequential: 2-digit year + 5 random digits (e.g. `2614837`)
 - Booking status flow: `pending → booked → ongoing → completed` or `pending → rejected`
 - Critical: Car availability must be checked at every step to prevent double-booking
 - Pricing includes rental fees, delivery fee, charges, tax — all calculated in `BookingBalanceService` for consistency

@@ -5,7 +5,7 @@ namespace App\Http\Resources\Api;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Maps a CarBookingTransaction (type=extension) to the extension API shape.
+ * Maps a BookingExtension to the extension API shape.
  */
 class CarBookingExtensionResource extends JsonResource
 {
@@ -25,16 +25,14 @@ class CarBookingExtensionResource extends JsonResource
             'new_return_date'      => $this->new_return_date
                 ? $this->new_return_date->toDateString()
                 : null,
-            'rental_fees'          => (float) ($this->amount ?? 0),
-            'tax_percentage'       => (float) ($this->tax_percentage ?? 0),
-            'tax_amount'           => (float) ($this->tax_amount ?? 0),
-            'total_cost'           => (float) ($this->total ?? 0),
             'daily_rate'           => $this->daily_rate !== null
                 ? (float) $this->daily_rate
                 : null,
-            'transacted_at'        => $this->transacted_at
-                ? $this->transacted_at->toIso8601String()
-                : null,
+            'rental_fees'          => (float) ($this->rental_fees ?? 0),
+            'tax_percentage'       => (float) ($this->tax_percentage ?? 0),
+            'tax_amount'           => (float) ($this->tax_amount ?? 0),
+            'total_cost'           => (float) ($this->total_cost ?? 0),
+            'status'               => (int)   ($this->status ?? 1),
             'created_at'           => $this->created_at
                 ? $this->created_at->toIso8601String()
                 : null,

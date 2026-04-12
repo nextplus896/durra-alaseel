@@ -1813,5 +1813,17 @@
     "CUSTOMER INFORMATION": "INFORMATIONS CLIENT",
     "No additional notes provided by the customer.": "Aucune note supplémentaire fournie par le client.",
     "Luxury": "Luxe",
-    "Seats": "Sièges"
+    "Seats": "Sièges",
+    "Booking Confirmed": "Réservation Confirmée",
+    "Your booking is confirmed. Car: :model, Pickup: :date, Ref: :trx": "Votre réservation est confirmée. Voiture: :model, Récupération: :date, Réf: :trx",
+    "Booking Cancelled": "Réservation Annulée",
+    ":amount SAR refunded to your wallet.": ":amount SAR remboursés sur votre portefeuille.",
+    "Your booking :trx has been cancelled.:refund": "Votre réservation :trx a été annulée.:refund",
+    "Payment refund — Moyasar invoice :id": "Remboursement de paiement — facture Moyasar :id",
+    "Payment refund reversal — Moyasar invoice :id": "Annulation de remboursement — facture Moyasar :id",
+    "Payment successfully: :amount SAR for booking #:trx": "Paiement effectué avec succès: :amount SAR pour la réservation #:trx",
+    "Booking #:trx has been extended by :days days": "La réservation #:trx a été prolongée de :days jours",
+    "Booking #:trx has been extended by :days": "La réservation #:trx a été prolongée de :days",
+    ":amount SAR has been refunded for booking #:trx due to :reason": ":amount SAR ont été remboursés pour la réservation #:trx en raison de :reason",
+    "cancellation": "annulation"
 }

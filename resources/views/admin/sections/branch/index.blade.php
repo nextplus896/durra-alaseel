@@ -72,6 +72,8 @@
                                 </td>
                                 <td>{{ $item->admin->full_name ?? '-' }}</td>
                                 <td>
+                                    <a href="{{ setRoute('admin.branch.working.hours', $item->id) }}"
+                                        class="btn btn--base btn--warning"><i class="las la-clock"></i></a>
                                     <a href="{{ setRoute('admin.branch.delivery.settings', $item->id) }}"
                                         class="btn btn--base btn--info"><i class="las la-truck"></i></a>
                                     @include('admin.components.link.edit-default', [

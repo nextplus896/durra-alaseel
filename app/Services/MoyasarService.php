@@ -58,6 +58,10 @@ class MoyasarService
     ): array {
         $currency = config('moyasar.invoice.currency', 'SAR');
         $expiresAt = now()->addDays(config('moyasar.invoice.expires_at_days', 7))->toIso8601String();
+        $normalizedUserName = trim((string) preg_replace('/\s+/', ' ', $userName));
+        if ($normalizedUserName === '') {
+            $normalizedUserName = 'User';
+        }
 
         // Moyasar expects amount in the smallest currency unit (halalas for SAR)
         $amountInHalalas = (int) round($amount * 100);
@@ -65,7 +69,7 @@ class MoyasarService
         $payload = [
             'amount'      => $amountInHalalas,
             'currency'    => $currency,
-            'description' => "Wallet recharge for user #{$userId}",
+            'description' => "Wallet Top-Up – User: {$normalizedUserName} | ID: {$userId}",
             'expired_at'  => $expiresAt,
             'metadata'    => array_merge([
                 'user_id'    => $userId,

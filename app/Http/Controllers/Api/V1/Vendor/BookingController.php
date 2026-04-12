@@ -183,7 +183,7 @@ class BookingController extends Controller
                             $bookingUser,
                             $booking_info,
                             (float) $booking_info->balance_deducted,
-                            __('Auto-refund: Booking rejected by vendor — :reason', ['reason' => $rejectionReason]),
+                            __('Booking rejected by vendor — :reason', ['reason' => $rejectionReason], 'ar'),
                         );
                         Log::info('Auto-refund processed for rejected booking', [
                             'booking_id' => $booking_info->id,
@@ -201,7 +201,7 @@ class BookingController extends Controller
 
             $notification_content = [
                 'title'   => __('Booking Rejected', [], 'ar'),
-                'message' => __('Your booking #:trx was rejected. Reason: :reason', ['trx' => $booking_info->trx_id, 'reason' => $rejectionReason], 'ar'),
+                'message' => __('Your booking #:trx was rejected. Reason: :reason', ['trx' => $booking_info->trip_id, 'reason' => $rejectionReason], 'ar'),
                 'time'    => Carbon::now()->diffForHumans(),
                 'image'   => files_asset_path('profile-default'),
             ];

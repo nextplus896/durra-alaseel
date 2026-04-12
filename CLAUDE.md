@@ -35,11 +35,11 @@ php artisan test --filter=TestName      # Single test
 
 The app uses **three separate authentication guards** with distinct routing and controllers:
 
-| Role | Guard | Web Controller | API Controller | Routes File |
-|------|-------|----------------|----------------|-------------|
-| User | `auth` / `auth:api` | `Http/Controllers/User/` | `Http/Controllers/Api/V1/User/` | `routes/user.php` |
-| Vendor | `auth:vendor` | `Http/Controllers/Vendor/` | `Http/Controllers/Api/V1/Vendor/` | `routes/vendor.php` |
-| Admin | `auth:admin` | `Http/Controllers/Admin/` | — | `routes/admin.php` |
+| Role   | Guard               | Web Controller             | API Controller                    | Routes File         |
+| ------ | ------------------- | -------------------------- | --------------------------------- | ------------------- |
+| User   | `auth` / `auth:api` | `Http/Controllers/User/`   | `Http/Controllers/Api/V1/User/`   | `routes/user.php`   |
+| Vendor | `auth:vendor`       | `Http/Controllers/Vendor/` | `Http/Controllers/Api/V1/Vendor/` | `routes/vendor.php` |
+| Admin  | `auth:admin`        | `Http/Controllers/Admin/`  | —                                 | `routes/admin.php`  |
 
 **Critical:** Always verify which guard/route group you're modifying. Web routes return Blade views; API routes (`/api/v1/`) return JSON. Same business logic is shared via `App\Services\`.
 
@@ -50,7 +50,7 @@ pending (0) → booked (1) → ongoing (2) → completed (3)
 pending (0) → rejected (4)
 ```
 
-- Booking IDs must be 6 characters, unique, non-sequential (e.g., `5G7H2K`)
+- Booking IDs must be 7 digits, unique, non-sequential: 2-digit year + 5 random digits (e.g., `2614837`)
 - Car availability must be checked at every step to prevent double-booking
 - All multi-step writes must be wrapped in `DB::transaction()`
 
@@ -82,16 +82,16 @@ Delivery is **per-vendor per-branch** via `BranchDeliverySetting (branch_id, ven
 
 ## Key Classes
 
-| Class | Location | Purpose |
-|-------|----------|---------|
-| `BookingBalanceService` | `App\Services\` | Pricing, tax, balance calculations |
-| `WalletService` | `App\Services\` | Wallet deductions and refunds |
-| `TwilioService` | `App\Services\` | SMS/WhatsApp OTP |
-| `MoyasarService` | `App\Services\` | Moyasar payment gateway |
-| `PayTabsService` | `App\Services\` | PayTabs payment gateway |
-| `Response` | `App\Http\Helpers\` | JSON response formatting |
-| `PaymentGatewayHelper` | `App\Http\Helpers\` | Gateway initialization |
-| `PushNotificationHelper` | `App\Http\Helpers\` | Push notifications |
+| Class                    | Location            | Purpose                            |
+| ------------------------ | ------------------- | ---------------------------------- |
+| `BookingBalanceService`  | `App\Services\`     | Pricing, tax, balance calculations |
+| `WalletService`          | `App\Services\`     | Wallet deductions and refunds      |
+| `TwilioService`          | `App\Services\`     | SMS/WhatsApp OTP                   |
+| `MoyasarService`         | `App\Services\`     | Moyasar payment gateway            |
+| `PayTabsService`         | `App\Services\`     | PayTabs payment gateway            |
+| `Response`               | `App\Http\Helpers\` | JSON response formatting           |
+| `PaymentGatewayHelper`   | `App\Http\Helpers\` | Gateway initialization             |
+| `PushNotificationHelper` | `App\Http\Helpers\` | Push notifications                 |
 
 ## Conventions
 

@@ -5,6 +5,7 @@ namespace App\Models\Admin;
 use App\Models\Admin\Admin;
 use App\Models\Vendor\Cars\Car;
 use App\Models\BranchDeliverySetting;
+use App\Models\BranchWorkingHour;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -24,6 +25,8 @@ class Branch extends Model
         'service_radius_km' => 'decimal:2',
         'delivery_enabled' => 'boolean',
         'delivery_radius_km' => 'decimal:2',
+        'phone' => 'string',
+        'email' => 'string',
         'status' => 'boolean',
         'last_edit_by' => 'integer',
         'created_at' => 'datetime',
@@ -52,6 +55,32 @@ class Branch extends Model
     public function deliverySettings()
     {
         return $this->hasMany(BranchDeliverySetting::class, 'branch_id');
+    }
+
+    /**
+     * Get working hours for this branch
+     */
+    public function workingHours()
+    {
+        return $this->hasMany(BranchWorkingHour::class, 'branch_id');
+    }
+
+    /**
+     * Check if the branch is currently open based on working hours.
+     * Uses Asia/Riyadh timezone (all branches are in KSA).
+     */
+    public function isCurrentlyOpen(): bool
+    {
+        $now = now('Asia/Riyadh');
+        $dayOfWeek = $now->dayOfWeek; // 0=Sunday, 6=Saturday
+        $currentTime = $now->format('H:i:s');
+
+        return $this->workingHours()
+            ->enabled()
+            ->forDay($dayOfWeek)
+            ->where('open_time', '<=', $currentTime)
+            ->where('close_time', '>', $currentTime)
+            ->exists();
     }
 
     /**

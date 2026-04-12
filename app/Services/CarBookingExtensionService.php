@@ -4,8 +4,10 @@ namespace App\Services;
 
 use Exception;
 use Carbon\Carbon;
+use App\Models\BookingExtension;
 use App\Models\CarBooking;
 use App\Models\CarBookingTransaction;
+use App\Models\User;
 use App\Models\Vendor\Cars\Car;
 use App\Constants\CarBookingConst;
 use Illuminate\Support\Facades\DB;
@@ -44,18 +46,9 @@ class CarBookingExtensionService
         }
 
         // Maximum total rental duration
-        $newTotalDays = (int) $booking->rental_days + $extensionDays;
+        $newTotalDays = (int) $booking->rental_days + (int) $booking->total_extension_days + $extensionDays;
         if ($newTotalDays > 365) {
             throw new Exception(__('Total rental duration cannot exceed 365 days.'));
-        }
-
-        // Must extend at least 2 hours before current return date
-        $returnDate = $booking->return_date
-            ? Carbon::parse($booking->return_date)
-            : $booking->calculateReturnDate();
-
-        if ($returnDate->lessThanOrEqualTo(now()->addHours(2))) {
-            throw new Exception(__('Extensions must be requested at least 2 hours before the return date.'));
         }
     }
 
@@ -70,9 +63,7 @@ class CarBookingExtensionService
      */
     public function checkAvailability(CarBooking $booking, int $extensionDays): void
     {
-        $currentReturnDate = $booking->return_date
-            ? Carbon::parse($booking->return_date)->toDateString()
-            : $booking->calculateReturnDate()->toDateString();
+        $currentReturnDate = $booking->calculateReturnDate()->toDateString();
 
         $newReturnDate = Carbon::parse($currentReturnDate)
             ->addDays($extensionDays)
@@ -119,11 +110,10 @@ class CarBookingExtensionService
 
     /**
      * Validate, check availability, and persist the extension — all in one transaction.
-     * Payment type is cash: the extension cost will be collected on car return.
      *
      * @throws Exception
      */
-    public function processExtension(CarBooking $booking, int $extensionDays, int $authUserId): CarBookingTransaction
+    public function processExtension(CarBooking $booking, int $extensionDays, int $authUserId, string $paymentType = 'cash', ?User $user = null): BookingExtension
     {
         $this->validateExtension($booking, $extensionDays, $authUserId);
 
@@ -132,7 +122,20 @@ class CarBookingExtensionService
         $costBreakdown = $this->calculateExtensionCost($car, $extensionDays);
         $totalCost     = $costBreakdown['total_cost'];
 
-        $transaction = DB::transaction(function () use ($booking, $extensionDays, $costBreakdown, $totalCost, $authUserId) {
+        // Validate balance upfront (outside transaction) to give a clear error early
+        if ($paymentType === 'balance') {
+            if (!$user) {
+                throw new Exception(__('User is required for balance payment.'));
+            }
+            if (!$this->balanceService->hasSufficientBalance($user, $totalCost)) {
+                throw new Exception(__('Insufficient balance. Your balance is :balance, required amount is :required', [
+                    'balance'  => number_format($user->balance, 2),
+                    'required' => number_format($totalCost, 2),
+                ]));
+            }
+        }
+
+        $extension = DB::transaction(function () use ($booking, $extensionDays, $costBreakdown, $totalCost, $authUserId, $paymentType, $user) {
             // Re-lock the booking row to prevent race conditions
             $booking = CarBooking::lockForUpdate()->findOrFail($booking->id);
 
@@ -145,45 +148,50 @@ class CarBookingExtensionService
             $this->checkAvailability($booking, $extensionDays);
 
             // Resolve dates
-            $previousReturnDate = $booking->return_date
-                ? Carbon::parse($booking->return_date)
-                : $booking->calculateReturnDate();
-
-            $newReturnDate = $previousReturnDate->copy()->addDays($extensionDays);
+            $previousReturnDate = $booking->calculateReturnDate();
+            $newReturnDate      = $previousReturnDate->copy()->addDays($extensionDays);
 
             // Retrieve parent rental transaction to copy daily_rate
             $parentRentalTrx = CarBookingTransaction::where('car_booking_id', $booking->id)
                 ->where('type', CarBookingTransaction::TYPE_RENTAL)
                 ->first();
 
-            // Create the extension transaction directly (no separate extension record)
-            $transaction = CarBookingTransaction::create([
-                'car_booking_id'     => $booking->id,
-                'type'               => CarBookingTransaction::TYPE_EXTENSION,
-                'description'        => "+{$extensionDays} days extension",
-                'amount'             => (float) $costBreakdown['rental_fees'],
-                'tax_percentage'     => (float) $costBreakdown['tax_percentage'],
-                'tax_amount'         => (float) $costBreakdown['tax_amount'],
-                'total'              => (float) $totalCost,
-                'daily_rate'         => $parentRentalTrx?->daily_rate,
-                'extension_days'     => $extensionDays,
+            // Deduct from wallet if payment is by balance
+            $balanceTransactionId = null;
+            if ($paymentType === 'balance' && $user) {
+                $balanceTrx           = $this->balanceService->deductBalanceForExtension($user, $booking, $totalCost, $extensionDays);
+                $balanceTransactionId = $balanceTrx->id;
+            }
+
+            // Create the extension record in the dedicated booking_extensions table
+            $extension = BookingExtension::create([
+                'car_booking_id'       => $booking->id,
+                'user_id'              => $authUserId,
+                'extension_days'       => $extensionDays,
                 'previous_return_date' => $previousReturnDate->toDateString(),
-                'new_return_date'    => $newReturnDate->toDateString(),
-                'transacted_at'      => now(),
+                'new_return_date'      => $newReturnDate->toDateString(),
+                'daily_rate'           => $parentRentalTrx?->daily_rate ?? 0,
+                'rental_fees'          => (float) $costBreakdown['rental_fees'],
+                'tax_percentage'       => (float) $costBreakdown['tax_percentage'],
+                'tax_amount'           => (float) $costBreakdown['tax_amount'],
+                'total_cost'           => (float) $totalCost,
+                'payment_type'         => $paymentType,
+                'paid_from_balance'    => $paymentType === 'balance',
+                'status'               => BookingExtension::STATUS_APPROVED,
+                'balance_transaction_id' => $balanceTransactionId,
             ]);
 
-            // Update the parent booking
+            // Update the parent booking — rental_days is immutable; only extension tracking fields change
             $booking->update([
-                'rental_days'          => (int) $booking->rental_days + $extensionDays,
                 'return_date'          => $newReturnDate->toDateString(),
                 'extension_count'      => (int) $booking->extension_count + 1,
                 'total_extension_days' => (int) $booking->total_extension_days + $extensionDays,
                 'total_amount'         => (float) $booking->total_amount + $totalCost,
             ]);
 
-            return $transaction;
+            return $extension;
         });
 
-        return $transaction;
+        return $extension;
     }
 }

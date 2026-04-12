@@ -89,6 +89,16 @@
                         <label>{{ __('Address') }}</label>
                         <textarea name="address" class="form--control" rows="2" placeholder="{{ __('Enter branch address') }}">{{ old('address', $branch->address) }}</textarea>
                     </div>
+                    <div class="col-xl-6 col-lg-6 form-group">
+                        <label>{{ __('Phone') }}</label>
+                        <input type="text" name="phone" class="form--control"
+                            placeholder="{{ __('Enter phone number') }}" value="{{ old('phone', $branch->phone) }}">
+                    </div>
+                    <div class="col-xl-6 col-lg-6 form-group">
+                        <label>{{ __('Email') }}</label>
+                        <input type="email" name="email" class="form--control"
+                            placeholder="{{ __('Enter email address') }}" value="{{ old('email', $branch->email) }}">
+                    </div>
                     <div class="col-xl-12 col-lg-12 form-group">
                         <label>{{ __('Select Location on Map') }}<span>*</span></label>
                         <div class="map-search-wrapper">

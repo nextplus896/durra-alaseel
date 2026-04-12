@@ -80,7 +80,7 @@ class BalanceController extends Controller
                 'customer_email' => $user->email,
                 'customer_phone' => $user->mobile ?? '',
                 'order_id' => 'RECHARGE-' . $user->id . '-' . time(),
-                'description' => __('Balance Recharge'),
+                'description' => __('Balance Recharge', [], 'ar'),
                 'callback_url' => route('api.user.balance.recharge.callback'),
                 'return_url' => route('api.user.balance.recharge.return'),
                 'user_id' => $user->id,
@@ -144,7 +144,7 @@ class BalanceController extends Controller
                                 'amount'         => $amount,
                                 'balance_before' => $balanceBefore,
                                 'balance_after'  => $balanceAfter,
-                                'description'    => __('Balance recharge via PayTabs'),
+                                'description'    => __('Balance recharge via PayTabs', [], 'ar'),
                                 'payment_gateway' => 'paytabs',
                                 'reference'      => $result['tran_ref'] ?? null,
                             ]);

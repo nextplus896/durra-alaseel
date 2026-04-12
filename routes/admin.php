@@ -277,6 +277,10 @@ Route::name('admin.')->group(function () {
             Route::put('status/update', 'statusUpdate')->name('status.update');
             Route::delete('delete', 'delete')->name('delete');
             Route::get('delivery-settings/{id}', 'deliverySettings')->name('delivery.settings');
+            Route::get('working-hours/{id}', 'workingHours')->name('working.hours');
+            Route::post('working-hours/{id}/store', 'storeWorkingHour')->name('working.hours.store');
+            Route::put('working-hours/{id}/toggle', 'toggleWorkingHour')->name('working.hours.toggle');
+            Route::delete('working-hours/{id}/delete', 'deleteWorkingHour')->name('working.hours.delete');
         });
 
         // Tax Settings Section
@@ -566,21 +570,21 @@ Route::get('admin/pusher/beams-auth', function (Request $request) {
     Log::info('📍 Timestamp: ' . now()->toDateTimeString());
     Log::info('Session ID: ' . session()->getId());
     Log::info('Cookies: ' . json_encode($request->cookies->all()));
-    
+
     if (Auth::check() == false) {
         Log::error('❌ Authentication failed - Admin not logged in');
         Log::error('Session authenticated: ' . (Auth::check() ? 'Yes' : 'No'));
         return response(['Inconsistent request'], 401);
     }
     $userID = Auth::user()->id;
-    
+
     // Validate user_id query parameter matches authenticated admin (security check)
     $userIDInQueryParam = $request->query('user_id');
     Log::info('📋 Validating user_id query parameter', [
         'authenticated_admin_id' => $userID,
         'query_param_user_id' => $userIDInQueryParam,
     ]);
-    
+
     // The Pusher Beams SDK automatically sends user_id as query param
     // We must verify it matches the authenticated admin
     if ($userIDInQueryParam && $userIDInQueryParam != 'admin-' . $userID) {
@@ -591,7 +595,7 @@ Route::get('admin/pusher/beams-auth', function (Request $request) {
         ]);
         return response(['Inconsistent request - admin ID mismatch'], 401);
     }
-    
+
     Log::info('✅ Admin authenticated successfully', [
         'admin_id' => $userID,
         'email' => Auth::user()->email,
@@ -612,17 +616,17 @@ Route::get('admin/pusher/beams-auth', function (Request $request) {
 
     $instance_id    = $notification_config->instance_id ?? null;
     $primary_key    = $notification_config->primary_key ?? null;
-    
+
     Log::info('📋 Push Notification Config:', [
         'instance_id' => $instance_id ? (substr($instance_id, 0, 10) . '...') : 'Missing',
         'primary_key' => $primary_key ? 'Present (****)' : 'Missing',
     ]);
-    
+
     if ($instance_id == null || $primary_key == null) {
         Log::error('❌ Instance ID or Primary Key missing');
         return response('Sorry! You have to configure first to send push notification.', 404);
     }
-    
+
     try {
         $beamsClient = new PushNotifications(
             array(
@@ -631,19 +635,19 @@ Route::get('admin/pusher/beams-auth', function (Request $request) {
             )
         );
         Log::info('✅ Pusher Beams client created');
-    } catch(Throwable $e) {
+    } catch (Throwable $e) {
         Log::error('❌ Failed to create Pusher Beams client: ' . $e->getMessage());
         return response(['Server Error. Failed to create beams client.'], 500);
     }
-    
+
     $publisherUserId = make_user_id_for_pusher("admin", $userID);
     Log::info('📱 Publisher User ID: ' . $publisherUserId);
-    
+
     try {
         $beamsToken = $beamsClient->generateToken($publisherUserId);
         Log::info('✅ Beams token generated successfully');
         Log::info('Token structure: ' . json_encode(array_keys((array)$beamsToken)));
-        
+
         // Log the complete response (for debugging)
         $responseData = json_decode(json_encode($beamsToken), true);
         Log::info('📤 Response Data:', [
@@ -651,7 +655,7 @@ Route::get('admin/pusher/beams-auth', function (Request $request) {
             'has_token' => isset($responseData['token']),
             'response_keys' => array_keys($responseData),
         ]);
-        
+
         Log::info('═══════════════════════════════════════════════════');
         Log::info('✅ [ADMIN WEB] PUSHER BEAMS AUTH SUCCESSFUL');
         Log::info('📱 Returning token to web app');

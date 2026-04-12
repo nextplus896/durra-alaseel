@@ -151,7 +151,7 @@ class BookingRequestController extends Controller
 
             $notification_content = [
                 'title'   => __('Booking Rejected', [], 'ar'),
-                'message' => __('Your booking #:trx was rejected. Reason: :reason', ['trx' => $booking_info->trx_id, 'reason' => $rejectionReason], 'ar'),
+                'message' => __('Your booking #:trx was rejected. Reason: :reason', ['trx' => $booking_info->trip_id, 'reason' => $rejectionReason], 'ar'),
                 'time'    => Carbon::now()->diffForHumans(),
                 'image'   => files_asset_path('profile-default'),
             ];
