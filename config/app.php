@@ -240,8 +240,7 @@ return [
         'Response'  => App\Http\Helpers\Response::class,
         'Agent'     => Jenssegers\Agent\Facades\Agent::class,
         'Excel'     => Maatwebsite\Excel\Facades\Excel::class,
-        'Agent'     => Jenssegers\Agent\Facades\Agent::class,
-        'Paystack'  => Unicodeveloper\Paystack\Facades\Paystack::class,
+        //'Paystack'  => Unicodeveloper\Paystack\Facades\Paystack::class,
     ])->toArray(),
 
 ];
