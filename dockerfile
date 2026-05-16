@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libxml2-dev \
         libsodium-dev \
         libpq-dev \
+        libicu-dev \
         unzip \
         curl \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
