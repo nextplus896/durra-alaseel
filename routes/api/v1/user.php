@@ -216,12 +216,10 @@ Route::prefix('user')
             Route::get('success/response/{gateway}', 'success')->withoutMiddleware(['auth:api'])->name('payment.success');
             Route::get('cancel/response/{gateway}', 'cancel')->withoutMiddleware(['auth:api'])->name('payment.cancel');
 
-            // POST Route For Unauthenticated Request
+            // POST Route For Unauthenticated Request (no name — avoids duplicate with GET routes above)
             Route::post('success/response/{gateway}', 'postSuccess')
-                ->name('payment.success')
                 ->withoutMiddleware(['auth:api']);
             Route::post('cancel/response/{gateway}', 'postCancel')
-                ->name('payment.cancel')
                 ->withoutMiddleware(['auth:api']);
 
             //redirect with Btn Pay

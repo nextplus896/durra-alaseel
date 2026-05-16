@@ -40,9 +40,9 @@ Route::prefix("user")->name("user.")->group(function(){
         Route::get('success/response/{gateway}','success')->name('payment.success');
         Route::get("cancel/response/{gateway}",'cancel')->name('payment.cancel');
 
-        // POST Route For Unauthenticated Request
-        Route::post('cancel/response/{gateway}','postCancel')->name('payment.cancel')->withoutMiddleware(['auth','verification.guard','user.google.two.factor']);
-        Route::post('success/response/{gateway}','postSuccess')->name('payment.success')->withoutMiddleware(['auth','verification.guard','user.google.two.factor']);
+        // POST Route For Unauthenticated Request (no name — avoids duplicate with GET routes above)
+        Route::post('cancel/response/{gateway}','postCancel')->withoutMiddleware(['auth','verification.guard','user.google.two.factor']);
+        Route::post('success/response/{gateway}','postSuccess')->withoutMiddleware(['auth','verification.guard','user.google.two.factor']);
 
         Route::post("callback/response/{gateway}",'callback')->name('payment.callback')->withoutMiddleware(['web','auth','verification.guard','user.google.two.factor']);
         // redirect with HTML form route
