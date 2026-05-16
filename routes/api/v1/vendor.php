@@ -154,7 +154,7 @@ Route::prefix('vendor')->name('api.vendor.')->group(function () {
     });
 
     // Car routes
-    Route::controller(CarController::class)->middleware(['kyc.verification.guard'])->prefix('car')->name("car")->group(function () {
+    Route::controller(CarController::class)->middleware(['kyc.verification.guard'])->prefix('car')->group(function () {
         Route::get('list', 'list');   // GET /api/v1/vendor/car/list - Get vendor's own cars with sort/filter
         Route::get('area', 'carArea');
         Route::get('type', 'carType');
@@ -167,7 +167,7 @@ Route::prefix('vendor')->name('api.vendor.')->group(function () {
     });
 
     // Booking routes
-    Route::controller(BookingController::class)->middleware(['kyc.verification.guard'])->prefix('booking')->name("booking")->group(function () {
+    Route::controller(BookingController::class)->middleware(['kyc.verification.guard'])->prefix('booking')->group(function () {
         Route::get('requests', 'bookings');
         Route::get('accept', 'accept');
         Route::post('reject', 'reject');
@@ -175,7 +175,7 @@ Route::prefix('vendor')->name('api.vendor.')->group(function () {
     });
 
     // Booking History routes
-    Route::controller(BookingHistoryController::class)->prefix('history')->name("history")->group(function () {
+    Route::controller(BookingHistoryController::class)->prefix('history')->group(function () {
         Route::get('view', 'view');
     });
 
