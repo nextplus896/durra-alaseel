@@ -43,7 +43,7 @@ Route::controller(AuthorizationController::class)->prefix("authorize")->middlewa
 
 
 // Vendor Auth Routes
-Route::middleware(['api.vendor.auth.guard'])->prefix("vendor")->name('vendor')->group(function(){
+Route::middleware(['api.vendor.auth.guard'])->prefix("vendor")->group(function(){
     Route::controller(VendorRegisterController::class)->group(function() {
         Route::post("register","register");
     });
@@ -62,7 +62,7 @@ Route::middleware(['api.vendor.auth.guard'])->prefix("vendor")->name('vendor')->
 
 });
 
-Route::controller(VendorAuthorizationController::class)->prefix("vendor-authorize")->name('vendor.authorize')->middleware(['auth:vendor_api'])->group(function(){
+Route::controller(VendorAuthorizationController::class)->prefix("vendor-authorize")->middleware(['auth:vendor_api'])->group(function(){
     // Mail
     Route::prefix("mail")->group(function(){
         Route::get("send/code","sendCodeToMail");

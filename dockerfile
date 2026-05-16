@@ -24,6 +24,14 @@ RUN composer install \
 RUN chmod +x /var/www/html/docker-entrypoint.sh && \
     chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
+# Ensure PHP-FPM pool always has a valid user — serversideup generates this
+# dynamically from PUID, but Coolify can deliver PUID as empty at runtime.
+RUN printf '[www]\nuser = www-data\ngroup = www-data\n' \
+    > /usr/local/etc/php-fpm.d/zzz-user-override.conf
+
+ENV PUID=9999
+ENV PGID=9999
+
 EXPOSE 8080
 
 ENTRYPOINT ["/var/www/html/docker-entrypoint.sh"]
