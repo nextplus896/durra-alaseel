@@ -1,11 +1,6 @@
 #!/bin/sh
 set -e
 
-# Force PHP-FPM upstream vars so webdevops/php-nginx 10-init.sh never gets an empty host.
-# Coolify or other orchestrators may pass these as empty strings, which crashes nginx.
-export PHP_FPM_HOST="${PHP_FPM_HOST:-127.0.0.1}"
-export PHP_FPM_PORT="${PHP_FPM_PORT:-9000}"
-
 # Ensure writable directories exist (important when storage/ is a mounted volume)
 mkdir -p storage/app/public \
          storage/logs \
