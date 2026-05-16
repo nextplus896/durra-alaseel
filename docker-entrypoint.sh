@@ -36,4 +36,7 @@ if [ -z "$PASSPORT_PRIVATE_KEY" ] && [ ! -f "storage/oauth-private.key" ]; then
     php artisan passport:keys
 fi
 
+# Fix ownership so php-fpm (www-data) can write to these directories
+chown -R www-data:www-data storage bootstrap/cache
+
 exec "$@"
