@@ -30,19 +30,24 @@ class FileController extends Controller
             $file_holder_files = $validated['fileholder_files'];
             $file_ext = $file_holder_files->getClientOriginalExtension();
             $file_store_name = Str::uuid() . "." . $file_ext;
-            $data['path']   = asset('public/fileholder/img/');
-            $data['file_name']  =  $file_store_name;
-            $data['file_link']  = $data['path'] . "/" . $data['file_name'];
-            $data['file_type']  = $file_holder_files->getClientMimeType();
-            $data['file_old_name']  = $file_holder_files->getClientOriginalName();
+            $dest_dir = public_path('fileholder/img');
+            if (!File::isDirectory($dest_dir)) {
+                File::makeDirectory($dest_dir, 0755, true);
+            }
+
+            $data['path']          = asset('fileholder/img/');
+            $data['file_name']     = $file_store_name;
+            $data['file_link']     = $data['path'] . "/" . $data['file_name'];
+            $data['file_type']     = $file_holder_files->getClientMimeType();
+            $data['file_old_name'] = $file_holder_files->getClientOriginalName();
 
             $data['status'] = true;
             try{
-                File::move($file_holder_files,public_path('/fileholder/img/'.$file_store_name));
-                chmod(public_path('/fileholder/img/'.$file_store_name), 0644);
+                $file_holder_files->move($dest_dir, $file_store_name);
             }catch(Exception $e) {
-                return print_r($e);
                 $data['status'] = false;
+                $data['error']  = __("Something Went Wrong! Please try again.");
+                return response()->json($data, 500);
             }
         }else {
             $data['status'] = false;
@@ -69,7 +74,7 @@ class FileController extends Controller
         $file_info = json_decode($validated['file_info']);
         $data['status'] = true;
         try {
-            FIle::delete(public_path($file_path.'/'.$file_info->file_name));
+            File::delete(public_path($file_path.'/'.$file_info->file_name));
             $data['message'] = __("File Deleted Successfully!");
         }catch(Exception $e) {
             $data['status'] = false;

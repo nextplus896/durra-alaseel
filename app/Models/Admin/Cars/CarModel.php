@@ -61,7 +61,7 @@ class CarModel extends Model
 
         $relativePath = files_path('car-models')->path . '/' . $image;
         if (file_exists(public_path($relativePath))) {
-            return asset('public/' . $relativePath);
+            return asset($relativePath);
         }
 
         return files_asset_path('default');
