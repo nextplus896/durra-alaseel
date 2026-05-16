@@ -27,4 +27,11 @@ php artisan storage:link --force
 # Run any pending migrations automatically on each deploy
 php artisan migrate --force
 
+# Generate Passport keys only if they do not already exist.
+# NEVER run passport:key unconditionally — it rotates keys and logs out all users.
+# Preferred: set PASSPORT_PRIVATE_KEY and PASSPORT_PUBLIC_KEY as Coolify env vars instead.
+if [ -z "$PASSPORT_PRIVATE_KEY" ] && [ ! -f "storage/oauth-private.key" ]; then
+    php artisan passport:keys
+fi
+
 exec "$@"
