@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+cd /var/www/html
+
 # Ensure writable directories exist (important when storage/ is a mounted volume)
 mkdir -p storage/app/public \
          storage/logs \
