@@ -5,7 +5,7 @@
                 <h5 class="modal-title">{{ __("Edit Permission") }}</h5>
             </div>
             <div class="modal-form-data">
-                <form class="modal-form" method="POST" action="{{ setRoute('admin.admins.role.permission.update') }}" enctype="multipart/form-data">
+                <form class="modal-form" method="POST" action="{{ setRoute('admin.admins.role.permission.update.inline') }}" enctype="multipart/form-data">
                     @csrf
                     @method("PUT")
                     <input type="hidden" name="target" value="{{ old("target") }}">

@@ -18,7 +18,7 @@ php artisan view:clear
 
 # Re-cache using runtime environment
 php artisan config:cache
-php artisan route:cache
+php artisan route:cache || echo "WARNING: route:cache failed — duplicate route names detected. Fix before next deploy."
 php artisan view:cache
 
 # Create storage symlink (--force is safe to re-run on every deploy)

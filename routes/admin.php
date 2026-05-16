@@ -215,7 +215,7 @@ Route::name('admin.')->group(function () {
 
             Route::get('role/permission/index', 'rolePermissionIndex')->name('role.permission.index');
             Route::post('role/permission/store', 'rolePermissionStore')->name('role.permission.store');
-            Route::put('role/permission/update', 'rolePermissionUpdate')->name('role.permission.update');
+            Route::put('role/permission/update', 'rolePermissionUpdate')->name('role.permission.update.inline');
             Route::delete('role/permission/assign/delete/{slug}', 'rolePermissionAssignDelete')->name('role.permission.assign.delete');
 
             Route::get('role/permission/{slug}', 'viewRolePermission')->name('role.permission');
@@ -223,11 +223,11 @@ Route::name('admin.')->group(function () {
 
 
             Route::get('role-permission-create', 'rolePermissionCreate')->name('role.permission.create');
-            Route::post('role/permission/store', 'rolePermissionStore')->name('role.permission.store');
+            Route::post('role/permission/store', 'rolePermissionStore');
             Route::get('role-permission-edit/{slug}', 'rolePermissionEdit')->name('role.permission.edit');
             Route::post('role/permission/update/{slug}', 'rolePermissionUpdate')->name('role.permission.update');
             Route::delete('role/permission/delete', 'rolePermissionDelete')->name('role.permission.delete');
-            Route::get('role/permission/{slug}', 'viewRolePermission')->name('role.permission');
+            Route::get('role/permission/{slug}', 'viewRolePermission');
         });
 
         // Cars Section
