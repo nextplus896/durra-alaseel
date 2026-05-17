@@ -1,3 +1,11 @@
+FROM node:20-slim AS assets
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --no-audit
+COPY . .
+RUN npm run build
+
 FROM php:8.4-fpm
 
 # Install system deps + PHP extensions
@@ -38,6 +46,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 
 COPY --chown=www-data:www-data . .
+COPY --from=assets --chown=www-data:www-data /app/public/build ./public/build
 
 RUN composer install \
     --no-dev \
