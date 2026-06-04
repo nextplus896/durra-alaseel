@@ -58,18 +58,21 @@ abstract class TestCase extends BaseTestCase
      */
     protected function createUserWithWallet(float $balance = 0.0): User
     {
-        // Create a default currency (admin_id=1 is safe in SQLite — no FK enforcement)
-        $currency = Currency::create([
-            'admin_id' => 1,
-            'country'  => 'Saudi Arabia',
-            'name'     => 'Saudi Riyal',
-            'code'     => 'SAR',
-            'symbol'   => '﷼',
-            'type'     => 'FIAT',
-            'rate'     => 1.00,
-            'default'  => true,
-            'status'   => true,
-        ]);
+        // Reuse the existing default SAR currency if it was already created in
+        // this test (e.g., a previous createUserWithWallet() call in setUp()).
+        // currencies.code has a UNIQUE constraint, so creating twice would throw.
+        $currency = Currency::where('code', 'SAR')->first()
+            ?? Currency::create([
+                'admin_id' => 1,
+                'country'  => 'Saudi Arabia',
+                'name'     => 'Saudi Riyal',
+                'code'     => 'SAR',
+                'symbol'   => '﷼',
+                'type'     => 'FIAT',
+                'rate'     => 1.00,
+                'default'  => true,
+                'status'   => true,
+            ]);
 
         $user = User::factory()->create([
             'status'         => 1,
