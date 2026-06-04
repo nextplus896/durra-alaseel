@@ -13,6 +13,18 @@ abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication, WithFaker;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Disable FK enforcement in SQLite so tests can seed data without
+        // creating full admin/vendor records just to satisfy FK chains.
+        // Production (MySQL) still enforces FKs — this only affects tests.
+        if (config('database.default') === 'sqlite') {
+            \Illuminate\Support\Facades\DB::statement('PRAGMA foreign_keys = OFF;');
+        }
+    }
+
     /**
      * Seed a SystemMaintenance row with status=0 (not in maintenance).
      *
