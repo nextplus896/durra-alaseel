@@ -91,9 +91,10 @@ class UserLoginTest extends TestCase
     public function user_can_login_with_username(): void
     {
         User::factory()->create([
-            'username' => 'ali_driver_99',
-            'password' => bcrypt('pass1234'),
-            'status'   => 1,
+            'username'       => 'ali_driver_99',
+            'password'       => bcrypt('pass1234'),
+            'status'         => 1,
+            'email_verified' => 1,  // avoid triggering sendCodeToMail() in the login flow
         ]);
 
         $response = $this->postJson('/api/v1/login', [
