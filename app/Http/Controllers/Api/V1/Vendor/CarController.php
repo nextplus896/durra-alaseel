@@ -184,6 +184,8 @@ class CarController extends Controller
             'year'        => 'required|integer|min:1900|max:' . (date('Y') + 1),
             'experience'  => 'nullable|numeric',
             'fees'        => 'required|numeric',
+            'daily_insurance'      => 'required|numeric|min:0',
+            'deductible_insurance' => 'required|numeric|min:0',
             'image'       => 'required|image|mimes:png,jpg,jpeg,svg,webp',
         ]);
 
@@ -283,6 +285,8 @@ class CarController extends Controller
             'year'        => 'required|integer|min:1900|max:' . (date('Y') + 1),
             'experience'  => 'nullable|numeric',
             'fees'        => 'required|numeric',
+            'daily_insurance'      => 'required|numeric|min:0',
+            'deductible_insurance' => 'required|numeric|min:0',
             'image'       => 'nullable|image|mimes:png,jpg,jpeg,svg,webp',
         ]);
 

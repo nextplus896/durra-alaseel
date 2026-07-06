@@ -13,12 +13,14 @@ return new class extends Migration
             $table->dropColumn('original_rental_days');
         });
 
-        // Add DB comment documenting the return_date formula
-        DB::statement(
-            "ALTER TABLE car_bookings
-             MODIFY COLUMN return_date DATE NULL
-             COMMENT 'Computed as: pickup_date + pickup_time + rental_days + total_extension_days'"
-        );
+        // SQLite does not support MODIFY COLUMN with COMMENT — skip on SQLite.
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement(
+                "ALTER TABLE car_bookings
+                 MODIFY COLUMN return_date DATE NULL
+                 COMMENT 'Computed as: pickup_date + pickup_time + rental_days + total_extension_days'"
+            );
+        }
     }
 
     public function down(): void
@@ -27,10 +29,12 @@ return new class extends Migration
             $table->integer('original_rental_days')->nullable()->after('rental_days');
         });
 
-        DB::statement(
-            "ALTER TABLE car_bookings
-             MODIFY COLUMN return_date DATE NULL
-             COMMENT ''"
-        );
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement(
+                "ALTER TABLE car_bookings
+                 MODIFY COLUMN return_date DATE NULL
+                 COMMENT ''"
+            );
+        }
     }
 };

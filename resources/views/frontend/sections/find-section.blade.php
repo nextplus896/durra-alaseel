@@ -25,7 +25,7 @@
                         </div>
                         <!-- Car Animation -->
                         <div class="car-animation">
-                            <img src="{{ asset('public/frontend/images/element/loder.gif') }}">
+                            <img src="{{ asset('frontend/images/element/loder.gif') }}">
                         </div>
                     </div>
                 </div>

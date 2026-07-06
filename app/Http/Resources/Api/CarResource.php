@@ -38,6 +38,8 @@ class CarResource extends JsonResource
             'price_per_month' => $this->price_per_month ? (float) $this->price_per_month : null,
             'allowance_km' => $this->allowance_km ? (float) $this->allowance_km : null,
             'allowance_price_per_km' => $this->allowance_price_per_km ? (float) $this->allowance_price_per_km : null,
+            'daily_insurance'      => (float) ($this->daily_insurance ?? 0),
+            'deductible_insurance' => (float) ($this->deductible_insurance ?? 0),
             'status' => (int) $this->status,
             'approval' => (int) $this->approval,
             'created_at' => $this->created_at ? $this->created_at->toIso8601String() : null,

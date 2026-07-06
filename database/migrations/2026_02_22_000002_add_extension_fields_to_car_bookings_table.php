@@ -7,9 +7,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::table('car_bookings', function (Blueprint $table) {
@@ -21,21 +18,31 @@ return new class extends Migration
             $table->index(['car_id', 'return_date', 'status'], 'car_bookings_car_return_status_index');
         });
 
-        // Backfill return_date for existing bookings that have pickup_date and rental_days
-        DB::statement("
-            UPDATE car_bookings
-            SET return_date = DATE_ADD(pickup_date, INTERVAL rental_days DAY),
-                original_rental_days = rental_days
-            WHERE pickup_date IS NOT NULL
-              AND rental_days IS NOT NULL
-              AND rental_days > 0
-              AND return_date IS NULL
-        ");
+        // Backfill return_date — use database-appropriate date arithmetic.
+        if (DB::getDriverName() === 'sqlite') {
+            // SQLite uses: date(column, '+N days')
+            DB::statement("
+                UPDATE car_bookings
+                SET return_date = date(pickup_date, '+' || rental_days || ' days'),
+                    original_rental_days = rental_days
+                WHERE pickup_date IS NOT NULL
+                  AND rental_days IS NOT NULL
+                  AND rental_days > 0
+                  AND return_date IS NULL
+            ");
+        } else {
+            DB::statement("
+                UPDATE car_bookings
+                SET return_date = DATE_ADD(pickup_date, INTERVAL rental_days DAY),
+                    original_rental_days = rental_days
+                WHERE pickup_date IS NOT NULL
+                  AND rental_days IS NOT NULL
+                  AND rental_days > 0
+                  AND return_date IS NULL
+            ");
+        }
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('car_bookings', function (Blueprint $table) {

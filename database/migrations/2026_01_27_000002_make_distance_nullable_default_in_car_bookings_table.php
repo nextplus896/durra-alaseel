@@ -12,6 +12,11 @@ return new class extends Migration
             return;
         }
 
+        if (DB::getDriverName() === 'sqlite') {
+            Schema::table('car_bookings', fn ($t) => $t->decimal('distance', 28, 8)->nullable()->default(0)->change());
+            return;
+        }
+
         // Avoid doctrine/dbal dependency by using raw SQL.
         // Keep a sane default for existing logic that assumes a numeric value.
         DB::statement("ALTER TABLE `car_bookings` MODIFY `distance` DECIMAL(28,8) NULL DEFAULT 0");
@@ -20,6 +25,11 @@ return new class extends Migration
     public function down(): void
     {
         if (!Schema::hasTable('car_bookings') || !Schema::hasColumn('car_bookings', 'distance')) {
+            return;
+        }
+
+        if (DB::getDriverName() === 'sqlite') {
+            Schema::table('car_bookings', fn ($t) => $t->decimal('distance', 28, 8)->nullable(false)->default(0)->change());
             return;
         }
 

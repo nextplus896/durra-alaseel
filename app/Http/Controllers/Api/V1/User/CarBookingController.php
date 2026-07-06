@@ -285,6 +285,7 @@ class CarBookingController extends Controller
                     'token' => 'required',
                     'car_id' => 'required',
                     'rental_days' => 'required|integer|min:1',
+                    'insurance_type' => 'required|in:daily,deductible',
                     'pickup_location' => 'nullable|array',
                     'pickup_location.latitude' => 'required_with:pickup_location|numeric|between:-90,90',
                     'pickup_location.longitude' => 'required_with:pickup_location|numeric|between:-180,180',
@@ -344,6 +345,7 @@ class CarBookingController extends Controller
                     'pickup_time' => 'required',
                     'pickup_date' => 'required',
                     'rental_days' => 'required|integer|min:1',
+                    'insurance_type' => 'required|in:daily,deductible',
                     'pickup_location' => 'nullable|array',
                     'pickup_location.latitude' => 'required_with:pickup_location|numeric|between:-90,90',
                     'pickup_location.longitude' => 'required_with:pickup_location|numeric|between:-180,180',
@@ -439,13 +441,19 @@ class CarBookingController extends Controller
                 ? floatval($deliveryInfo['price'])
                 : 0;
 
-            $pricingBreakdown = $balanceService->calculateBookingTotal($rentalFees, $deliveryPrice);
+            // Calculate insurance based on user's chosen type
+            $insuranceType = $validated['insurance_type'];
+            $insuranceBreakdown = $balanceService->calculateInsuranceTotal($car, $rentalDays, $insuranceType);
+
+            $pricingBreakdown = $balanceService->calculateBookingTotal($rentalFees, $deliveryPrice, 0, $insuranceBreakdown['insurance_total']);
 
             Log::info('API car-booking.preview totals calculated', [
-                'request_id' => $requestId,
-                'user_id' => $userId,
+                'request_id'     => $requestId,
+                'user_id'        => $userId,
                 'delivery_price' => $deliveryPrice,
-                'pricing_total' => $pricingBreakdown['total'] ?? null,
+                'insurance_type' => $insuranceType,
+                'insurance_total'=> $insuranceBreakdown['insurance_total'],
+                'pricing_total'  => $pricingBreakdown['total'] ?? null,
                 'tax_percentage' => $pricingBreakdown['tax_percentage'] ?? null,
             ]);
 
@@ -551,6 +559,12 @@ class CarBookingController extends Controller
                         'has_sufficient_balance' => ($validated_user->balance ?? 0) >= $pricingBreakdown['total'],
                     ],
                     'delivery_info' => $deliveryInfo,
+                    'insurance_breakdown' => [
+                        'insurance_type'       => (string) $insuranceBreakdown['insurance_type'],
+                        'daily_insurance'      => (float)  $insuranceBreakdown['daily_insurance'],
+                        'insurance_total'      => (float)  $insuranceBreakdown['insurance_total'],
+                        'deductible_insurance' => (float)  $insuranceBreakdown['deductible_insurance'],
+                    ],
                     'pricing_breakdown' => $pricingBreakdown,
                     'payment-type' => [
                         'online-payment' => Str::Slug(PaymentGatewayConst::ONLINEPAYMENT),
@@ -586,6 +600,7 @@ class CarBookingController extends Controller
             'car_slug' => 'required',
             'location' => 'required',
             'rental_days' => 'required|integer|min:1',
+            'insurance_type' => 'required|in:daily,deductible',
             'pickup_location' => 'nullable|array',
             'pickup_location.latitude' => 'required_with:pickup_location|numeric|between:-90,90',
             'pickup_location.longitude' => 'required_with:pickup_location|numeric|between:-180,180',
@@ -620,7 +635,7 @@ class CarBookingController extends Controller
         // can still use a booking token. We create it before handling payment type.
         if (!$request->filled('token')) {
             try {
-                $payload = $request->only(['car_type', 'pickup_time', 'pickup_date', 'round_pickup_date', 'round_pickup_time', 'location', 'credentials', 'mobile', 'message', 'payment', 'car_id', 'car_slug', 'include_delivery', 'delivery_price', 'rental_days', 'pickup_location']);
+                $payload = $request->only(['car_type', 'pickup_time', 'pickup_date', 'round_pickup_date', 'round_pickup_time', 'location', 'credentials', 'mobile', 'message', 'payment', 'car_id', 'car_slug', 'include_delivery', 'delivery_price', 'rental_days', 'insurance_type', 'pickup_location']);
                 $payload = array_filter($payload, function ($v) {
                     return $v !== null && $v !== '';
                 });
@@ -792,7 +807,11 @@ class CarBookingController extends Controller
             }
         }
 
-        $pricingBreakdown = $balanceService->calculateBookingTotal($rentalFees, $deliveryPrice, $charges);
+        // GOLDEN RULE: Recalculate insurance server-side — never trust frontend
+        $insuranceType = $data['insurance_type'] ?? 'deductible';
+        $insuranceBreakdown = $balanceService->calculateInsuranceTotal($car, $rentalDays, $insuranceType);
+
+        $pricingBreakdown = $balanceService->calculateBookingTotal($rentalFees, $deliveryPrice, $charges, $insuranceBreakdown['insurance_total']);
 
         try {
             // Extract pickup location data
@@ -827,6 +846,10 @@ class CarBookingController extends Controller
                 'charges' => $charges,
                 'delivery_fee' => $deliveryPrice,
                 'is_delivery' => ($deliveryPrice > 0),
+                'insurance_type'       => $insuranceBreakdown['insurance_type'],
+                'daily_insurance'      => $insuranceBreakdown['daily_insurance'],
+                'insurance_total'      => $insuranceBreakdown['insurance_total'],
+                'deductible_insurance' => $insuranceBreakdown['deductible_insurance'],
                 'subtotal' => $pricingBreakdown['subtotal'],
                 'tax_percentage' => $pricingBreakdown['tax_percentage'],
                 'tax_amount' => $pricingBreakdown['tax_amount'],
@@ -984,7 +1007,11 @@ class CarBookingController extends Controller
 
         $deliveryPrice = $request->include_delivery ? floatval($request->delivery_price ?? 0) : 0;
 
-        $pricingBreakdown = $balanceService->calculateBookingTotal($rentalFees, $deliveryPrice);
+        // GOLDEN RULE: Recalculate insurance server-side — never trust frontend
+        $insuranceType = $data['insurance_type'] ?? 'deductible';
+        $insuranceBreakdown = $balanceService->calculateInsuranceTotal($car, $rentalDays, $insuranceType);
+
+        $pricingBreakdown = $balanceService->calculateBookingTotal($rentalFees, $deliveryPrice, 0, $insuranceBreakdown['insurance_total']);
         $totalAmount = $pricingBreakdown['total'];
 
         // Check if user has sufficient balance
@@ -1036,6 +1063,10 @@ class CarBookingController extends Controller
                 'charges' => 0,
                 'delivery_fee' => $deliveryPrice,
                 'is_delivery' => ($deliveryPrice > 0),
+                'insurance_type'       => $insuranceBreakdown['insurance_type'],
+                'daily_insurance'      => $insuranceBreakdown['daily_insurance'],
+                'insurance_total'      => $insuranceBreakdown['insurance_total'],
+                'deductible_insurance' => $insuranceBreakdown['deductible_insurance'],
                 'subtotal' => $pricingBreakdown['subtotal'],
                 'tax_percentage' => $pricingBreakdown['tax_percentage'],
                 'tax_amount' => $pricingBreakdown['tax_amount'],

@@ -5,10 +5,10 @@
 @endpush
 
 @section('content')
-    <section class="account-section bg_img" data-background="{{ asset('public/frontend/images/element/account.png') }}">
+    <section class="account-section bg_img" data-background="{{ asset('frontend/images/element/account.png') }}">
         <div class="right float-end">
             <div class="account-header text-center">
-                <a class="site-logo" href="{{ setroute('frontend.index') }}"><img src="{{ asset('public/frontend/images/logo/logo.png') }}" alt="logo"></a>
+                <a class="site-logo" href="{{ setroute('frontend.index') }}"><img src="{{ asset('frontend/images/logo/logo.png') }}" alt="logo"></a>
             </div>
             <div class="account-middle">
                 <div class="account-form-area">

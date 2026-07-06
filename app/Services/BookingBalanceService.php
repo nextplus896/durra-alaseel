@@ -80,21 +80,54 @@ class BookingBalanceService
     }
 
     /**
-     * Calculate full booking amount including fees, delivery, and tax
+     * Calculate insurance amounts based on the customer's chosen insurance type.
+     *
+     * @param  \App\Models\Vendor\Cars\Car  $car
+     * @param  int    $rentalDays
+     * @param  string $insuranceType  'daily' or 'deductible'
+     * @return array{insurance_type: string, daily_insurance: float, insurance_total: float, deductible_insurance: float}
      */
-    public function calculateBookingTotal(float $rentalFees, float $deliveryPrice = 0, float $charges = 0): array
+    public function calculateInsuranceTotal(Car $car, int $rentalDays, string $insuranceType): array
     {
-        $subtotal = $rentalFees + $deliveryPrice + $charges;
+        if ($insuranceType === 'daily') {
+            $dailyInsurance   = (float) ($car->daily_insurance ?? 0);
+            $insuranceTotal   = round($dailyInsurance * $rentalDays, 2);
+            $deductible       = 0.0;
+        } else {
+            // 'deductible' — displayed as liability only, never charged
+            $dailyInsurance   = 0.0;
+            $insuranceTotal   = 0.0;
+            $deductible       = round((float) ($car->deductible_insurance ?? 0), 2);
+        }
+
+        return [
+            'insurance_type'       => $insuranceType,
+            'daily_insurance'      => $dailyInsurance,
+            'insurance_total'      => $insuranceTotal,
+            'deductible_insurance' => $deductible,
+        ];
+    }
+
+    /**
+     * Calculate full booking amount including fees, delivery, tax, and insurance.
+     *
+     * The $insuranceTotal parameter defaults to 0 for backward compatibility
+     * with existing callers that do not yet pass insurance data.
+     */
+    public function calculateBookingTotal(float $rentalFees, float $deliveryPrice = 0, float $charges = 0, float $insuranceTotal = 0): array
+    {
+        $subtotal = $rentalFees + $deliveryPrice + $charges + $insuranceTotal;
         $taxCalculation = $this->calculateTax($subtotal);
 
         return [
-            'rental_fees' => $rentalFees,
+            'rental_fees'    => $rentalFees,
             'delivery_price' => $deliveryPrice,
-            'charges' => $charges,
-            'subtotal' => $subtotal,
+            'charges'        => $charges,
+            'insurance_total'=> $insuranceTotal,
+            'subtotal'       => $subtotal,
             'tax_percentage' => $taxCalculation['tax_percentage'],
-            'tax_amount' => $taxCalculation['tax_amount'],
-            'total' => $taxCalculation['total'],
+            'tax_amount'     => $taxCalculation['tax_amount'],
+            'total'          => $taxCalculation['total'],
         ];
     }
 

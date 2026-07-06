@@ -1,0 +1,177 @@
+{
+  "version": 1,
+  "bugs": [
+    {
+      "id": "bug-001",
+      "timestamp": "2026-06-03T23:51:00.106Z",
+      "error_message": "Significant refactor of ",
+      "file": "database/migrations/2026_01_27_000001_make_destination_nullable_in_car_bookings_table.php",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 20→33 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "php"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-03T23:51:00.106Z"
+    },
+    {
+      "id": "bug-002",
+      "timestamp": "2026-06-04T00:10:28.157Z",
+      "error_message": "Incorrect value in code",
+      "file": "database/factories/UserFactory.php",
+      "root_cause": "Had 'refferal_user_id'",
+      "fix": "Changed to 'email_verified'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "php"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-04T00:10:28.157Z"
+    },
+    {
+      "id": "bug-003",
+      "timestamp": "2026-06-04T00:12:42.010Z",
+      "error_message": "Significant refactor of ",
+      "file": "tests/Unit/Services/BookingBalanceServiceTest.php",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 13→19 lines (5 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "php"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-04T00:12:42.010Z"
+    },
+    {
+      "id": "bug-004",
+      "timestamp": "2026-06-04T00:21:23.870Z",
+      "error_message": "Null/undefined access in ",
+      "file": "tests/TestCase.php",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "php"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-04T00:21:23.870Z"
+    },
+    {
+      "id": "bug-005",
+      "timestamp": "2026-06-04T00:25:52.003Z",
+      "error_message": "Incorrect value in code",
+      "file": "tests/Feature/Api/V1/Vendor/Auth/VendorLoginTest.php",
+      "root_cause": "Had 'passport:keys --force'",
+      "fix": "Changed to 'passport:install --force'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "php"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-04T00:25:52.003Z"
+    },
+    {
+      "id": "bug-006",
+      "timestamp": "2026-06-04T01:04:24.025Z",
+      "error_message": "Significant refactor of ",
+      "file": "tests/Feature/Api/V1/User/Auth/UserLoginTest.php",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 5→6 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "php"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-04T01:04:24.025Z"
+    },
+    {
+      "id": "bug-007",
+      "timestamp": "2026-06-06T22:04:47.765Z",
+      "error_message": "Incorrect value in code",
+      "file": "resources/views/errors/custom-layouts-503.blade.php",
+      "root_cause": "Had ') }}/css/bootstrap.css\"",
+      "fix": "Changed to ') }}\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "php"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-06T22:04:47.765Z"
+    },
+    {
+      "id": "bug-008",
+      "timestamp": "2026-06-07T00:00:00.000Z",
+      "error_message": "CSS/JS/image assets returning 404 — URLs contained /public/ segment (e.g. http://localhost:8001/public/backend/css/fontawesome-all.min.css)",
+      "file": "resources/views/**/*.php (54 files)",
+      "root_cause": "asset() calls passed 'public/frontend/...' or 'public/backend/...' as the path. Since public/ IS the web root for php artisan serve, Nginx, and Apache, the generated URLs contained a double /public/ segment that doesn't exist on the filesystem.",
+      "fix": "Stripped the leading 'public/' prefix from 194 asset() calls across 54 Blade files using PowerShell batch replace. Also fixed a broken asset path split in custom-layouts-503.blade.php and a trailing space in swiper.css asset paths.",
+      "tags": [
+        "asset-url",
+        "public-path",
+        "blade",
+        "css",
+        "js",
+        "docker",
+        "nginx"
+      ],
+      "related_bugs": [
+        "bug-007"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-06-07T00:00:00.000Z"
+    },
+    {
+      "id": "bug-009",
+      "timestamp": "2026-06-07T00:00:00.000Z",
+      "error_message": "CSS and JS not loading with php artisan serve on Windows",
+      "file": "server.php",
+      "root_cause": "Two Windows-specific bugs: (1) realpath() normalises path separators to backslashes while $fullPath uses mixed slashes, so realpath() !== $fullPath is always true — every file is treated as a symlink. (2) mime_content_type() returns 'text/plain' for CSS/JS files on Windows, so browsers receive CSS with wrong Content-Type and refuse to apply it.",
+      "fix": "Replaced the realpath symlink-detection approach with an explicit MIME type map. Known asset extensions (css, js, webp, woff2, etc.) are served via readfile() with correct Content-Type headers, bypassing both the unreliable realpath comparison and mime_content_type().",
+      "tags": [
+        "windows",
+        "mime-type",
+        "realpath",
+        "server.php",
+        "php-builtin-server",
+        "css",
+        "js"
+      ],
+      "related_bugs": [
+        "bug-008"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-06-07T00:00:00.000Z"
+    },
+    {
+      "id": "bug-010",
+      "timestamp": "2026-06-06T23:19:05.751Z",
+      "error_message": "Incorrect value in code",
+      "file": "resources/views/frontend/sections/banner-section.blade.php",
+      "root_cause": "Had `public/frontend/images/car/car-${currentImageInde",
+      "fix": "Changed to `{{ asset('",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "php"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-06T23:19:05.751Z"
+    }
+  ]
+}

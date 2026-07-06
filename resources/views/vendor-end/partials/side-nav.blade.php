@@ -79,7 +79,7 @@
 
     <div class="sidebar-footer">
         <div class="sidebar-help bg-overlay-base bg_img"
-            data-background="{{ asset('public/frontend/images/element/sidebar-img.webp') }}">
+            data-background="{{ asset('frontend/images/element/sidebar-img.webp') }}">
             <div class="sidebar-help-icon">
                 <i class="las la-headphones-alt"></i>
             </div>

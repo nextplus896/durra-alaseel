@@ -82,7 +82,7 @@
                 </li>
             </ul>
         </div>
-        <div class="sidebar-doc-box bg_img" data-background="{{ asset("public/frontend/images/element/side-bg.webp") }}">
+        <div class="sidebar-doc-box bg_img" data-background="{{ asset("frontend/images/element/side-bg.webp") }}">
             <div class="sidebar-doc-icon">
                 <i class="fas fa-question-circle"></i>
             </div>

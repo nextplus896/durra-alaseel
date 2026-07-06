@@ -4,7 +4,7 @@
     $default = get_default_language_code() ?? 'en';
     $default_lng = 'en';
 @endphp
-<section class="banner-section  bg_img" data-background="{{ asset('public/frontend/images/banner/banner-bg.webp') }}">
+<section class="banner-section  bg_img" data-background="{{ asset('frontend/images/banner/banner-bg.webp') }}">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lx-6 col-lg-6">
@@ -22,7 +22,7 @@
             </div>
             <div class="col-xl-6 col-lg-6">
                 <div class="banner-img">
-                    <img src="{{ asset('public/frontend/images/banner/banner-img.webp') }}" alt="img">
+                    <img src="{{ asset('frontend/images/banner/banner-img.webp') }}" alt="img">
                     <div class="banner-inner-img">
                         <img id="myImg" alt="img">
                     </div>
@@ -45,7 +45,7 @@
             } else {
                 currentImageIndex = (currentImageIndex === 1) ? totalImages : currentImageIndex - 1;
             }
-            img.src = `public/frontend/images/car/car-${currentImageIndex}.webp`;
+            img.src = `{{ asset('frontend/images/car') }}/car-${currentImageIndex}.webp`;
         }
 
         function toggleDirection() {

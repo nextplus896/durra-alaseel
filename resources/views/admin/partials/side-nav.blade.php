@@ -54,6 +54,11 @@
                             'route' => 'admin.subscriber.index',
                             'icon' => 'menu-icon las la-bell',
                         ],
+                        [
+                            'title' => __('Cancellation Policy'),
+                            'route' => 'admin.cancellation.policy.index',
+                            'icon' => 'menu-icon las la-ban',
+                        ],
                     ],
                 ])
 

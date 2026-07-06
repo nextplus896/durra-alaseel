@@ -27,7 +27,7 @@
                         <div class="profile-settings-wrapper">
                             <div class="preview-thumb profile-wallpaper">
                                 <div class="avatar-preview">
-                                    <div class="profilePicPreview bg_img" data-background="{{ asset('public/frontend/images/element/account.png') }}"></div>
+                                    <div class="profilePicPreview bg_img" data-background="{{ asset('frontend/images/element/account.png') }}"></div>
                                 </div>
                             </div>
                             <div class="profile-thumb-content">

@@ -25,7 +25,6 @@ class UserFactory extends Factory
             'lastname' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'status' => fake()->numberBetween(0, 2),
-            'refferal_user_id' => fake()->numberBetween(1, 100),
             'email_verified' =>fake()->numberBetween(0, 1),
             'sms_verified' =>fake()->numberBetween(0, 1),
             'kyc_verified' =>fake()->numberBetween(0, 1),

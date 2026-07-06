@@ -1,0 +1,1035 @@
+2026-May-17 00:14:07.291174 Docker 28.4.0 with BuildKit and Buildx detected on deployment server (localhost).
+2026-May-17 00:14:07.391991 Starting deployment of <REDACTED>:nextplus896/durra-alaseel.git:main to localhost.
+2026-May-17 00:14:09.998042 Preparing container with helper image: ghcr.io/coollabsio/coolify-helper:1.0.13
+2026-May-17 00:14:10.835565 [DEBUG] [CMD]: docker stop -t 30 gfsrd67odqo5pskiwxour3bo
+2026-May-17 00:14:10.835565 [DEBUG] Error response from daemon: No such container: gfsrd67odqo5pskiwxour3bo
+2026-May-17 00:14:11.936433 [DEBUG] [CMD]: docker run -d --network 'coolify' --name gfsrd67odqo5pskiwxour3bo  --rm -v /var/run/docker.sock:/var/run/docker.sock ghcr.io/coollabsio/coolify-helper:1.0.13
+2026-May-17 00:14:11.936433 [DEBUG] 606cf4f6a7f5ce03b1ff9f85b6b82e8d6f04dbfca14d853c680dd2ed881872bf
+2026-May-17 00:14:26.097141 [DEBUG] [CMD]: docker exec gfsrd67odqo5pskiwxour3bo bash -c 'GIT_SSH_COMMAND="ssh -o ConnectTimeout=30 -p 22 -o Port=22 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /root/.ssh/id_rsa" git ls-remote <REDACTED>:nextplus896/durra-alaseel.git refs/heads/main'
+2026-May-17 00:14:26.097141 [DEBUG] 6713944099caf02eb03124a96e6df7bd155a85b6	refs/heads/main
+2026-May-17 00:14:26.225833 ----------------------------------------
+2026-May-17 00:14:26.239654 Importing <REDACTED>:nextplus896/durra-alaseel.git:main (commit sha 6713944099caf02eb03124a96e6df7bd155a85b6) to /artifacts/gfsrd67odqo5pskiwxour3bo.
+2026-May-17 00:14:27.677256 [DEBUG] [CMD]: docker exec gfsrd67odqo5pskiwxour3bo bash -c 'mkdir -p /root/.ssh' && docker exec gfsrd67odqo5pskiwxour3bo bash -c 'echo '\''LS0tLS1CRUdJTiBPUEVOU1NIIFBSSVZBVEUgS0VZLS0tLS0KYjNCbGJuTnphQzFyWlhrdGRqRUFBQUFBQkc1dmJtVUFBQUFFYm05dVpRQUFBQUFBQUFBQkFBQUFNd0FBQUF0emMyZ3RaVwpReU5UVXhPUUFBQUNCWnFmQU1CdEJiY05hcWZtTTlJSGxFWmc3Vkdpb0s0ai83QkxYeEhlajkvd0FBQUtDcDczaXJxZTk0CnF3QUFBQXR6YzJndFpXUXlOVFV4T1FBQUFDQlpxZkFNQnRCYmNOYXFmbU05SUhsRVpnN1ZHaW9LNGovN0JMWHhIZWo5L3cKQUFBRUMzY1I1T0Z6UHZjSWpRMmd6L1ZpaDRSUG8vWW9aY1NsbGRwSlZRUEtMVk4xbXA4QXdHMEZ0dzFxcCtZejBnZVVSbQpEdFVhS2dyaVAvc0V0ZkVkNlAzL0FBQUFGM0JvY0hObFkyeHBZaTFuWlc1bGNtRjBaV1F0YTJWNUFRSURCQVVHCi0tLS0tRU5EIE9QRU5TU0ggUFJJVkFURSBLRVktLS0tLQo='\'' | base64 -d | tee /root/.ssh/id_rsa > /dev/null' && docker exec gfsrd67odqo5pskiwxour3bo bash -c 'chmod 600 /root/.ssh/id_rsa' && docker exec gfsrd67odqo5pskiwxour3bo bash -c 'GIT_SSH_COMMAND="ssh -o ConnectTimeout=30 -p 22 -o Port=22 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /root/.ssh/id_rsa" git clone --depth=1 --recurse-submodules --shallow-submodules -b '\''main'\'' '\''<REDACTED>:nextplus896/durra-alaseel.git'\'' '\''/artifacts/gfsrd67odqo5pskiwxour3bo'\'' && cd '\''/artifacts/gfsrd67odqo5pskiwxour3bo'\'' && GIT_SSH_COMMAND="ssh -o ConnectTimeout=30 -p 22 -o Port=22 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /root/.ssh/id_rsa" git fetch --depth=1 origin '\''6713944099caf02eb03124a96e6df7bd155a85b6'\'' && git -c advice.detachedHead=false checkout '\''6713944099caf02eb03124a96e6df7bd155a85b6'\'' >/dev/null 2>&1 && cd '\''/artifacts/gfsrd67odqo5pskiwxour3bo'\'' && if [ -f .gitmodules ]; then git submodule sync && GIT_SSH_COMMAND="ssh -o ConnectTimeout=30 -p 22 -o Port=22 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /root/.ssh/id_rsa" git submodule update --init --recursive --depth=1; fi && cd '\''/artifacts/gfsrd67odqo5pskiwxour3bo'\'' && GIT_SSH_COMMAND="ssh -o ConnectTimeout=30 -p 22 -o Port=22 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /root/.ssh/id_rsa" git lfs pull'
+2026-May-17 00:14:27.677256 [DEBUG] Cloning into '/artifacts/gfsrd67odqo5pskiwxour3bo'...
+2026-May-17 00:14:33.842776 [DEBUG] Updating files:  70% (1223/1739)
+2026-May-17 00:14:33.906954 [DEBUG] Updating files:  71% (1235/1739)
+2026-May-17 00:14:33.915786 [DEBUG] Updating files:  72% (1253/1739)
+2026-May-17 00:14:33.924463 [DEBUG] Updating files:  73% (1270/1739)
+2026-May-17 00:14:33.933830 [DEBUG] Updating files:  74% (1287/1739)
+2026-May-17 00:14:33.938424 [DEBUG] Updating files:  75% (1305/1739)
+2026-May-17 00:14:33.981077 [DEBUG] Updating files:  76% (1322/1739)
+2026-May-17 00:14:33.986794 [DEBUG] Updating files:  77% (1340/1739)
+2026-May-17 00:14:33.991597 [DEBUG] Updating files:  78% (1357/1739)
+2026-May-17 00:14:33.996230 [DEBUG] Updating files:  79% (1374/1739)
+2026-May-17 00:14:34.003480 [DEBUG] Updating files:  80% (1392/1739)
+2026-May-17 00:14:34.014658 [DEBUG] Updating files:  81% (1409/1739)
+2026-May-17 00:14:34.025375 [DEBUG] Updating files:  82% (1426/1739)
+2026-May-17 00:14:34.034981 [DEBUG] Updating files:  83% (1444/1739)
+2026-May-17 00:14:34.044121 [DEBUG] Updating files:  84% (1461/1739)
+2026-May-17 00:14:34.082609 [DEBUG] Updating files:  85% (1479/1739)Updating files:  86% (1496/1739)
+2026-May-17 00:14:34.089617 [DEBUG] Updating files:  87% (1513/1739)
+2026-May-17 00:14:34.095924 [DEBUG] Updating files:  88% (1531/1739)
+2026-May-17 00:14:34.104415 [DEBUG] Updating files:  89% (1548/1739)Updating files:  90% (1566/1739)
+2026-May-17 00:14:34.116221 [DEBUG] Updating files:  91% (1583/1739)Updating files:  92% (1600/1739)
+2026-May-17 00:14:34.126855 [DEBUG] Updating files:  93% (1618/1739)Updating files:  94% (1635/1739)
+2026-May-17 00:14:34.134908 [DEBUG] Updating files:  95% (1653/1739)
+2026-May-17 00:14:34.179641 [DEBUG] Updating files:  96% (1670/1739)Updating files:  97% (1687/1739)
+2026-May-17 00:14:34.385262 [DEBUG] Updating files:  98% (1705/1739)
+2026-May-17 00:14:34.394540 [DEBUG] Updating files:  99% (1722/1739)
+2026-May-17 00:14:34.402132 [DEBUG] Updating files: 100% (1739/1739)Updating files: 100% (1739/1739), done.
+2026-May-17 00:14:36.081931 [DEBUG] From github.com:nextplus896/durra-alaseel
+2026-May-17 00:14:36.081931 [DEBUG] * branch            6713944099caf02eb03124a96e6df7bd155a85b6 -> FETCH_HEAD
+2026-May-17 00:14:40.451365 [DEBUG] [CMD]: docker exec gfsrd67odqo5pskiwxour3bo bash -c 'cd /artifacts/gfsrd67odqo5pskiwxour3bo && git log -1 '\''6713944099caf02eb03124a96e6df7bd155a85b6'\'' --pretty=%B'
+2026-May-17 00:14:40.451365 [DEBUG] fix: add Node.js build stage to compile Vite assets in Docker
+2026-May-17 00:14:40.451365 [DEBUG] 
+2026-May-17 00:14:40.451365 [DEBUG] Co-Authored-By: Claude Sonnet 4.6 <<REDACTED>>
+2026-May-17 00:14:41.105323 Image not found (w1mab3nhxlzzk3sthavzd9vp:6713944099caf02eb03124a96e6df7bd155a85b6). Building new image.
+2026-May-17 00:14:45.930647 [DEBUG] [CMD]: docker exec gfsrd67odqo5pskiwxour3bo bash -c 'cat /artifacts/gfsrd67odqo5pskiwxour3bo/dockerfile'
+2026-May-17 00:14:45.930647 [DEBUG] FROM node:20-slim AS assets
+2026-May-17 00:14:45.930647 [DEBUG] 
+2026-May-17 00:14:45.930647 [DEBUG] WORKDIR /app
+2026-May-17 00:14:45.930647 [DEBUG] COPY package*.json ./
+2026-May-17 00:14:45.930647 [DEBUG] RUN npm ci --no-audit
+2026-May-17 00:14:45.930647 [DEBUG] COPY . .
+2026-May-17 00:14:45.930647 [DEBUG] RUN npm run build
+2026-May-17 00:14:45.930647 [DEBUG] 
+2026-May-17 00:14:45.930647 [DEBUG] FROM php:8.4-fpm
+2026-May-17 00:14:45.930647 [DEBUG] 
+2026-May-17 00:14:45.930647 [DEBUG] # Install system deps + PHP extensions
+2026-May-17 00:14:45.930647 [DEBUG] RUN apt-get update && apt-get install -y --no-install-recommends \
+2026-May-17 00:14:45.930647 [DEBUG] nginx \
+2026-May-17 00:14:45.930647 [DEBUG] supervisor \
+2026-May-17 00:14:45.930647 [DEBUG] libfreetype6-dev \
+2026-May-17 00:14:45.930647 [DEBUG] libjpeg62-turbo-dev \
+2026-May-17 00:14:45.930647 [DEBUG] libpng-dev \
+2026-May-17 00:14:45.930647 [DEBUG] libzip-dev \
+2026-May-17 00:14:45.930647 [DEBUG] libonig-dev \
+2026-May-17 00:14:45.930647 [DEBUG] libxml2-dev \
+2026-May-17 00:14:45.930647 [DEBUG] libsodium-dev \
+2026-May-17 00:14:45.930647 [DEBUG] libpq-dev \
+2026-May-17 00:14:45.930647 [DEBUG] libicu-dev \
+2026-May-17 00:14:45.930647 [DEBUG] unzip \
+2026-May-17 00:14:45.930647 [DEBUG] curl \
+2026-May-17 00:14:45.930647 [DEBUG] && docker-php-ext-configure gd --with-freetype --with-jpeg \
+2026-May-17 00:14:45.930647 [DEBUG] && docker-php-ext-install -j$(nproc) \
+2026-May-17 00:14:45.930647 [DEBUG] gd \
+2026-May-17 00:14:45.930647 [DEBUG] pdo_mysql \
+2026-May-17 00:14:45.930647 [DEBUG] pdo_pgsql \
+2026-May-17 00:14:45.930647 [DEBUG] mbstring \
+2026-May-17 00:14:45.930647 [DEBUG] xml \
+2026-May-17 00:14:45.930647 [DEBUG] zip \
+2026-May-17 00:14:45.930647 [DEBUG] bcmath \
+2026-May-17 00:14:45.930647 [DEBUG] pcntl \
+2026-May-17 00:14:45.930647 [DEBUG] sodium \
+2026-May-17 00:14:45.930647 [DEBUG] opcache \
+2026-May-17 00:14:45.930647 [DEBUG] intl \
+2026-May-17 00:14:45.930647 [DEBUG] && pecl install redis \
+2026-May-17 00:14:45.930647 [DEBUG] && docker-php-ext-enable redis \
+2026-May-17 00:14:45.930647 [DEBUG] && rm -rf /var/lib/apt/lists/* /tmp/pear
+2026-May-17 00:14:45.930647 [DEBUG] 
+2026-May-17 00:14:45.930647 [DEBUG] # Composer
+2026-May-17 00:14:45.930647 [DEBUG] COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+2026-May-17 00:14:45.930647 [DEBUG] 
+2026-May-17 00:14:45.930647 [DEBUG] WORKDIR /var/www/html
+2026-May-17 00:14:45.930647 [DEBUG] 
+2026-May-17 00:14:45.930647 [DEBUG] COPY --chown=www-data:www-data . .
+2026-May-17 00:14:45.930647 [DEBUG] COPY --from=assets --chown=www-data:www-data /app/public/build ./public/build
+2026-May-17 00:14:45.930647 [DEBUG] 
+2026-May-17 00:14:45.930647 [DEBUG] RUN composer install \
+2026-May-17 00:14:45.930647 [DEBUG] --no-dev \
+2026-May-17 00:14:45.930647 [DEBUG] --optimize-autoloader \
+2026-May-17 00:14:45.930647 [DEBUG] --no-interaction
+2026-May-17 00:14:45.930647 [DEBUG] 
+2026-May-17 00:14:45.930647 [DEBUG] RUN chmod +x /var/www/html/docker-entrypoint.sh
+2026-May-17 00:14:45.930647 [DEBUG] 
+2026-May-17 00:14:45.930647 [DEBUG] # ── nginx ──────────────────────────────────────────────────────────────────────
+2026-May-17 00:14:45.930647 [DEBUG] RUN rm -f /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default
+2026-May-17 00:14:45.930647 [DEBUG] 
+2026-May-17 00:14:45.930647 [DEBUG] RUN cat > /etc/nginx/nginx.conf << 'EOF'
+2026-May-17 00:14:45.930647 [DEBUG] user www-data;
+2026-May-17 00:14:45.930647 [DEBUG] worker_processes auto;
+2026-May-17 00:14:45.930647 [DEBUG] pid /run/nginx.pid;
+2026-May-17 00:14:45.930647 [DEBUG] error_log stderr warn;
+2026-May-17 00:14:45.930647 [DEBUG] 
+2026-May-17 00:14:45.930647 [DEBUG] events {
+2026-May-17 00:14:45.930647 [DEBUG] worker_connections 1024;
+2026-May-17 00:14:45.930647 [DEBUG] }
+2026-May-17 00:14:45.930647 [DEBUG] 
+2026-May-17 00:14:45.930647 [DEBUG] http {
+2026-May-17 00:14:45.930647 [DEBUG] include /etc/nginx/mime.types;
+2026-May-17 00:14:45.930647 [DEBUG] default_type application/octet-stream;
+2026-May-17 00:14:45.930647 [DEBUG] sendfile on;
+2026-May-17 00:14:45.930647 [DEBUG] tcp_nopush on;
+2026-May-17 00:14:45.930647 [DEBUG] keepalive_timeout 65;
+2026-May-17 00:14:45.930647 [DEBUG] client_max_body_size 100m;
+2026-May-17 00:14:45.930647 [DEBUG] fastcgi_read_timeout 300;
+2026-May-17 00:14:45.930647 [DEBUG] 
+2026-May-17 00:14:45.930647 [DEBUG] server {
+2026-May-17 00:14:45.930647 [DEBUG] listen 8080;
+2026-May-17 00:14:45.930647 [DEBUG] root /var/www/html/public;
+2026-May-17 00:14:45.930647 [DEBUG] index index.php index.html;
+2026-May-17 00:14:45.930647 [DEBUG] charset utf-8;
+2026-May-17 00:14:45.930647 [DEBUG] 
+2026-May-17 00:14:45.930647 [DEBUG] location / {
+2026-May-17 00:14:45.930647 [DEBUG] try_files $uri $uri/ /index.php?$query_string;
+2026-May-17 00:14:45.930647 [DEBUG] }
+2026-May-17 00:14:45.930647 [DEBUG] 
+2026-May-17 00:14:45.930647 [DEBUG] location = /favicon.ico { access_log off; log_not_found off; }
+2026-May-17 00:14:45.930647 [DEBUG] location = /robots.txt  { access_log off; log_not_found off; }
+2026-May-17 00:14:45.930647 [DEBUG] 
+2026-May-17 00:14:45.930647 [DEBUG] error_page 404 /index.php;
+2026-May-17 00:14:45.930647 [DEBUG] 
+2026-May-17 00:14:45.930647 [DEBUG] location ~ \.php$ {
+2026-May-17 00:14:45.930647 [DEBUG] try_files $uri =404;
+2026-May-17 00:14:45.930647 [DEBUG] fastcgi_pass 127.0.0.1:9000;
+2026-May-17 00:14:45.930647 [DEBUG] fastcgi_index index.php;
+2026-May-17 00:14:45.930647 [DEBUG] fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+2026-May-17 00:14:45.930647 [DEBUG] include fastcgi_params;
+2026-May-17 00:14:45.930647 [DEBUG] fastcgi_buffers 16 16k;
+2026-May-17 00:14:45.930647 [DEBUG] fastcgi_buffer_size 32k;
+2026-May-17 00:14:45.930647 [DEBUG] }
+2026-May-17 00:14:45.930647 [DEBUG] 
+2026-May-17 00:14:45.930647 [DEBUG] location ~ /\.(?!well-known).* {
+2026-May-17 00:14:45.930647 [DEBUG] deny all;
+2026-May-17 00:14:45.930647 [DEBUG] }
+2026-May-17 00:14:45.930647 [DEBUG] }
+2026-May-17 00:14:45.930647 [DEBUG] }
+2026-May-17 00:14:45.930647 [DEBUG] EOF
+2026-May-17 00:14:45.930647 [DEBUG] 
+2026-May-17 00:14:45.930647 [DEBUG] # ── PHP-FPM pool ───────────────────────────────────────────────────────────────
+2026-May-17 00:14:45.930647 [DEBUG] RUN cat > /usr/local/etc/php-fpm.d/www.conf << 'EOF'
+2026-May-17 00:14:45.930647 [DEBUG] [www]
+2026-May-17 00:14:45.930647 [DEBUG] user = www-data
+2026-May-17 00:14:45.930647 [DEBUG] group = www-data
+2026-May-17 00:14:45.930647 [DEBUG] listen = 127.0.0.1:9000
+2026-May-17 00:14:45.930647 [DEBUG] pm = dynamic
+2026-May-17 00:14:45.930647 [DEBUG] pm.max_children = 50
+2026-May-17 00:14:45.930647 [DEBUG] pm.start_servers = 2
+2026-May-17 00:14:45.930647 [DEBUG] pm.min_spare_servers = 1
+2026-May-17 00:14:45.930647 [DEBUG] pm.max_spare_servers = 10
+2026-May-17 00:14:45.930647 [DEBUG] pm.process_idle_timeout = 10s
+2026-May-17 00:14:45.930647 [DEBUG] pm.max_requests = 500
+2026-May-17 00:14:45.930647 [DEBUG] EOF
+2026-May-17 00:14:45.930647 [DEBUG] 
+2026-May-17 00:14:45.930647 [DEBUG] # ── PHP config ─────────────────────────────────────────────────────────────────
+2026-May-17 00:14:45.930647 [DEBUG] RUN cat > /usr/local/etc/php/conf.d/app.ini << 'EOF'
+2026-May-17 00:14:45.930647 [DEBUG] opcache.enable=1
+2026-May-17 00:14:45.930647 [DEBUG] opcache.memory_consumption=128
+2026-May-17 00:14:45.930647 [DEBUG] opcache.interned_strings_buffer=16
+2026-May-17 00:14:45.930647 [DEBUG] opcache.max_accelerated_files=10000
+2026-May-17 00:14:45.930647 [DEBUG] opcache.validate_timestamps=0
+2026-May-17 00:14:45.930647 [DEBUG] opcache.save_comments=1
+2026-May-17 00:14:45.930647 [DEBUG] upload_max_filesize=50M
+2026-May-17 00:14:45.930647 [DEBUG] post_max_size=50M
+2026-May-17 00:14:45.930647 [DEBUG] memory_limit=256M
+2026-May-17 00:14:45.930647 [DEBUG] max_execution_time=60
+2026-May-17 00:14:45.930647 [DEBUG] EOF
+2026-May-17 00:14:45.930647 [DEBUG] 
+2026-May-17 00:14:45.930647 [DEBUG] # ── supervisord ────────────────────────────────────────────────────────────────
+2026-May-17 00:14:45.930647 [DEBUG] RUN mkdir -p /var/log/supervisor
+2026-May-17 00:14:45.930647 [DEBUG] 
+2026-May-17 00:14:45.930647 [DEBUG] RUN cat > /etc/supervisor/supervisord.conf << 'EOF'
+2026-May-17 00:14:45.930647 [DEBUG] [supervisord]
+2026-May-17 00:14:45.930647 [DEBUG] nodaemon=true
+2026-May-17 00:14:45.930647 [DEBUG] logfile=/dev/null
+2026-May-17 00:14:45.930647 [DEBUG] logfile_maxbytes=0
+2026-May-17 00:14:45.930647 [DEBUG] pidfile=/run/supervisord.pid
+2026-May-17 00:14:45.930647 [DEBUG] 
+2026-May-17 00:14:45.930647 [DEBUG] [program:php-fpm]
+2026-May-17 00:14:45.930647 [DEBUG] command=/usr/local/sbin/php-fpm -F
+2026-May-17 00:14:45.930647 [DEBUG] stdout_logfile=/dev/stdout
+2026-May-17 00:14:45.930647 [DEBUG] stdout_logfile_maxbytes=0
+2026-May-17 00:14:45.930647 [DEBUG] stderr_logfile=/dev/stderr
+2026-May-17 00:14:45.930647 [DEBUG] stderr_logfile_maxbytes=0
+2026-May-17 00:14:45.930647 [DEBUG] autorestart=true
+2026-May-17 00:14:45.930647 [DEBUG] 
+2026-May-17 00:14:45.930647 [DEBUG] [program:nginx]
+2026-May-17 00:14:45.930647 [DEBUG] command=/usr/sbin/nginx -g "daemon off;"
+2026-May-17 00:14:45.930647 [DEBUG] stdout_logfile=/dev/stdout
+2026-May-17 00:14:45.930647 [DEBUG] stdout_logfile_maxbytes=0
+2026-May-17 00:14:45.930647 [DEBUG] stderr_logfile=/dev/stderr
+2026-May-17 00:14:45.930647 [DEBUG] stderr_logfile_maxbytes=0
+2026-May-17 00:14:45.930647 [DEBUG] autorestart=true
+2026-May-17 00:14:45.930647 [DEBUG] EOF
+2026-May-17 00:14:45.930647 [DEBUG] 
+2026-May-17 00:14:45.930647 [DEBUG] EXPOSE 8080
+2026-May-17 00:14:45.930647 [DEBUG] 
+2026-May-17 00:14:45.930647 [DEBUG] ENTRYPOINT ["/var/www/html/docker-entrypoint.sh"]
+2026-May-17 00:14:45.930647 [DEBUG] CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
+2026-May-17 00:14:50.848511 [DEBUG] Creating build-time .env file in /artifacts (outside Docker context).
+2026-May-17 00:14:52.859449 ----------------------------------------
+2026-May-17 00:14:52.881628 ⚠️ Build-time environment variable warning: APP_ENV=production
+2026-May-17 00:14:52.896513 Affects: Laravel/Symfony
+2026-May-17 00:14:52.912792 Issue: May affect dependency installation and build optimizations
+2026-May-17 00:14:52.928000 Recommendation: Consider using "local" or "development" for build
+2026-May-17 00:14:52.944623 
+2026-May-17 00:14:52.962133 💡 Tips to resolve build issues:
+2026-May-17 00:14:52.979331 1. Set these variables as "Runtime only" in the environment variables settings
+2026-May-17 00:14:52.996691 2. Use different values for build-time (e.g., NODE_ENV=development for build)
+2026-May-17 00:14:53.015988 3. Consider using multi-stage Docker builds to separate build and runtime environments
+2026-May-17 00:14:53.753028 [DEBUG] [CMD]: docker exec gfsrd67odqo5pskiwxour3bo bash -c 'cat /artifacts/gfsrd67odqo5pskiwxour3bo/dockerfile'
+2026-May-17 00:14:53.753028 [DEBUG] FROM node:20-slim AS assets
+2026-May-17 00:14:53.753028 [DEBUG] 
+2026-May-17 00:14:53.753028 [DEBUG] WORKDIR /app
+2026-May-17 00:14:53.753028 [DEBUG] COPY package*.json ./
+2026-May-17 00:14:53.753028 [DEBUG] RUN npm ci --no-audit
+2026-May-17 00:14:53.753028 [DEBUG] COPY . .
+2026-May-17 00:14:53.753028 [DEBUG] RUN npm run build
+2026-May-17 00:14:53.753028 [DEBUG] 
+2026-May-17 00:14:53.753028 [DEBUG] FROM php:8.4-fpm
+2026-May-17 00:14:53.753028 [DEBUG] 
+2026-May-17 00:14:53.753028 [DEBUG] # Install system deps + PHP extensions
+2026-May-17 00:14:53.753028 [DEBUG] RUN apt-get update && apt-get install -y --no-install-recommends \
+2026-May-17 00:14:53.753028 [DEBUG] nginx \
+2026-May-17 00:14:53.753028 [DEBUG] supervisor \
+2026-May-17 00:14:53.753028 [DEBUG] libfreetype6-dev \
+2026-May-17 00:14:53.753028 [DEBUG] libjpeg62-turbo-dev \
+2026-May-17 00:14:53.753028 [DEBUG] libpng-dev \
+2026-May-17 00:14:53.753028 [DEBUG] libzip-dev \
+2026-May-17 00:14:53.753028 [DEBUG] libonig-dev \
+2026-May-17 00:14:53.753028 [DEBUG] libxml2-dev \
+2026-May-17 00:14:53.753028 [DEBUG] libsodium-dev \
+2026-May-17 00:14:53.753028 [DEBUG] libpq-dev \
+2026-May-17 00:14:53.753028 [DEBUG] libicu-dev \
+2026-May-17 00:14:53.753028 [DEBUG] unzip \
+2026-May-17 00:14:53.753028 [DEBUG] curl \
+2026-May-17 00:14:53.753028 [DEBUG] && docker-php-ext-configure gd --with-freetype --with-jpeg \
+2026-May-17 00:14:53.753028 [DEBUG] && docker-php-ext-install -j$(nproc) \
+2026-May-17 00:14:53.753028 [DEBUG] gd \
+2026-May-17 00:14:53.753028 [DEBUG] pdo_mysql \
+2026-May-17 00:14:53.753028 [DEBUG] pdo_pgsql \
+2026-May-17 00:14:53.753028 [DEBUG] mbstring \
+2026-May-17 00:14:53.753028 [DEBUG] xml \
+2026-May-17 00:14:53.753028 [DEBUG] zip \
+2026-May-17 00:14:53.753028 [DEBUG] bcmath \
+2026-May-17 00:14:53.753028 [DEBUG] pcntl \
+2026-May-17 00:14:53.753028 [DEBUG] sodium \
+2026-May-17 00:14:53.753028 [DEBUG] opcache \
+2026-May-17 00:14:53.753028 [DEBUG] intl \
+2026-May-17 00:14:53.753028 [DEBUG] && pecl install redis \
+2026-May-17 00:14:53.753028 [DEBUG] && docker-php-ext-enable redis \
+2026-May-17 00:14:53.753028 [DEBUG] && rm -rf /var/lib/apt/lists/* /tmp/pear
+2026-May-17 00:14:53.753028 [DEBUG] 
+2026-May-17 00:14:53.753028 [DEBUG] # Composer
+2026-May-17 00:14:53.753028 [DEBUG] COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+2026-May-17 00:14:53.753028 [DEBUG] 
+2026-May-17 00:14:53.753028 [DEBUG] WORKDIR /var/www/html
+2026-May-17 00:14:53.753028 [DEBUG] 
+2026-May-17 00:14:53.753028 [DEBUG] COPY --chown=www-data:www-data . .
+2026-May-17 00:14:53.753028 [DEBUG] COPY --from=assets --chown=www-data:www-data /app/public/build ./public/build
+2026-May-17 00:14:53.753028 [DEBUG] 
+2026-May-17 00:14:53.753028 [DEBUG] RUN composer install \
+2026-May-17 00:14:53.753028 [DEBUG] --no-dev \
+2026-May-17 00:14:53.753028 [DEBUG] --optimize-autoloader \
+2026-May-17 00:14:53.753028 [DEBUG] --no-interaction
+2026-May-17 00:14:53.753028 [DEBUG] 
+2026-May-17 00:14:53.753028 [DEBUG] RUN chmod +x /var/www/html/docker-entrypoint.sh
+2026-May-17 00:14:53.753028 [DEBUG] 
+2026-May-17 00:14:53.753028 [DEBUG] # ── nginx ──────────────────────────────────────────────────────────────────────
+2026-May-17 00:14:53.753028 [DEBUG] RUN rm -f /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default
+2026-May-17 00:14:53.753028 [DEBUG] 
+2026-May-17 00:14:53.753028 [DEBUG] RUN cat > /etc/nginx/nginx.conf << 'EOF'
+2026-May-17 00:14:53.753028 [DEBUG] user www-data;
+2026-May-17 00:14:53.753028 [DEBUG] worker_processes auto;
+2026-May-17 00:14:53.753028 [DEBUG] pid /run/nginx.pid;
+2026-May-17 00:14:53.753028 [DEBUG] error_log stderr warn;
+2026-May-17 00:14:53.753028 [DEBUG] 
+2026-May-17 00:14:53.753028 [DEBUG] events {
+2026-May-17 00:14:53.753028 [DEBUG] worker_connections 1024;
+2026-May-17 00:14:53.753028 [DEBUG] }
+2026-May-17 00:14:53.753028 [DEBUG] 
+2026-May-17 00:14:53.753028 [DEBUG] http {
+2026-May-17 00:14:53.753028 [DEBUG] include /etc/nginx/mime.types;
+2026-May-17 00:14:53.753028 [DEBUG] default_type application/octet-stream;
+2026-May-17 00:14:53.753028 [DEBUG] sendfile on;
+2026-May-17 00:14:53.753028 [DEBUG] tcp_nopush on;
+2026-May-17 00:14:53.753028 [DEBUG] keepalive_timeout 65;
+2026-May-17 00:14:53.753028 [DEBUG] client_max_body_size 100m;
+2026-May-17 00:14:53.753028 [DEBUG] fastcgi_read_timeout 300;
+2026-May-17 00:14:53.753028 [DEBUG] 
+2026-May-17 00:14:53.753028 [DEBUG] server {
+2026-May-17 00:14:53.753028 [DEBUG] listen 8080;
+2026-May-17 00:14:53.753028 [DEBUG] root /var/www/html/public;
+2026-May-17 00:14:53.753028 [DEBUG] index index.php index.html;
+2026-May-17 00:14:53.753028 [DEBUG] charset utf-8;
+2026-May-17 00:14:53.753028 [DEBUG] 
+2026-May-17 00:14:53.753028 [DEBUG] location / {
+2026-May-17 00:14:53.753028 [DEBUG] try_files $uri $uri/ /index.php?$query_string;
+2026-May-17 00:14:53.753028 [DEBUG] }
+2026-May-17 00:14:53.753028 [DEBUG] 
+2026-May-17 00:14:53.753028 [DEBUG] location = /favicon.ico { access_log off; log_not_found off; }
+2026-May-17 00:14:53.753028 [DEBUG] location = /robots.txt  { access_log off; log_not_found off; }
+2026-May-17 00:14:53.753028 [DEBUG] 
+2026-May-17 00:14:53.753028 [DEBUG] error_page 404 /index.php;
+2026-May-17 00:14:53.753028 [DEBUG] 
+2026-May-17 00:14:53.753028 [DEBUG] location ~ \.php$ {
+2026-May-17 00:14:53.753028 [DEBUG] try_files $uri =404;
+2026-May-17 00:14:53.753028 [DEBUG] fastcgi_pass 127.0.0.1:9000;
+2026-May-17 00:14:53.753028 [DEBUG] fastcgi_index index.php;
+2026-May-17 00:14:53.753028 [DEBUG] fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+2026-May-17 00:14:53.753028 [DEBUG] include fastcgi_params;
+2026-May-17 00:14:53.753028 [DEBUG] fastcgi_buffers 16 16k;
+2026-May-17 00:14:53.753028 [DEBUG] fastcgi_buffer_size 32k;
+2026-May-17 00:14:53.753028 [DEBUG] }
+2026-May-17 00:14:53.753028 [DEBUG] 
+2026-May-17 00:14:53.753028 [DEBUG] location ~ /\.(?!well-known).* {
+2026-May-17 00:14:53.753028 [DEBUG] deny all;
+2026-May-17 00:14:53.753028 [DEBUG] }
+2026-May-17 00:14:53.753028 [DEBUG] }
+2026-May-17 00:14:53.753028 [DEBUG] }
+2026-May-17 00:14:53.753028 [DEBUG] EOF
+2026-May-17 00:14:53.753028 [DEBUG] 
+2026-May-17 00:14:53.753028 [DEBUG] # ── PHP-FPM pool ───────────────────────────────────────────────────────────────
+2026-May-17 00:14:53.753028 [DEBUG] RUN cat > /usr/local/etc/php-fpm.d/www.conf << 'EOF'
+2026-May-17 00:14:53.753028 [DEBUG] [www]
+2026-May-17 00:14:53.753028 [DEBUG] user = www-data
+2026-May-17 00:14:53.753028 [DEBUG] group = www-data
+2026-May-17 00:14:53.753028 [DEBUG] listen = 127.0.0.1:9000
+2026-May-17 00:14:53.753028 [DEBUG] pm = dynamic
+2026-May-17 00:14:53.753028 [DEBUG] pm.max_children = 50
+2026-May-17 00:14:53.753028 [DEBUG] pm.start_servers = 2
+2026-May-17 00:14:53.753028 [DEBUG] pm.min_spare_servers = 1
+2026-May-17 00:14:53.753028 [DEBUG] pm.max_spare_servers = 10
+2026-May-17 00:14:53.753028 [DEBUG] pm.process_idle_timeout = 10s
+2026-May-17 00:14:53.753028 [DEBUG] pm.max_requests = 500
+2026-May-17 00:14:53.753028 [DEBUG] EOF
+2026-May-17 00:14:53.753028 [DEBUG] 
+2026-May-17 00:14:53.753028 [DEBUG] # ── PHP config ─────────────────────────────────────────────────────────────────
+2026-May-17 00:14:53.753028 [DEBUG] RUN cat > /usr/local/etc/php/conf.d/app.ini << 'EOF'
+2026-May-17 00:14:53.753028 [DEBUG] opcache.enable=1
+2026-May-17 00:14:53.753028 [DEBUG] opcache.memory_consumption=128
+2026-May-17 00:14:53.753028 [DEBUG] opcache.interned_strings_buffer=16
+2026-May-17 00:14:53.753028 [DEBUG] opcache.max_accelerated_files=10000
+2026-May-17 00:14:53.753028 [DEBUG] opcache.validate_timestamps=0
+2026-May-17 00:14:53.753028 [DEBUG] opcache.save_comments=1
+2026-May-17 00:14:53.753028 [DEBUG] upload_max_filesize=50M
+2026-May-17 00:14:53.753028 [DEBUG] post_max_size=50M
+2026-May-17 00:14:53.753028 [DEBUG] memory_limit=256M
+2026-May-17 00:14:53.753028 [DEBUG] max_execution_time=60
+2026-May-17 00:14:53.753028 [DEBUG] EOF
+2026-May-17 00:14:53.753028 [DEBUG] 
+2026-May-17 00:14:53.753028 [DEBUG] # ── supervisord ────────────────────────────────────────────────────────────────
+2026-May-17 00:14:53.753028 [DEBUG] RUN mkdir -p /var/log/supervisor
+2026-May-17 00:14:53.753028 [DEBUG] 
+2026-May-17 00:14:53.753028 [DEBUG] RUN cat > /etc/supervisor/supervisord.conf << 'EOF'
+2026-May-17 00:14:53.753028 [DEBUG] [supervisord]
+2026-May-17 00:14:53.753028 [DEBUG] nodaemon=true
+2026-May-17 00:14:53.753028 [DEBUG] logfile=/dev/null
+2026-May-17 00:14:53.753028 [DEBUG] logfile_maxbytes=0
+2026-May-17 00:14:53.753028 [DEBUG] pidfile=/run/supervisord.pid
+2026-May-17 00:14:53.753028 [DEBUG] 
+2026-May-17 00:14:53.753028 [DEBUG] [program:php-fpm]
+2026-May-17 00:14:53.753028 [DEBUG] command=/usr/local/sbin/php-fpm -F
+2026-May-17 00:14:53.753028 [DEBUG] stdout_logfile=/dev/stdout
+2026-May-17 00:14:53.753028 [DEBUG] stdout_logfile_maxbytes=0
+2026-May-17 00:14:53.753028 [DEBUG] stderr_logfile=/dev/stderr
+2026-May-17 00:14:53.753028 [DEBUG] stderr_logfile_maxbytes=0
+2026-May-17 00:14:53.753028 [DEBUG] autorestart=true
+2026-May-17 00:14:53.753028 [DEBUG] 
+2026-May-17 00:14:53.753028 [DEBUG] [program:nginx]
+2026-May-17 00:14:53.753028 [DEBUG] command=/usr/sbin/nginx -g "daemon off;"
+2026-May-17 00:14:53.753028 [DEBUG] stdout_logfile=/dev/stdout
+2026-May-17 00:14:53.753028 [DEBUG] stdout_logfile_maxbytes=0
+2026-May-17 00:14:53.753028 [DEBUG] stderr_logfile=/dev/stderr
+2026-May-17 00:14:53.753028 [DEBUG] stderr_logfile_maxbytes=0
+2026-May-17 00:14:53.753028 [DEBUG] autorestart=true
+2026-May-17 00:14:53.753028 [DEBUG] EOF
+2026-May-17 00:14:53.753028 [DEBUG] 
+2026-May-17 00:14:53.753028 [DEBUG] EXPOSE 8080
+2026-May-17 00:14:53.753028 [DEBUG] 
+2026-May-17 00:14:53.753028 [DEBUG] ENTRYPOINT ["/var/www/html/docker-entrypoint.sh"]
+2026-May-17 00:14:53.753028 [DEBUG] CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
+2026-May-17 00:14:54.723202 [DEBUG] Final Dockerfile:
+2026-May-17 00:14:56.626103 [DEBUG] [CMD]: docker exec gfsrd67odqo5pskiwxour3bo bash -c 'cat /artifacts/gfsrd67odqo5pskiwxour3bo/dockerfile'
+2026-May-17 00:14:56.626103 [DEBUG] FROM node:20-slim AS assets
+2026-May-17 00:14:56.626103 [DEBUG] ARG APP_NAME=DRent
+2026-May-17 00:14:56.626103 [DEBUG] ARG APP_ENV=production
+2026-May-17 00:14:56.626103 [DEBUG] ARG APP_KEY=base64:KoiOzHoV0ykQFAFFR61RZrZWvZyW5DgaLMFz0VMxPg8=
+2026-May-17 00:14:56.626103 [DEBUG] ARG APP_DEBUG=false
+2026-May-17 00:14:56.626103 [DEBUG] ARG APP_URL=https://durraalaseel.nextoneplus.com
+2026-May-17 00:<REDACTED>@sha256:b09bccd91a78fe8a9ab4b33d707b862e8fe54fec17782e32683ad2a69c46867d
+2026-May-17 00:15:04.635566 [DEBUG] #6 DONE 0.0s
+2026-May-17 00:15:04.635566 [DEBUG] 
+2026-May-17 00:15:04.635566 [DEBUG] #7 [stage-1  1/14] FROM docker.io/library/php:8.4-fpm@sha256:121ed120cc0c125e33cd3ad9ccd7cde679e680040b21b58f8b787c28d81d9bce
+2026-May-17 00:15:04.635566 [DEBUG] #7 DONE 0.0s
+2026-May-17 00:15:04.635566 [DEBUG] 
+2026-May-17 00:15:04.635566 [DEBUG] #8 [assets 1/6] FROM docker.io/library/node:20-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0
+2026-May-17 00:15:04.635566 [DEBUG] #8 resolve docker.io/library/node:20-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0 0.0s done
+2026-May-17 00:15:04.635566 [DEBUG] #8 sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0 6.49kB / 6.49kB done
+2026-May-17 00:15:04.635566 [DEBUG] #8 sha256:3d0f05455dea2c82e2f76e7e2543964c30f6b7d673fc1a83286736d44fe4c41c 1.93kB / 1.93kB done
+2026-May-17 00:15:04.635566 [DEBUG] #8 sha256:9da6b4e352d0d5c94963eba1832408f5b7b08839cd8be9b6610c05de5118c704 6.88kB / 6.88kB done
+2026-May-17 00:15:04.744652 [DEBUG] #8 sha256:ff86ea2e5edce334d19a34fbc65d1a511aa1fc823dba1110422f991aa56b44d4 0B / 28.24MB 0.1s
+2026-May-17 00:15:04.744652 [DEBUG] #8 sha256:e54aec64c365815cd7b91e718f00ac6e625562b1de09036b38614621b42c7582 0B / 3.31kB 0.1s
+2026-May-17 00:15:04.982483 [DEBUG] #8 sha256:804d4d68057cbb26cbcde9a735148ebc6589911bad32cf9dbddb5b0ba878bf1f 0B / 41.42MB 0.2s
+2026-May-17 00:15:05.396157 [DEBUG] #8 sha256:ff86ea2e5edce334d19a34fbc65d1a511aa1fc823dba1110422f991aa56b44d4 2.10MB / 28.24MB 0.6s
+2026-May-17 00:15:05.503965 [DEBUG] #8 sha256:e54aec64c365815cd7b91e718f00ac6e625562b1de09036b38614621b42c7582 3.31kB / 3.31kB 0.6s done
+2026-May-17 00:15:05.609496 [DEBUG] #8 sha256:ff86ea2e5edce334d19a34fbc65d1a511aa1fc823dba1110422f991aa56b44d4 5.24MB / 28.24MB 0.9s
+2026-May-17 00:15:05.609496 [DEBUG] #8 sha256:64cfb949317c9824fd081d55c59a7225bfe1f650c6395ba42d7ed0ccf51993d2 0B / 1.71MB 0.9s
+2026-May-17 00:15:05.796151 [DEBUG] #8 sha256:804d4d68057cbb26cbcde9a735148ebc6589911bad32cf9dbddb5b0ba878bf1f 3.15MB / 41.42MB 1.0s
+2026-May-17 00:15:05.914921 [DEBUG] #8 sha256:ff86ea2e5edce334d19a34fbc65d1a511aa1fc823dba1110422f991aa56b44d4 7.34MB / 28.24MB 1.1s
+2026-May-17 00:15:06.101036 [DEBUG] #8 sha256:ff86ea2e5edce334d19a34fbc65d1a511aa1fc823dba1110422f991aa56b44d4 9.90MB / 28.24MB 1.4s
+2026-May-17 00:15:06.101036 [DEBUG] #8 sha256:804d4d68057cbb26cbcde9a735148ebc6589911bad32cf9dbddb5b0ba878bf1f 5.24MB / 41.42MB 1.4s
+2026-May-17 00:15:06.501989 [DEBUG] #8 sha256:ff86ea2e5edce334d19a34fbc65d1a511aa1fc823dba1110422f991aa56b44d4 11.53MB / 28.24MB 1.6s
+2026-May-17 00:15:06.501989 [DEBUG] #8 sha256:64cfb949317c9824fd081d55c59a7225bfe1f650c6395ba42d7ed0ccf51993d2 1.05MB / 1.71MB 1.6s
+2026-May-17 00:15:06.628662 [DEBUG] #8 sha256:64cfb949317c9824fd081d55c59a7225bfe1f650c6395ba42d7ed0ccf51993d2 1.71MB / 1.71MB 1.9s
+2026-May-17 00:15:06.819456 [DEBUG] #8 sha256:ff86ea2e5edce334d19a34fbc65d1a511aa1fc823dba1110422f991aa56b44d4 13.63MB / 28.24MB 2.0s
+2026-May-17 00:15:06.819456 [DEBUG] #8 sha256:64cfb949317c9824fd081d55c59a7225bfe1f650c6395ba42d7ed0ccf51993d2 1.71MB / 1.71MB 1.9s done
+2026-May-17 00:15:06.930585 [DEBUG] #8 sha256:3c02fd806613748139b8b8a14a69ae3518a1b0e863c57c35aada3b92ed87fb31 0B / 447B 2.1s
+2026-May-17 00:15:06.930585 [DEBUG] #8 sha256:ff86ea2e5edce334d19a34fbc65d1a511aa1fc823dba1110422f991aa56b44d4 16.78MB / 28.24MB 2.2s
+2026-May-17 00:15:07.121697 [DEBUG] #8 sha256:ff86ea2e5edce334d19a34fbc65d1a511aa1fc823dba1110422f991aa56b44d4 18.87MB / 28.24MB 2.5s
+2026-May-17 00:15:07.121697 [DEBUG] #8 sha256:804d4d68057cbb26cbcde9a735148ebc6589911bad32cf9dbddb5b0ba878bf1f 7.34MB / 41.42MB 2.5s
+2026-May-17 00:15:07.121697 [DEBUG] #8 sha256:3c02fd806613748139b8b8a14a69ae3518a1b0e863c57c35aada3b92ed87fb31 447B / 447B 2.4s done
+2026-May-17 00:15:07.588938 [DEBUG] #8 sha256:ff86ea2e5edce334d19a34fbc65d1a511aa1fc823dba1110422f991aa56b44d4 27.26MB / 28.24MB 2.9s
+2026-May-17 00:15:07.588938 [DEBUG] #8 sha256:804d4d68057cbb26cbcde9a735148ebc6589911bad32cf9dbddb5b0ba878bf1f 14.68MB / 41.42MB 2.9s
+2026-May-17 00:15:07.890194 [DEBUG] #8 sha256:ff86ea2e5edce334d19a34fbc65d1a511aa1fc823dba1110422f991aa56b44d4 28.24MB / 28.24MB 3.1s done
+2026-May-17 00:15:07.890194 [DEBUG] #8 sha256:804d4d68057cbb26cbcde9a735148ebc6589911bad32cf9dbddb5b0ba878bf1f 17.83MB / 41.42MB 3.2s
+2026-May-17 00:15:08.232816 [DEBUG] #8 sha256:804d4d68057cbb26cbcde9a735148ebc6589911bad32cf9dbddb5b0ba878bf1f 25.17MB / 41.42MB 3.6s
+2026-May-17 00:15:08.331963 [DEBUG] #8 sha256:804d4d68057cbb26cbcde9a735148ebc6589911bad32cf9dbddb5b0ba878bf1f 28.31MB / 41.42MB 3.7s
+2026-May-17 00:15:08.331963 [DEBUG] #8 extracting sha256:ff86ea2e5edce334d19a34fbc65d1a511aa1fc823dba1110422f991aa56b44d4
+2026-May-17 00:15:08.430480 [DEBUG] #8 sha256:804d4d68057cbb26cbcde9a735148ebc6589911bad32cf9dbddb5b0ba878bf1f 31.46MB / 41.42MB 3.8s
+2026-May-17 00:15:08.707438 [DEBUG] #8 sha256:804d4d68057cbb26cbcde9a735148ebc6589911bad32cf9dbddb5b0ba878bf1f 34.60MB / 41.42MB 4.0s
+2026-May-17 00:15:08.836365 [DEBUG] #8 sha256:804d4d68057cbb26cbcde9a735148ebc6589911bad32cf9dbddb5b0ba878bf1f 39.85MB / 41.42MB 4.2s
+2026-May-17 00:15:09.208568 [DEBUG] #8 sha256:804d4d68057cbb26cbcde9a735148ebc6589911bad32cf9dbddb5b0ba878bf1f 41.42MB / 41.42MB 4.4s done
+2026-May-17 00:15:14.098679 [DEBUG] #8 extracting sha256:ff86ea2e5edce334d19a34fbc65d1a511aa1fc823dba1110422f991aa56b44d4 5.6s
+2026-May-17 00:15:14.896345 [DEBUG] #8 ...
+2026-May-17 00:15:14.896345 [DEBUG] 
+2026-May-17 00:15:14.896345 [DEBUG] #9 [internal] load build context
+2026-May-17 00:15:14.896345 [DEBUG] #9 transferring context: 78.69MB 9.4s done
+2026-May-17 00:15:14.896345 [DEBUG] #9 DONE 9.8s
+2026-May-17 00:15:14.896345 [DEBUG] 
+2026-May-17 00:15:14.896345 [DEBUG] #8 [assets 1/6] FROM docker.io/library/node:20-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0
+2026-May-17 00:15:14.896345 [DEBUG] #8 ...
+2026-May-17 00:15:14.896345 [DEBUG] 
+2026-May-17 00:15:14.896345 [DEBUG] #10 [stage-1  3/14] COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+2026-May-17 00:15:14.896345 [DEBUG] #10 CACHED
+2026-May-17 00:15:14.896345 [DEBUG] 
+2026-May-17 00:15:14.896345 [DEBUG] #11 [stage-1  2/14] RUN apt-get update && apt-get install -y --no-install-recommends         nginx         supervisor         libfreetype6-dev         libjpeg62-turbo-dev         libpng-dev         libzip-dev         libonig-dev         libxml2-dev         libsodium-dev         libpq-dev         libicu-dev         unzip         curl     && docker-php-ext-configure gd --with-freetype --with-jpeg     && docker-php-ext-install -j$(nproc)         gd         pdo_mysql         pdo_pgsql         mbstring         xml         zip         bcmath         pcntl         sodium         opcache         intl     && pecl install redis     && docker-php-ext-enable redis     && rm -rf /var/lib/apt/lists/* /tmp/pear
+2026-May-17 00:15:14.896345 [DEBUG] #11 CACHED
+2026-May-17 00:15:14.896345 [DEBUG] 
+2026-May-17 00:15:14.896345 [DEBUG] #12 [stage-1  4/14] WORKDIR /var/www/html
+2026-May-17 00:15:14.896345 [DEBUG] #12 CACHED
+2026-May-17 00:15:14.896345 [DEBUG] 
+2026-May-17 00:15:14.896345 [DEBUG] #13 [stage-1  5/14] COPY --chown=www-data:www-data . .
+2026-May-17 00:15:19.814301 [DEBUG] #13 ...
+2026-May-17 00:15:19.814301 [DEBUG] 
+2026-May-17 00:15:19.814301 [DEBUG] #8 [assets 1/6] FROM docker.io/library/node:20-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0
+2026-May-17 00:15:19.814301 [DEBUG] #8 extracting sha256:ff86ea2e5edce334d19a34fbc65d1a511aa1fc823dba1110422f991aa56b44d4 11.6s
+2026-May-17 00:15:21.009833 [DEBUG] #8 ...
+2026-May-17 00:15:21.009833 [DEBUG] 
+2026-May-17 00:15:21.009833 [DEBUG] #13 [stage-1  5/14] COPY --chown=www-data:www-data . .
+2026-May-17 00:15:21.009833 [DEBUG] #13 DONE 6.5s
+2026-May-17 00:15:21.210497 [DEBUG] #8 [assets 1/6] FROM docker.io/library/node:20-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0
+2026-May-17 00:15:24.511337 [DEBUG] #8 extracting sha256:ff86ea2e5edce334d19a34fbc65d1a511aa1fc823dba1110422f991aa56b44d4 16.3s done
+2026-May-17 00:15:24.645680 [DEBUG] #8 extracting sha256:e54aec64c365815cd7b91e718f00ac6e625562b1de09036b38614621b42c7582
+2026-May-17 00:15:24.821576 [DEBUG] #8 extracting sha256:e54aec64c365815cd7b91e718f00ac6e625562b1de09036b38614621b42c7582 done
+2026-May-17 00:15:24.821576 [DEBUG] #8 extracting sha256:804d4d68057cbb26cbcde9a735148ebc6589911bad32cf9dbddb5b0ba878bf1f 0.1s
+2026-May-17 00:15:30.013442 [DEBUG] #8 extracting sha256:804d4d68057cbb26cbcde9a735148ebc6589911bad32cf9dbddb5b0ba878bf1f 5.3s
+2026-May-17 00:15:30.882542 [DEBUG] #8 extracting sha256:804d4d68057cbb26cbcde9a735148ebc6589911bad32cf9dbddb5b0ba878bf1f 6.1s done
+2026-May-17 00:15:30.882542 [DEBUG] #8 extracting sha256:64cfb949317c9824fd081d55c59a7225bfe1f650c6395ba42d7ed0ccf51993d2
+2026-May-17 00:15:31.233865 [DEBUG] #8 extracting sha256:64cfb949317c9824fd081d55c59a7225bfe1f650c6395ba42d7ed0ccf51993d2 0.3s done
+2026-May-17 00:15:31.233865 [DEBUG] #8 extracting sha256:3c02fd806613748139b8b8a14a69ae3518a1b0e863c57c35aada3b92ed87fb31 done
+2026-May-17 00:15:31.233865 [DEBUG] #8 DONE 26.7s
+2026-May-17 00:15:31.391184 [DEBUG] #14 [assets 2/6] WORKDIR /app
+2026-May-17 00:15:31.687114 [DEBUG] #14 DONE 0.5s
+2026-May-17 00:15:31.795658 [DEBUG] #15 [assets 3/6] COPY package*.json ./
+2026-May-17 00:15:31.795658 [DEBUG] #15 DONE 0.1s
+2026-May-17 00:15:31.984244 [DEBUG] #16 [assets 4/6] RUN npm ci --no-audit
+2026-May-17 00:15:33.663593 [DEBUG] #16 1.861 npm warn EBADENGINE Unsupported engine {
+2026-May-17 00:15:33.663593 [DEBUG] #16 1.861 npm warn EBADENGINE   package: 'postman-to-openapi@3.0.1',
+2026-May-17 00:15:33.663593 [DEBUG] #16 1.861 npm warn EBADENGINE   required: { node: '>=14 <20' },
+2026-May-17 00:15:33.663593 [DEBUG] #16 1.861 npm warn EBADENGINE   current: { node: 'v20.20.2', npm: '10.8.2' }
+2026-May-17 00:15:33.663593 [DEBUG] #16 1.861 npm warn EBADENGINE }
+2026-May-17 00:15:41.318672 [DEBUG] #16 9.513
+2026-May-17 00:15:41.318672 [DEBUG] #16 9.513 added 66 packages in 9s
+2026-May-17 00:15:41.487742 [DEBUG] #16 9.516
+2026-May-17 00:15:41.487742 [DEBUG] #16 9.516 20 packages are looking for funding
+2026-May-17 00:15:41.487742 [DEBUG] #16 9.516   run `npm fund` for details
+2026-May-17 00:15:41.487742 [DEBUG] #16 9.520 npm notice
+2026-May-17 00:15:41.487742 [DEBUG] #16 9.520 npm notice New major version of npm available! 10.8.2 -> 11.14.1
+2026-May-17 00:15:41.487742 [DEBUG] #16 9.520 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.14.1
+2026-May-17 00:<REDACTED>@11.14.1
+2026-May-17 00:15:41.487742 [DEBUG] #16 9.520 npm notice
+2026-May-17 00:15:41.622443 [DEBUG] #16 DONE 9.8s
+2026-May-17 00:15:41.774907 [DEBUG] #17 [assets 5/6] COPY . .
+2026-May-17 00:15:42.944780 [DEBUG] #17 DONE 1.3s
+2026-May-17 00:15:43.112754 [DEBUG] #18 [assets 6/6] RUN npm run build
+2026-May-17 00:15:44.397352 [DEBUG] #18 1.367
+2026-May-17 00:15:44.397352 [DEBUG] #18 1.367 > build
+2026-May-17 00:15:44.397352 [DEBUG] #18 1.367 > vite build
+2026-May-17 00:15:44.397352 [DEBUG] #18 1.367
+2026-May-17 00:15:46.702293 [DEBUG] #18 3.748 vite v3.2.11 building for production...
+2026-May-17 00:15:46.988441 [DEBUG] #18 3.997 transforming...
+2026-May-17 00:15:53.642777 [DEBUG] #18 10.69 DEPRECATION WARNING [legacy-js-api]: The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+2026-May-17 00:15:53.642777 [DEBUG] #18 10.69
+2026-May-17 00:15:53.642777 [DEBUG] #18 10.69 More info: https://sass-lang.com/d/legacy-js-api
+2026-May-17 00:<REDACTED>@import rules are deprecated and will be removed in Dart Sass 3.0.0.
+2026-May-17 00:15:53.815945 [DEBUG] #18 10.76
+2026-May-17 00:15:53.815945 [DEBUG] #18 10.76 More info and automated migrator: https://sass-lang.com/d/import
+2026-May-17 00:<REDACTED>@import 'variables';
+2026-May-17 00:15:53.815945 [DEBUG] #18 10.76   │         ^^^^^^^^^^^
+2026-May-17 00:15:53.815945 [DEBUG] #18 10.76   ╵
+2026-May-17 00:15:53.815945 [DEBUG] #18 10.76     resources/sass/app.scss 5:<REDACTED>@import rules are deprecated and will be removed in Dart Sass 3.0.0.
+2026-May-17 00:15:53.815945 [DEBUG] #18 10.76
+2026-May-17 00:15:53.815945 [DEBUG] #18 10.76 More info and automated migrator: https://sass-lang.com/d/import
+2026-May-17 00:<REDACTED>@import 'bootstrap/scss/bootstrap';
+2026-May-17 00:15:53.815945 [DEBUG] #18 10.76   │         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-May-17 00:15:53.815945 [DEBUG] #18 10.76   ╵
+2026-May-17 00:15:53.815945 [DEBUG] #18 10.76     resources/sass/app.scss 8:<REDACTED>@import rules are deprecated and will be removed in Dart Sass 3.0.0.
+2026-May-17 00:15:53.815945 [DEBUG] #18 10.86
+2026-May-17 00:15:53.815945 [DEBUG] #18 10.86 More info and automated migrator: https://sass-lang.com/d/import
+2026-May-17 00:<REDACTED>@import "mixins/banner";
+2026-May-17 00:15:53.815945 [DEBUG] #18 10.86   │         ^^^^^^^^^^^^^^^
+2026-May-17 00:15:53.815945 [DEBUG] #18 10.86   ╵
+2026-May-17 00:15:53.815945 [DEBUG] #18 10.86     node_modules/bootstrap/scss/bootstrap.scss 1:<REDACTED>@import
+2026-May-17 00:15:53.815945 [DEBUG] #18 10.86     resources/sass/app.scss 8:9                     root stylesheet
+2026-May-17 00:15:53.815945 [DEBUG] #18 10.86
+2026-May-17 00:15:53.987353 [DEBUG] #18 10.87 DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+2026-May-17 00:15:53.987353 [DEBUG] #18 10.87
+2026-May-17 00:15:53.987353 [DEBUG] #18 10.87 More info and automated migrator: https://sass-lang.com/d/import
+2026-May-17 00:<REDACTED>@import "functions";
+2026-May-17 00:15:53.987353 [DEBUG] #18 10.87   │         ^^^^^^^^^^^
+2026-May-17 00:15:53.987353 [DEBUG] #18 10.87   ╵
+2026-May-17 00:15:53.987353 [DEBUG] #18 10.87     node_modules/bootstrap/scss/bootstrap.scss 7:<REDACTED>@import
+2026-May-17 00:15:53.987353 [DEBUG] #18 10.87     resources/sass/app.scss 8:9                     root stylesheet
+2026-May-17 00:15:53.987353 [DEBUG] #18 10.87
+2026-May-17 00:15:53.987353 [DEBUG] #18 10.87 DEPRECATION WARNING [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+2026-May-17 00:15:53.987353 [DEBUG] #18 10.87
+2026-May-17 00:15:53.987353 [DEBUG] #18 10.87 More info and automated migrator: https://sass-lang.com/d/import
+2026-May-17 00:<REDACTED>@import "variables";
+2026-May-17 00:15:53.987353 [DEBUG] #18 10.87   │         ^^^^^^^^^^^
+2026-May-17 00:15:53.987353 [DEBUG] #18 10.87   ╵
+2026-May-17 00:15:53.987353 [DEBUG] #18 10.87     node_modules/bootstrap/scss/bootstrap.scss 8:<REDACTED>@import
+2026-May-17 00:15:53.987353 [DEBUG] #18 10.87     resources/sass/app.scss 8:9                     root stylesheet
+2026-May-17 00:15:53.987353 [DEBUG] #18 10.87
+2026-May-17 00:15:54.403642 [DEBUG] #18 11.46 DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+2026-May-17 00:15:54.403642 [DEBUG] #18 11.46 Use color.mix instead.
+2026-May-17 00:15:54.403642 [DEBUG] #18 11.46
+2026-May-17 00:15:54.403642 [DEBUG] #18 11.46 More info and automated migrator: https://sass-lang.com/d/import
+2026-May-17 00:<REDACTED>@return mix(white, $color, $weight);
+2026-May-17 00:15:54.403642 [DEBUG] #18 11.46     │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-May-17 00:15:54.403642 [DEBUG] #18 11.46     ╵
+2026-May-17 00:15:54.403642 [DEBUG] #18 11.46     node_modules/bootstrap/scss/_functions.scss 207:<REDACTED>@import
+2026-May-17 00:15:54.403642 [DEBUG] #18 11.46     node_modules/bootstrap/scss/bootstrap.scss 8:9      @import
+2026-May-17 00:15:54.403642 [DEBUG] #18 11.46     resources/sass/app.scss 8:9                         root stylesheet
+2026-May-17 00:15:54.403642 [DEBUG] #18 11.46
+2026-May-17 00:15:54.527300 [DEBUG] #18 11.47 DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+2026-May-17 00:15:54.527300 [DEBUG] #18 11.47 Use color.mix instead.
+2026-May-17 00:15:54.527300 [DEBUG] #18 11.47
+2026-May-17 00:15:54.527300 [DEBUG] #18 11.47 More info and automated migrator: https://sass-lang.com/d/import
+2026-May-17 00:<REDACTED>@return mix(black, $color, $weight);
+2026-May-17 00:15:54.527300 [DEBUG] #18 11.47     │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-May-17 00:15:54.527300 [DEBUG] #18 11.47     ╵
+2026-May-17 00:15:54.527300 [DEBUG] #18 11.47     node_modules/bootstrap/scss/_functions.scss 212:<REDACTED>@import
+2026-May-17 00:15:54.527300 [DEBUG] #18 11.47     node_modules/bootstrap/scss/bootstrap.scss 8:9      @import
+2026-May-17 00:15:54.527300 [DEBUG] #18 11.47     resources/sass/app.scss 8:9                         root stylesheet
+2026-May-17 00:15:54.527300 [DEBUG] #18 11.47
+2026-May-17 00:15:54.527300 [DEBUG] #18 11.58 DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+2026-May-17 00:15:54.527300 [DEBUG] #18 11.58 Use color.mix instead.
+2026-May-17 00:15:54.527300 [DEBUG] #18 11.58
+2026-May-17 00:15:54.527300 [DEBUG] #18 11.58 More info and automated migrator: https://sass-lang.com/d/import
+2026-May-17 00:<REDACTED>@import
+2026-May-17 00:15:54.527300 [DEBUG] #18 11.58     node_modules/bootstrap/scss/bootstrap.scss 8:9      @import
+2026-May-17 00:15:54.527300 [DEBUG] #18 11.58     resources/sass/app.scss 8:9                         root stylesheet
+2026-May-17 00:15:54.527300 [DEBUG] #18 11.58
+2026-May-17 00:15:54.637522 [DEBUG] #18 11.60 DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+2026-May-17 00:15:54.637522 [DEBUG] #18 11.60 Use math.unit instead.
+2026-May-17 00:15:54.637522 [DEBUG] #18 11.60
+2026-May-17 00:15:54.637522 [DEBUG] #18 11.60 More info and automated migrator: https://sass-lang.com/d/import
+2026-May-17 00:<REDACTED>@if $prev-num == null or unit($num) == "%" or unit($prev-num) == "%" {
+2026-May-17 00:15:54.650940 [DEBUG] #18 11.60    │                              ^^^^^^^^^^
+2026-May-17 00:15:54.650940 [DEBUG] #18 11.60    ╵
+2026-May-17 00:15:54.650940 [DEBUG] #18 11.60     node_modules/bootstrap/scss/_functions.scss 11:30  -assert-ascending()
+2026-May-17 00:15:54.650940 [DEBUG] #18 11.60     node_modules/bootstrap/scss/_variables.scss 494:1  @import
+2026-May-17 00:15:54.650940 [DEBUG] #18 11.60     node_modules/bootstrap/scss/bootstrap.scss 8:9     @import
+2026-May-17 00:15:54.650940 [DEBUG] #18 11.60     resources/sass/app.scss 8:9                        root stylesheet
+2026-May-17 00:15:54.650940 [DEBUG] #18 11.60
+2026-May-17 00:15:54.650940 [DEBUG] #18 11.61 DEPRECATION WARNING [global-builtin]: Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+2026-May-17 00:15:54.650940 [DEBUG] #18 11.61 Use math.unit instead.
+2026-May-17 00:15:54.650940 [DEBUG] #18 11.61
+2026-May-17 00:15:54.650940 [DEBUG] #18 11.61 More info and automated migrator: https://sass-lang.com/d/import
+2026-May-17 00:<REDACTED>@if $prev-num == null or unit($num) == "%" or unit($prev-num) == "%" {
+2026-May-17 00:15:54.650940 [DEBUG] #18 11.61    │                                                   ^^^^^^^^^^^^^^^
+2026-May-17 00:15:54.650940 [DEBUG] #18 11.61    ╵
+2026-May-17 00:15:54.650940 [DEBUG] #18 11.61     node_modules/bootstrap/scss/_functions.scss 11:<REDACTED>@import
+2026-May-17 00:15:54.650940 [DEBUG] #18 11.61     node_modules/bootstrap/scss/bootstrap.scss 8:9     @import
+2026-May-17 00:15:54.650940 [DEBUG] #18 11.61     resources/sass/app.scss 8:9                        root stylesheet
+2026-May-17 00:15:54.650940 [DEBUG] #18 11.61
+2026-May-17 00:15:54.650940 [DEBUG] #18 11.69 DEPRECATION WARNING [color-functions]: red() is deprecated. Suggestion:
+2026-May-17 00:15:54.650940 [DEBUG] #18 11.69
+2026-May-17 00:15:54.650940 [DEBUG] #18 11.69 color.channel($color, "red", $space: rgb)
+2026-May-17 00:15:54.650940 [DEBUG] #18 11.69
+2026-May-17 00:15:54.650940 [DEBUG] #18 11.69 More info: https://sass-lang.com/d/color-functions
+2026-May-17 00:<REDACTED>@import
+2026-May-17 00:15:54.650940 [DEBUG] #18 11.69     node_modules/bootstrap/scss/bootstrap.scss 8:9      @import
+2026-May-17 00:15:54.650940 [DEBUG] #18 11.69     resources/sass/app.scss 8:9                         root stylesheet
+2026-May-17 00:15:54.650940 [DEBUG] #18 11.69
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.69 DEPRECATION WARNING [color-functions]: green() is deprecated. Suggestion:
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.69
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.69 color.channel($color, "green", $space: rgb)
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.69
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.69 More info: https://sass-lang.com/d/color-functions
+2026-May-17 00:<REDACTED>@import
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.69     node_modules/bootstrap/scss/bootstrap.scss 8:9      @import
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.69     resources/sass/app.scss 8:9                         root stylesheet
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.69
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.70 DEPRECATION WARNING [color-functions]: blue() is deprecated. Suggestion:
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.70
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.70 color.channel($color, "blue", $space: rgb)
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.70
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.70 More info: https://sass-lang.com/d/color-functions
+2026-May-17 00:<REDACTED>@import
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.70     node_modules/bootstrap/scss/bootstrap.scss 8:9      @import
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.70     resources/sass/app.scss 8:9                         root stylesheet
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.70
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.79 DEPRECATION WARNING [color-functions]: red() is deprecated. Suggestion:
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.79
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.79 color.channel($color, "red", $space: rgb)
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.79
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.79 More info: https://sass-lang.com/d/color-functions
+2026-May-17 00:<REDACTED>@return red($value), green($value), blue($value);
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.79    │           ^^^^^^^^^^^
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.79    ╵
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.79     node_modules/bootstrap/scss/_functions.scss 37:<REDACTED>@import
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.79     node_modules/bootstrap/scss/bootstrap.scss 8:9      @import
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.79     resources/sass/app.scss 8:9                         root stylesheet
+2026-May-17 00:15:54.741136 [DEBUG] #18 11.79
+2026-May-17 00:15:54.893773 [DEBUG] #18 11.79 DEPRECATION WARNING [color-functions]: green() is deprecated. Suggestion:
+2026-May-17 00:15:54.893773 [DEBUG] #18 11.79
+2026-May-17 00:15:54.893773 [DEBUG] #18 11.79 color.channel($color, "green", $space: rgb)
+2026-May-17 00:15:54.893773 [DEBUG] #18 11.79
+2026-May-17 00:15:54.893773 [DEBUG] #18 11.79 More info: https://sass-lang.com/d/color-functions
+2026-May-17 00:<REDACTED>@return red($value), green($value), blue($value);
+2026-May-17 00:15:54.893773 [DEBUG] #18 11.79    │                        ^^^^^^^^^^^^^
+2026-May-17 00:15:54.893773 [DEBUG] #18 11.79    ╵
+2026-May-17 00:15:54.893773 [DEBUG] #18 11.79     node_modules/bootstrap/scss/_functions.scss 37:<REDACTED>@import
+2026-May-17 00:15:54.893773 [DEBUG] #18 11.79     node_modules/bootstrap/scss/bootstrap.scss 8:9      @import
+2026-May-17 00:15:54.893773 [DEBUG] #18 11.79     resources/sass/app.scss 8:9                         root stylesheet
+2026-May-17 00:15:54.893773 [DEBUG] #18 11.79
+2026-May-17 00:16:23.623253 [DEBUG] #18 40.67 WARNING: 234 repetitive deprecation warnings omitted.
+2026-May-17 00:16:23.623253 [DEBUG] #18 40.67
+2026-May-17 00:16:26.337358 [DEBUG] #18 43.39 ✓ 114 modules transformed.
+2026-May-17 00:16:26.824623 [DEBUG] #18 43.88 rendering chunks...
+2026-May-17 00:16:27.052841 [DEBUG] #18 44.11 public/build/manifest.json             0.25 KiB
+2026-May-17 00:16:27.222552 [DEBUG] #18 44.15 public/build/assets/app.1eeda84e.css   221.58 KiB / gzip: 30.12 KiB
+2026-May-17 00:16:27.222552 [DEBUG] #18 44.15 public/build/assets/app.99cb3ce6.js    187.56 KiB / gzip: 64.53 KiB
+2026-May-17 00:16:27.222552 [DEBUG] #18 DONE 44.3s
+2026-May-17 00:16:27.333977 [DEBUG] #19 [stage-1  6/14] COPY --from=assets --chown=www-data:www-data /app/public/build ./public/build
+2026-May-17 00:16:27.556410 [DEBUG] #19 DONE 0.1s
+2026-May-17 00:16:27.556410 [DEBUG] 
+2026-May-17 00:16:27.556410 [DEBUG] #20 [stage-1  7/14] RUN composer install     --no-dev     --optimize-autoloader     --no-interaction
+2026-May-17 00:16:27.847046 [DEBUG] #20 0.442 Installing dependencies from lock file
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.457 Verifying lock file contents can be installed on current platform.
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.507 Package operations: 117 installs, 0 updates, 0 removals
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.519   - Downloading authorizenet/authorizenet (2.0.3)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.521   - Downloading voku/portable-ascii (2.0.3)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.522   - Downloading symfony/polyfill-php80 (v1.33.0)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.523   - Downloading symfony/polyfill-mbstring (v1.33.0)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.524   - Downloading symfony/polyfill-ctype (v1.33.0)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.524   - Downloading phpoption/phpoption (1.9.4)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.525   - Downloading graham-campbell/result-type (v1.1.3)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.526   - Downloading vlucas/phpdotenv (v5.6.2)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.527   - Downloading symfony/css-selector (v7.3.0)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.528   - Downloading tijsverkoyen/css-to-inline-styles (v2.3.0)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.529   - Downloading symfony/deprecation-contracts (v3.6.0)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.530   - Downloading symfony/var-dumper (v6.4.25)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.530   - Downloading symfony/polyfill-uuid (v1.33.0)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.531   - Downloading symfony/uid (v6.4.24)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.532   - Downloading symfony/routing (v6.4.24)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.532   - Downloading symfony/process (v6.4.25)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.532   - Downloading symfony/polyfill-intl-normalizer (v1.33.0)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.533   - Downloading symfony/polyfill-intl-idn (v1.33.0)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.534   - Downloading symfony/mime (v6.4.24)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.534   - Downloading psr/container (2.0.2)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.535   - Downloading symfony/service-contracts (v3.6.0)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.535   - Downloading psr/event-dispatcher (1.0.0)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.536   - Downloading symfony/event-dispatcher-contracts (v3.6.0)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.536   - Downloading symfony/event-dispatcher (v7.3.3)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.537   - Downloading psr/log (3.0.2)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.538   - Downloading doctrine/lexer (3.0.1)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.538   - Downloading egulias/email-validator (4.0.4)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.539   - Downloading symfony/mailer (v6.4.25)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.539   - Downloading symfony/polyfill-php83 (v1.33.0)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.540   - Downloading symfony/http-foundation (v6.4.25)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.540   - Downloading symfony/error-handler (v6.4.24)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.541   - Downloading symfony/http-kernel (v6.4.25)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.541   - Downloading symfony/finder (v6.4.24)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.542   - Downloading symfony/polyfill-intl-grapheme (v1.33.0)
+2026-May-17 00:16:27.948118 [DEBUG] #20 0.542   - Downloading symfony/string (v7.3.3)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.543   - Downloading symfony/console (v6.4.25)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.543   - Downloading ramsey/collection (2.1.1)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.545   - Downloading brick/math (0.12.3)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.545   - Downloading ramsey/uuid (4.9.1)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.545   - Downloading psr/simple-cache (3.0.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.545   - Downloading nunomaduro/termwind (v1.17.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.546   - Downloading symfony/translation-contracts (v3.6.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.546   - Downloading symfony/translation (v6.4.24)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.547   - Downloading psr/clock (1.0.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.547   - Downloading carbonphp/carbon-doctrine-types (2.1.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.548   - Downloading nesbot/carbon (2.73.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.548   - Downloading monolog/monolog (3.9.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.549   - Downloading league/mime-type-detection (1.16.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.549   - Downloading league/flysystem (3.30.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.550   - Downloading league/flysystem-local (3.30.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.550   - Downloading nette/utils (v4.0.8)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.551   - Downloading nette/schema (v1.3.2)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.551   - Downloading dflydev/dot-access-data (v3.0.3)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.552   - Downloading league/config (v1.2.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.552   - Downloading league/commonmark (2.7.1)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.553   - Downloading laravel/serializable-closure (v1.3.7)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.553   - Downloading laravel/framework (v10.49.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.553   - Downloading laravel/prompts (v0.1.25)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.554   - Downloading guzzlehttp/uri-template (v1.0.5)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.555   - Downloading fruitcake/php-cors (v1.3.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.555   - Downloading webmozart/assert (1.11.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.556   - Downloading dragonmantank/cron-expression (v3.4.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.556   - Downloading doctrine/inflector (2.1.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.557   - Downloading buglinjo/laravel-webp (v2.3.4)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.557   - Downloading symfony/yaml (v7.3.3)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.557   - Downloading zircote/swagger-php (4.11.1)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.558   - Downloading swagger-api/swagger-ui (v5.32.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.558   - Downloading psr/cache (3.0.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.559   - Downloading doctrine/annotations (2.0.2)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.559   - Downloading darkaonline/l5-swagger (8.6.5)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.559   - Downloading guzzlehttp/promises (2.3.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.560   - Downloading ralouphie/getallheaders (3.0.3)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.561   - Downloading psr/http-message (1.1)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.561   - Downloading psr/http-factory (1.1.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.561   - Downloading guzzlehttp/psr7 (2.8.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.562   - Downloading intervention/image (2.7.2)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.562   - Downloading mobiledetect/mobiledetectlib (2.8.45)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.563   - Downloading jaybizzle/crawler-detect (v1.3.5)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.563   - Downloading jenssegers/agent (v2.6.4)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.563   - Downloading symfony/psr-http-message-bridge (v2.3.1)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.564   - Downloading paragonie/random_compat (v9.99.100)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.564   - Downloading paragonie/constant_time_encoding (v3.0.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.565   - Downloading phpseclib/phpseclib (3.0.46)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.565   - Downloading nyholm/psr7 (1.8.2)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.566   - Downloading league/uri-interfaces (2.3.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.566   - Downloading league/uri (6.8.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.566   - Downloading league/event (2.3.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.567   - Downloading lcobucci/clock (3.6.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.567   - Downloading lcobucci/jwt (4.3.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.568   - Downloading defuse/php-encryption (v2.4.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.568   - Downloading league/oauth2-server (8.4.3)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.576   - Downloading firebase/php-jwt (v6.11.1)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.578   - Downloading laravel/passport (v11.8.4)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.578   - Downloading psr/http-client (1.0.3)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.578   - Downloading guzzlehttp/guzzle (7.10.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.578   - Downloading league/oauth1-client (v1.11.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.578   - Downloading laravel/socialite (v5.23.0)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.583   - Downloading nikic/php-parser (v5.6.1)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.583   - Downloading psy/psysh (v0.12.10)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.583   - Downloading laravel/tinker (v2.10.1)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.583   - Downloading laravel/ui (v4.6.1)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.583   - Downloading markbaker/matrix (3.0.1)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.583   - Downloading markbaker/complex (3.0.2)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.583   - Downloading maennchen/zipstream-php (3.1.2)
+2026-May-17 00:16:28.181246 [DEBUG] #20 0.583   - Downloading ezyang/htmlpurifier (v4.18.0)
+2026-May-17 00:16:28.195480 [DEBUG] #20 0.583   - Downloading composer/pcre (3.3.2)
+2026-May-17 00:16:28.195480 [DEBUG] #20 0.583   - Downloading phpoffice/phpspreadsheet (1.30.0)
+2026-May-17 00:16:28.195480 [DEBUG] #20 0.583   - Downloading composer/semver (3.4.4)
+2026-May-17 00:16:28.195480 [DEBUG] #20 0.584   - Downloading maatwebsite/excel (3.1.67)
+2026-May-17 00:16:28.195480 [DEBUG] #20 0.586   - Downloading pragmarx/google2fa (v8.0.3)
+2026-May-17 00:16:28.195480 [DEBUG] #20 0.586   - Downloading paragonie/sodium_compat (v2.1.0)
+2026-May-17 00:16:28.195480 [DEBUG] #20 0.586   - Downloading pusher/pusher-php-server (7.2.7)
+2026-May-17 00:16:28.195480 [DEBUG] #20 0.586   - Downloading pusher/pusher-push-notifications (2.0)
+2026-May-17 00:16:28.195480 [DEBUG] #20 0.586   - Downloading srmklive/paypal (3.0.40)
+2026-May-17 00:16:28.195480 [DEBUG] #20 0.586   - Downloading stripe/stripe-php (v10.21.0)
+2026-May-17 00:16:28.195480 [DEBUG] #20 0.587   - Downloading torann/geoip (3.0.9)
+2026-May-17 00:16:28.195480 [DEBUG] #20 0.591   - Downloading twilio/sdk (8.8.6)
+2026-May-17 00:16:28.195480 [DEBUG] #20 0.611    0/117 [>---------------------------]   0%
+2026-May-17 00:16:29.428459 [DEBUG] #20 2.024    9/117 [==>-------------------------]   7%
+2026-May-17 00:16:29.530493 [DEBUG] #20 2.124   15/117 [===>------------------------]  12%
+2026-May-17 00:16:29.763001 [DEBUG] #20 2.357   27/117 [======>---------------------]  23%
+2026-May-17 00:16:29.968040 [DEBUG] #20 2.563   38/117 [=========>------------------]  32%
+2026-May-17 00:16:30.169352 [DEBUG] #20 2.764   47/117 [===========>----------------]  40%
+2026-May-17 00:16:30.500103 [DEBUG] #20 3.090   59/117 [==============>-------------]  50%
+2026-May-17 00:16:30.939411 [DEBUG] #20 3.533   74/117 [=================>----------]  63%
+2026-May-17 00:16:31.327329 [DEBUG] #20 3.908   82/117 [===================>--------]  70%
+2026-May-17 00:16:31.645443 [DEBUG] #20 4.240   95/117 [======================>-----]  81%
+2026-May-17 00:16:31.879902 [DEBUG] #20 4.473  107/117 [=========================>--]  91%
+2026-May-17 00:16:32.547332 [DEBUG] #20 5.141  117/117 [============================] 100%
+2026-May-17 00:16:32.680598 [DEBUG] #20 5.142   - Installing authorizenet/authorizenet (2.0.3): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.146   - Installing voku/portable-ascii (2.0.3): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.148   - Installing symfony/polyfill-php80 (v1.33.0): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.152   - Installing symfony/polyfill-mbstring (v1.33.0): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.154   - Installing symfony/polyfill-ctype (v1.33.0): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.159   - Installing phpoption/phpoption (1.9.4): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.165   - Installing graham-campbell/result-type (v1.1.3): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.170   - Installing vlucas/phpdotenv (v5.6.2): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.173   - Installing symfony/css-selector (v7.3.0): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.177   - Installing tijsverkoyen/css-to-inline-styles (v2.3.0): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.183   - Installing symfony/deprecation-contracts (v3.6.0): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.188   - Installing symfony/var-dumper (v6.4.25): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.190   - Installing symfony/polyfill-uuid (v1.33.0): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.191   - Installing symfony/uid (v6.4.24): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.192   - Installing symfony/routing (v6.4.24): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.194   - Installing symfony/process (v6.4.25): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.196   - Installing symfony/polyfill-intl-normalizer (v1.33.0): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.198   - Installing symfony/polyfill-intl-idn (v1.33.0): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.201   - Installing symfony/mime (v6.4.24): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.202   - Installing psr/container (2.0.2): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.203   - Installing symfony/service-contracts (v3.6.0): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.204   - Installing psr/event-dispatcher (1.0.0): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.205   - Installing symfony/event-dispatcher-contracts (v3.6.0): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.207   - Installing symfony/event-dispatcher (v7.3.3): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.209   - Installing psr/log (3.0.2): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.211   - Installing doctrine/lexer (3.0.1): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.213   - Installing egulias/email-validator (4.0.4): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.216   - Installing symfony/mailer (v6.4.25): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.217   - Installing symfony/polyfill-php83 (v1.33.0): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.219   - Installing symfony/http-foundation (v6.4.25): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.220   - Installing symfony/error-handler (v6.4.24): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.222   - Installing symfony/http-kernel (v6.4.25): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.223   - Installing symfony/finder (v6.4.24): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.226   - Installing symfony/polyfill-intl-grapheme (v1.33.0): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.226   - Installing symfony/string (v7.3.3): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.229   - Installing symfony/console (v6.4.25): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.229   - Installing ramsey/collection (2.1.1): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.229   - Installing brick/math (0.12.3): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.230   - Installing ramsey/uuid (4.9.1): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.230   - Installing psr/simple-cache (3.0.0): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.231   - Installing nunomaduro/termwind (v1.17.0): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.232   - Installing symfony/translation-contracts (v3.6.0): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.234   - Installing symfony/translation (v6.4.24): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.235   - Installing psr/clock (1.0.0): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.236   - Installing carbonphp/carbon-doctrine-types (2.1.0): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.237   - Installing nesbot/carbon (2.73.0): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.237   - Installing monolog/monolog (3.9.0): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.239   - Installing league/mime-type-detection (1.16.0): Extracting archive
+2026-May-17 00:16:32.722083 [DEBUG] #20 5.241   - Installing league/flysystem (3.30.0): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.241   - Installing league/flysystem-local (3.30.0): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.242   - Installing nette/utils (v4.0.8): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.278   - Installing nette/schema (v1.3.2): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.278   - Installing dflydev/dot-access-data (v3.0.3): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.279   - Installing league/config (v1.2.0): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.281   - Installing league/commonmark (2.7.1): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.281   - Installing laravel/serializable-closure (v1.3.7): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.282   - Installing laravel/framework (v10.49.0): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.283   - Installing laravel/prompts (v0.1.25): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.284   - Installing guzzlehttp/uri-template (v1.0.5): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.287   - Installing fruitcake/php-cors (v1.3.0): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.287   - Installing webmozart/assert (1.11.0): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.287   - Installing dragonmantank/cron-expression (v3.4.0): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.288   - Installing doctrine/inflector (2.1.0): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.289   - Installing buglinjo/laravel-webp (v2.3.4): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.294   - Installing symfony/yaml (v7.3.3): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.294   - Installing zircote/swagger-php (4.11.1): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.294   - Installing swagger-api/swagger-ui (v5.32.0): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.294   - Installing psr/cache (3.0.0): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.299   - Installing doctrine/annotations (2.0.2): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.299   - Installing darkaonline/l5-swagger (8.6.5): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.299   - Installing guzzlehttp/promises (2.3.0): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.299   - Installing ralouphie/getallheaders (3.0.3): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.299   - Installing psr/http-message (1.1): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.305   - Installing psr/http-factory (1.1.0): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.310   - Installing guzzlehttp/psr7 (2.8.0): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.310   - Installing intervention/image (2.7.2): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.312   - Installing mobiledetect/mobiledetectlib (2.8.45): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.317   - Installing jaybizzle/crawler-detect (v1.3.5): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.317   - Installing jenssegers/agent (v2.6.4): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.317   - Installing symfony/psr-http-message-bridge (v2.3.1): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.317   - Installing paragonie/random_compat (v9.99.100): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.317   - Installing paragonie/constant_time_encoding (v3.0.0): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.319   - Installing phpseclib/phpseclib (3.0.46): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.322   - Installing nyholm/psr7 (1.8.2): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.322   - Installing league/uri-interfaces (2.3.0): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.322   - Installing league/uri (6.8.0): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.322   - Installing league/event (2.3.0): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.323   - Installing lcobucci/clock (3.6.0): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.324   - Installing lcobucci/jwt (4.3.0): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.328   - Installing defuse/php-encryption (v2.4.0): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.328   - Installing league/oauth2-server (8.4.3): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.328   - Installing firebase/php-jwt (v6.11.1): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.328   - Installing laravel/passport (v11.8.4): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.328   - Installing psr/http-client (1.0.3): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.328   - Installing guzzlehttp/guzzle (7.10.0): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.330   - Installing league/oauth1-client (v1.11.0): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.330   - Installing laravel/socialite (v5.23.0): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.334   - Installing nikic/php-parser (v5.6.1): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.334   - Installing psy/psysh (v0.12.10): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.334   - Installing laravel/tinker (v2.10.1): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.334   - Installing laravel/ui (v4.6.1): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.334   - Installing markbaker/matrix (3.0.1): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.336   - Installing markbaker/complex (3.0.2): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.339   - Installing maennchen/zipstream-php (3.1.2): Extracting archive
+2026-May-17 00:16:32.813094 [DEBUG] #20 5.339   - Installing ezyang/htmlpurifier (v4.18.0): Extracting archive
+2026-May-17 00:16:32.900916 [DEBUG] #20 5.379   - Installing composer/pcre (3.3.2): Extracting archive
+2026-May-17 00:16:32.900916 [DEBUG] #20 5.379   - Installing phpoffice/phpspreadsheet (1.30.0): Extracting archive
+2026-May-17 00:16:32.900916 [DEBUG] #20 5.379   - Installing composer/semver (3.4.4): Extracting archive
+2026-May-17 00:16:32.900916 [DEBUG] #20 5.381   - Installing maatwebsite/excel (3.1.67): Extracting archive
+2026-May-17 00:16:32.900916 [DEBUG] #20 5.381   - Installing pragmarx/google2fa (v8.0.3): Extracting archive
+2026-May-17 00:16:32.900916 [DEBUG] #20 5.384   - Installing paragonie/sodium_compat (v2.1.0): Extracting archive
+2026-May-17 00:16:32.900916 [DEBUG] #20 5.384   - Installing pusher/pusher-php-server (7.2.7): Extracting archive
+2026-May-17 00:16:32.900916 [DEBUG] #20 5.384   - Installing pusher/pusher-push-notifications (2.0): Extracting archive
+2026-May-17 00:16:32.900916 [DEBUG] #20 5.384   - Installing srmklive/paypal (3.0.40): Extracting archive
+2026-May-17 00:16:32.900916 [DEBUG] #20 5.386   - Installing stripe/stripe-php (v10.21.0): Extracting archive
+2026-May-17 00:16:32.900916 [DEBUG] #20 5.386   - Installing torann/geoip (3.0.9): Extracting archive
+2026-May-17 00:16:32.900916 [DEBUG] #20 5.388   - Installing twilio/sdk (8.8.6): Extracting archive
+2026-May-17 00:16:32.900916 [DEBUG] #20 5.494    0/117 [>---------------------------]   0%
+2026-May-17 00:16:33.320618 [DEBUG] #20 5.913   16/117 [===>------------------------]  13%
+2026-May-17 00:16:33.586518 [DEBUG] #20 6.181   25/117 [=====>----------------------]  21%
+2026-May-17 00:16:34.187051 [DEBUG] #20 6.782   41/117 [=========>------------------]  35%
+2026-May-17 00:16:34.305427 [DEBUG] #20 6.899   48/117 [===========>----------------]  41%
+2026-May-17 00:16:34.831470 [DEBUG] #20 7.425   61/117 [==============>-------------]  52%
+2026-May-17 00:16:35.289961 [DEBUG] #20 7.884   71/117 [================>-----------]  60%
+2026-May-17 00:16:36.301393 [DEBUG] #20 8.887   85/117 [====================>-------]  72%
+2026-May-17 00:16:36.784633 [DEBUG] #20 9.380   94/117 [======================>-----]  80%
+2026-May-17 00:16:37.308046 [DEBUG] #20 9.899  107/117 [=========================>--]  91%
+2026-May-17 00:16:38.404644 [DEBUG] #20 11.00  116/117 [===========================>]  99%
+2026-May-17 00:16:38.900597 [DEBUG] #20 11.49  117/117 [============================] 100%
+2026-May-17 00:16:39.088035 [DEBUG] #20 11.68 Package doctrine/annotations is abandoned, you should avoid using it. No replacement was suggested.
+2026-May-17 00:16:39.088035 [DEBUG] #20 11.68 Generating optimized autoload files
+2026-May-17 00:16:44.702664 [DEBUG] #20 17.19 Class App\Notifications\User\CarBookingNotification located in ./app/Notifications/User/carBookingNotification.php does not comply with psr-4 autoloading standard (rule: App\ => ./app). Skipping.
+2026-May-17 00:16:44.702664 [DEBUG] #20 17.19 Class App\Http\Helpers\Api\Helpers located in ./app/Http/Helpers/Api/helpers.php does not comply with psr-4 autoloading standard (rule: App\ => ./app). Skipping.
+2026-May-17 00:16:44.702664 [DEBUG] #20 17.19 Class App\Http\Controllers\Api\V1\User\TransactionController located in ./app/Http/Controllers/Api/V1/Vendor/TransactionController.php does not comply with psr-4 autoloading standard (rule: App\ => ./app). Skipping.
+2026-May-17 00:16:44.702664 [DEBUG] #20 17.19 Class App\Http\Controllers\Api\V1\User\SettingController located in ./app/Http/Controllers/Api/V1/Vendor/SettingController.php does not comply with psr-4 autoloading standard (rule: App\ => ./app). Skipping.
+2026-May-17 00:16:45.226439 [DEBUG] #20 17.58 > Illuminate\Foundation\ComposerScripts::postAutoloadDump
+2026-May-17 00:16:45.226439 [DEBUG] #20 17.63 > @php artisan package:discover --ansi
+2026-May-17 00:16:46.000493 [DEBUG] #20 18.59
+2026-May-17 00:16:46.000493 [DEBUG] #20 18.59    INFO  Discovering packages.
+2026-May-17 00:16:46.000493 [DEBUG] #20 18.59
+2026-May-17 00:16:46.128738 [DEBUG] #20 18.61   buglinjo/laravel-webp ................................................. DONE
+2026-May-17 00:16:46.128738 [DEBUG] #20 18.62   darkaonline/l5-swagger ................................................ DONE
+2026-May-17 00:16:46.128738 [DEBUG] #20 18.63   intervention/image .................................................... DONE
+2026-May-17 00:16:46.128738 [DEBUG] #20 18.70   jenssegers/agent
+2026-May-17 00:16:46.216673 [DEBUG] ...................................................... DONE
+2026-May-17 00:16:46.216673 [DEBUG] #20 18.71   laravel/passport ...................................................... DONE
+2026-May-17 00:16:46.216673 [DEBUG] #20 18.71   laravel/socialite ..................................................... DONE
+2026-May-17 00:16:46.216673 [DEBUG] #20 18.71   laravel/tinker ........................................................ DONE
+2026-May-17 00:16:46.216673 [DEBUG] #20 18.72   laravel/ui ............................................................ DONE
+2026-May-17 00:16:46.216673 [DEBUG] #20 18.72   maatwebsite/excel ..................................................... DONE
+2026-May-17 00:16:46.216673 [DEBUG] #20 18.74   nesbot/carbon ......................................................... DONE
+2026-May-17 00:16:46.216673 [DEBUG] #20 18.78   nunomaduro/termwind ................................................... DONE
+2026-May-17 00:16:46.216673 [DEBUG] #20 18.79   srmklive/paypal ....................................................... DONE
+2026-May-17 00:16:46.216673 [DEBUG] #20 18.80   torann/geoip .......................................................... DONE
+2026-May-17 00:16:46.216673 [DEBUG] #20 18.81
+2026-May-17 00:16:46.496978 [DEBUG] #20 18.89 65 packages you are using are looking for funding.
+2026-May-17 00:16:46.496978 [DEBUG] #20 18.89 Use the `composer fund` command to find out more!
+2026-May-17 00:16:47.390782 [DEBUG] #20 DONE 19.9s
+2026-May-17 00:16:47.617691 [DEBUG] #21 [stage-1  8/14] RUN chmod +x /var/www/html/docker-entrypoint.sh
+2026-May-17 00:16:48.205807 [DEBUG] #21 DONE 0.9s
+2026-May-17 00:16:48.390928 [DEBUG] #22 [stage-1  9/14] RUN rm -f /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default
+2026-May-17 00:16:48.822280 [DEBUG] #22 DONE 0.6s
+2026-May-17 00:16:48.980963 [DEBUG] #23 [stage-1 10/14] RUN cat > /etc/nginx/nginx.conf << 'EOF'
+2026-May-17 00:16:49.315889 [DEBUG] #23 DONE 0.5s
+2026-May-17 00:16:49.480622 [DEBUG] #24 [stage-1 11/14] RUN cat > /usr/local/etc/php-fpm.d/www.conf << 'EOF'
+2026-May-17 00:16:49.582180 [DEBUG] #24 DONE 0.2s
+2026-May-17 00:16:49.735222 [DEBUG] #25 [stage-1 12/14] RUN cat > /usr/local/etc/php/conf.d/app.ini << 'EOF'
+2026-May-17 00:16:49.752555 [DEBUG] #25 DONE 0.2s
+2026-May-17 00:16:49.870632 [DEBUG] #26 [stage-1 13/14] RUN mkdir -p /var/log/supervisor
+2026-May-17 00:16:49.870632 [DEBUG] #26 DONE 0.1s
+2026-May-17 00:16:50.025943 [DEBUG] #27 [stage-1 14/14] RUN cat > /etc/supervisor/supervisord.conf << 'EOF'
+2026-May-17 00:16:50.052559 [DEBUG] #27 DONE 0.2s
+2026-May-17 00:16:50.186666 [DEBUG] #28 exporting to image
+2026-May-17 00:16:50.186666 [DEBUG] #28 exporting layers
+2026-May-17 00:16:57.164020 [DEBUG] #28 exporting layers 7.1s done
+2026-May-17 00:16:57.394037 [DEBUG] #28 writing image sha256:eb61e03fa03b7cc59f2d3158449192a476bdab72bea2726e10fedec45eb4b49f done
+2026-May-17 00:16:57.394037 [DEBUG] #28 naming to docker.io/library/w1mab3nhxlzzk3sthavzd9vp:6713944099caf02eb03124a96e6df7bd155a85b6 0.0s done
+2026-May-17 00:16:57.394037 [DEBUG] #28 DONE 7.2s
+2026-May-17 00:16:57.698216 [DEBUG] 24 warnings found (use docker --debug to expand):
+2026-May-17 00:16:57.698216 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "REDIS_PASSWORD") (line 29)
+2026-May-17 00:16:57.698216 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "PUSHER_APP_KEY") (line 40)
+2026-May-17 00:16:57.698216 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "VITE_PUSHER_APP_KEY") (line 46)
+2026-May-17 00:16:57.698216 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "PUSHER_APP_KEY") (line 116)
+2026-May-17 00:16:57.698216 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "TWILIO_AUTH_TOKEN") (line 128)
+2026-May-17 00:16:57.698216 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "AWS_ACCESS_KEY_ID") (line 133)
+2026-May-17 00:16:57.698216 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "MAIL_PASSWORD") (line 35)
+2026-May-17 00:16:57.698216 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "AWS_ACCESS_KEY_ID") (line 57)
+2026-May-17 00:16:57.698216 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "DB_PASSWORD") (line 97)
+2026-May-17 00:16:57.698216 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "MAIL_PASSWORD") (line 111)
+2026-May-17 00:16:57.698216 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "PASSPORT_PRIVATE_KEY") (line 138)
+2026-May-17 00:16:57.698216 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "PUSHER_APP_SECRET") (line 41)
+2026-May-17 00:16:57.698216 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "PASSPORT_PRIVATE_KEY") (line 62)
+2026-May-17 00:16:57.698216 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "VITE_PUSHER_APP_KEY") (line 122)
+2026-May-17 00:16:57.698216 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "AWS_SECRET_ACCESS_KEY") (line 134)
+2026-May-17 00:16:57.698216 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "PRODUCT_KEY") (line 10)
+2026-May-17 00:16:57.698216 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "TWILIO_AUTH_TOKEN") (line 52)
+2026-May-17 00:16:57.698216 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "AWS_SECRET_ACCESS_KEY") (line 58)
+2026-May-17 00:16:57.698216 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "APP_KEY") (line 80)
+2026-May-17 00:16:57.698216 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "PRODUCT_KEY") (line 86)
+2026-May-17 00:16:57.698216 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "REDIS_PASSWORD") (line 105)
+2026-May-17 00:16:57.698216 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "PUSHER_APP_SECRET") (line 117)
+2026-May-17 00:16:57.698216 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "APP_KEY") (line 4)
+2026-May-17 00:16:57.698216 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "DB_PASSWORD") (line 21)
+2026-May-17 00:16:57.737348 Building docker image completed.
+2026-May-17 00:16:59.380523 [DEBUG] Creating .env file with runtime variables for container.
+2026-May-17 00:17:03.081106 ----------------------------------------
+2026-May-17 00:17:03.137923 Rolling update started.
+2026-May-17 00:17:15.982812 [DEBUG] [CMD]: docker exec gfsrd67odqo5pskiwxour3bo bash -c 'COOLIFY_URL=http://w1mab3nhxlzzk3sthavzd9vp.77.237.235.3.sslip.io COOLIFY_FQDN=w1mab3nhxlzzk3sthavzd9vp.77.237.235.3.sslip.io COOLIFY_BRANCH=main COOLIFY_RESOURCE_UUID=w1mab3nhxlzzk3sthavzd9vp  docker compose --project-name w1mab3nhxlzzk3sthavzd9vp --project-directory /artifacts/gfsrd67odqo5pskiwxour3bo -f /artifacts/gfsrd67odqo5pskiwxour3bo/docker-compose.yaml up --build -d'
+2026-May-17 00:17:15.982812 [DEBUG] time="2026-05-17T00:17:15Z" level=warning msg="Found orphan containers ([w1mab3nhxlzzk3sthavzd9vp-000651481418]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+2026-May-17 00:17:15.982812 [DEBUG] Container w1mab3nhxlzzk3sthavzd9vp-001401011311  Creating
+2026-May-17 00:17:17.404510 [DEBUG] w1mab3nhxlzzk3sthavzd9vp-001401011311 Your kernel does not support memory swappiness capabilities or the cgroup is not mounted. Memory swappiness discarded.
+2026-May-17 00:17:17.404510 [DEBUG] Container w1mab3nhxlzzk3sthavzd9vp-001401011311  Created
+2026-May-17 00:17:17.404510 [DEBUG] Container w1mab3nhxlzzk3sthavzd9vp-001401011311  Starting
+2026-May-17 00:17:25.786262 [DEBUG] Container w1mab3nhxlzzk3sthavzd9vp-001401011311  Started
+2026-May-17 00:17:25.910079 New container started.
+2026-May-17 00:17:26.005574 Removing old containers.
+2026-May-17 00:17:33.727902 [DEBUG] [CMD]: docker stop -t 30 w1mab3nhxlzzk3sthavzd9vp-000651481418
+2026-May-17 00:17:33.727902 [DEBUG] w1mab3nhxlzzk3sthavzd9vp-000651481418
+2026-May-17 00:17:36.914622 [DEBUG] [CMD]: docker rm -f w1mab3nhxlzzk3sthavzd9vp-000651481418
+2026-May-17 00:17:36.914622 [DEBUG] w1mab3nhxlzzk3sthavzd9vp-000651481418
+2026-May-17 00:17:37.010100 Rolling update completed.
+2026-May-17 00:17:43.034053 Gracefully shutting down build container: gfsrd67odqo5pskiwxour3bo
+2026-May-17 00:17:52.392558 [DEBUG] [CMD]: docker stop -t 30 gfsrd67odqo5pskiwxour3bo
+2026-May-17 00:17:52.392558 [DEBUG] gfsrd67odqo5pskiwxour3bo

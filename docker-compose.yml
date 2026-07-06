@@ -1,0 +1,46 @@
+services:
+    web:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: drent-app
+        volumes:
+            - .:/var/www/html
+            - /var/www/html/storage
+            - /var/www/html/bootstrap/cache
+        working_dir: /var/www/html
+        user: root
+        depends_on:
+            db:
+                condition: service_healthy
+
+    nginx:
+        image: nginx:latest
+        ports:
+            - "8001:80"
+        volumes:
+            - .:/var/www/html
+            - ./.docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+        depends_on:
+            - web
+
+    db:
+        image: mysql:latest
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: durra_alaseel_db
+            MYSQL_USER: user
+            MYSQL_PASSWORD: user
+        volumes:
+            - db_data:/var/lib/mysql
+        ports:
+            - "3307:3306"
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+            interval: 5s
+            timeout: 5s
+            retries: 10
+            start_period: 20s
+
+volumes:
+    db_data:

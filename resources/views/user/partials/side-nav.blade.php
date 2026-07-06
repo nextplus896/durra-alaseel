@@ -39,7 +39,7 @@
                 </ul>
             </div>
         </div>
-        <div class="sidebar-doc-box bg-overlay-base bg_img" data-background="{{ asset('public/frontend/images/element/sidebar-img.webp') }}">
+        <div class="sidebar-doc-box bg-overlay-base bg_img" data-background="{{ asset('frontend/images/element/sidebar-img.webp') }}">
             <div class="sidebar-doc-icon">
                 <i class="las la-headphones-alt"></i>
             </div>

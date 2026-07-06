@@ -12,7 +12,14 @@ return new class extends Migration
             return;
         }
 
-        // Avoid doctrine/dbal dependency by using raw SQL.
+        // SQLite does not support MODIFY — use Doctrine DBAL-backed change() instead.
+        if (DB::getDriverName() === 'sqlite') {
+            Schema::table('car_bookings', function ($table) {
+                $table->string('destination')->nullable()->change();
+            });
+            return;
+        }
+
         DB::statement("ALTER TABLE `car_bookings` MODIFY `destination` VARCHAR(255) NULL");
     }
 
@@ -22,7 +29,13 @@ return new class extends Migration
             return;
         }
 
-        // Ensure rollback won't fail due to NULL values.
+        if (DB::getDriverName() === 'sqlite') {
+            Schema::table('car_bookings', function ($table) {
+                $table->string('destination')->nullable(false)->change();
+            });
+            return;
+        }
+
         DB::statement("UPDATE `car_bookings` SET `destination` = '' WHERE `destination` IS NULL");
         DB::statement("ALTER TABLE `car_bookings` MODIFY `destination` VARCHAR(255) NOT NULL");
     }
