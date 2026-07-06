@@ -25,7 +25,7 @@
                     <div class="payment-area text-center pt-40">
                         <div class="loading-animation">
                             <div class="car-loader pb-40">
-                                <img src="{{ asset('public/frontend/images/element/loder.gif') }}" class="car-gif">
+                                <img src="{{ asset('frontend/images/element/loder.gif') }}" class="car-gif">
                             </div>
                             <div class="tickmark-container pb-40" style="display: none;">
                                 <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">

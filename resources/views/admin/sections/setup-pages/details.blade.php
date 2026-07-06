@@ -76,7 +76,7 @@
 @endsection
 
 @push('script')
-    <script src="{{ asset('public/backend/js/jquery-ui.js') }}"></script>
+    <script src="{{ asset('backend/js/jquery-ui.js') }}"></script>
 
 
     <script>

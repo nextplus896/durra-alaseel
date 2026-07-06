@@ -39,6 +39,8 @@ class Car extends Model
         'price_per_month' => 'decimal:8',
         'allowance_km'    => 'double',
         'allowance_price_per_km' => 'decimal:8',
+        'daily_insurance'        => 'decimal:8',
+        'deductible_insurance'   => 'decimal:8',
         'status'          => 'integer',
         'approval'        => 'integer',
     ];

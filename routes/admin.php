@@ -52,6 +52,7 @@ use App\Http\Controllers\Admin\VendorCareController;
 use App\Http\Controllers\Admin\TwilioUsageController;
 use App\Http\Controllers\Admin\BranchController;
 use App\Http\Controllers\Admin\TaxSettingController;
+use App\Http\Controllers\Admin\CancellationPolicyController;
 use App\Http\Controllers\Admin\BalanceTransactionController;
 
 // All Admin Route Is Here
@@ -285,6 +286,13 @@ Route::name('admin.')->group(function () {
 
         // Tax Settings Section
         Route::controller(TaxSettingController::class)->prefix('tax-settings')->name('tax.settings.')->group(function () {
+            Route::get('index', 'index')->name('index');
+            Route::put('update', 'update')->name('update');
+            Route::put('status/update', 'statusUpdate')->name('status.update');
+        });
+
+        // Cancellation Policy Section
+        Route::controller(CancellationPolicyController::class)->prefix('cancellation-policy')->name('cancellation.policy.')->group(function () {
             Route::get('index', 'index')->name('index');
             Route::put('update', 'update')->name('update');
             Route::put('status/update', 'statusUpdate')->name('status.update');

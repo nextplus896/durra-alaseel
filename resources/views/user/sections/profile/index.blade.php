@@ -42,7 +42,7 @@
                             <div class="preview-thumb profile-wallpaper">
                                 <div class="avatar-preview">
                                     <div class="profilePicPreview bg_img"
-                                        data-background="{{ asset('public/frontend/images/element/profile-thumb.webp') }}">
+                                        data-background="{{ asset('frontend/images/element/profile-thumb.webp') }}">
                                     </div>
                                 </div>
                             </div>

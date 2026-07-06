@@ -32,6 +32,7 @@ use Database\Seeders\Car\TypeSeeder;
 use Database\Seeders\Vendor\VendorSeeder;
 use Database\Seeders\Vendor\VendorWalletSeeder;
 use Database\Seeders\BranchSeeder;
+use Database\Seeders\Admin\CancellationPolicySeeder;
 use Database\Seeders\FreshSeeder\BasicSettingsSeeder as FreshBasicSettings;
 
 class DatabaseSeeder extends Seeder
@@ -99,6 +100,7 @@ class DatabaseSeeder extends Seeder
             SystemMaintenanceSeeder::class,
             SectionHasPageSeeder::class,
             BranchSeeder::class,
+            CancellationPolicySeeder::class,
         ]);
     }
 }

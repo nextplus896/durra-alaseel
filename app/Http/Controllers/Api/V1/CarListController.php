@@ -33,22 +33,34 @@ class CarListController extends Controller
     public function index(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'sort'         => 'nullable|string|in:price_asc,price_desc',
+            'sort'         => 'nullable|string|in:price_asc,price_desc,distance_asc,distance_desc',
             'car_type_id'  => 'nullable|integer|exists:car_types,id',
             'car_model_id' => 'nullable|integer|exists:car_models,id',
             'vendor_id'    => 'nullable|integer|exists:vendors,id',
             'branch_id'    => 'nullable|integer|exists:branches,id',
             'per_page'     => 'nullable|integer|min:1|max:100',
+            'user_lat'     => 'nullable|numeric|between:-90,90',
+            'user_lng'     => 'nullable|numeric|between:-180,180',
         ]);
 
         if ($validator->fails()) {
             return Response::error($validator->errors()->all(), [], 422);
         }
 
+        // Distance sort requires coordinates from the caller
+        $sort = $request->input('sort', 'price_desc');
+        $isDistanceSort = in_array($sort, ['distance_asc', 'distance_desc']);
+        if ($isDistanceSort && (!$request->filled('user_lat') || !$request->filled('user_lng'))) {
+            return Response::error([__('user_lat and user_lng are required for distance sorting.')], [], 422);
+        }
+
+        $userLat = $request->filled('user_lat') ? (float) $request->input('user_lat') : null;
+        $userLng = $request->filled('user_lng') ? (float) $request->input('user_lng') : null;
+
         $query = Car::query()
-            ->where('status', true)
-            ->where('approval', true)
-            ->with(['type', 'carModel', 'area', 'vendor']);
+            ->where('cars.status', true)
+            ->where('cars.approval', true)
+            ->with(['type', 'carModel', 'area', 'vendor', 'branch']);
 
         // Filter by car type
         if ($request->filled('car_type_id')) {
@@ -72,20 +84,41 @@ class CarListController extends Controller
 
         // Build available filters based on current query (before sorting and pagination)
         $filtersQueryForTypes = (clone $query);
-        $typeIds = $filtersQueryForTypes->select('car_type_id')->distinct()->pluck('car_type_id')->filter()->toArray();
+        $typeIds = $filtersQueryForTypes->select('cars.car_type_id')->distinct()->pluck('car_type_id')->filter()->toArray();
 
         $filtersQueryForModels = (clone $query);
-        $modelIds = $filtersQueryForModels->select('car_model_id')->distinct()->pluck('car_model_id')->filter()->toArray();
+        $modelIds = $filtersQueryForModels->select('cars.car_model_id')->distinct()->pluck('car_model_id')->filter()->toArray();
 
         $filtersQueryForBranches = (clone $query);
-        $branchIds = $filtersQueryForBranches->select('branch_id')->distinct()->pluck('branch_id')->filter()->toArray();
+        $branchIds = $filtersQueryForBranches->select('cars.branch_id')->distinct()->pluck('branch_id')->filter()->toArray();
 
-        // Sorting by price
-        $sort = $request->input('sort', 'price_desc');
-        if ($sort === 'price_asc') {
-            $query->orderBy('fees', 'asc');
+        // Sorting
+        if ($isDistanceSort) {
+            // Join branches to access their coordinates for the Haversine ORDER BY.
+            // select('cars.*') prevents column name ambiguity when branches is joined.
+            $query->select('cars.*')
+                ->leftJoin('branches', 'cars.branch_id', '=', 'branches.id');
+
+            $direction = ($sort === 'distance_asc') ? 'ASC' : 'DESC';
+
+            // Haversine formula in SQL. LEAST(1, …) guards against floating-point values
+            // marginally above 1 that would cause acos() to return NULL.
+            // Cars whose branch has no coordinates are pushed to the end of the list.
+            $query->orderByRaw(
+                "CASE
+                    WHEN branches.latitude IS NULL OR branches.longitude IS NULL THEN 999999
+                    ELSE (6371 * acos(LEAST(1,
+                        cos(radians(?)) * cos(radians(branches.latitude))
+                        * cos(radians(branches.longitude) - radians(?))
+                        + sin(radians(?)) * sin(radians(branches.latitude))
+                    )))
+                END {$direction}",
+                [$userLat, $userLng, $userLat]
+            );
+        } elseif ($sort === 'price_asc') {
+            $query->orderBy('cars.fees', 'asc');
         } else {
-            $query->orderBy('fees', 'desc');
+            $query->orderBy('cars.fees', 'desc');
         }
 
         // Pagination
@@ -139,7 +172,7 @@ class CarListController extends Controller
                         ];
                     }),
             ],
-            'cars' => $cars->getCollection()->map(function ($car) {
+            'cars' => $cars->getCollection()->map(function ($car) use ($userLat, $userLng) {
                 $feesRaw = (float) $car->fees;
                 $formattedFees = ((int) $feesRaw == $feesRaw) ? (string) ((int) $feesRaw) : number_format($feesRaw, 2, '.', '');
                 return [
@@ -186,7 +219,11 @@ class CarListController extends Controller
                         'name'     => $car->vendor->fullname ?? $car->vendor->firstname . ' ' . $car->vendor->lastname,
                         'username' => $car->vendor->username,
                     ] : null,
-                    'created_at' => $car->created_at?->toIso8601String(),
+                    'created_at'   => $car->created_at?->toIso8601String(),
+                    // Populated when user_lat/user_lng are provided; null otherwise
+                    'distance_km'  => ($userLat !== null && $userLng !== null && $car->branch && $car->branch->latitude)
+                        ? round($car->branch->calculateDistance($userLat, $userLng), 2)
+                        : null,
                 ];
             }),
             'pagination' => [

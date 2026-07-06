@@ -69,7 +69,7 @@
             <div class="header-user-wrapper">
                 <div class="header-user-thumb">
                     <a href="{{ setRoute('vendor.profile.index') }}"><img
-                            src="{{ auth()->user()->userImage ?? asset('public/frontend/assets/images/client/client-3.webp') }}"
+                            src="{{ auth()->user()->userImage ?? asset('frontend/assets/images/client/client-3.webp') }}"
                             alt="client"></a>
                 </div>
             </div>

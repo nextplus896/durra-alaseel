@@ -9,7 +9,7 @@
         <div class="row justify-content-center">
             <div class="col-lg-8 text-center">
                 <div>
-                    <img src="{{ asset("public/error-images/maintenance-mode.webp") }}" alt="404" class="error">
+                    <img src="{{ asset("error-images/maintenance-mode.webp") }}" alt="404" class="error">
                 </div>
                 <h2 class="mt-5">{{ __($system_maintenance->title??"") }}</h2>
                 <p class="mb-0">

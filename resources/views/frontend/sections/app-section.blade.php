@@ -22,14 +22,14 @@
                 <div class="app-btn-wrapper">
                     <a href="{{ $app_link->android_url }}" class="app-btn">
                         <div class="app-icon">
-                            <img src="{{ asset('public/frontend/images/icon/play-store.webp') }}" alt="icon">
+                            <img src="{{ asset('frontend/images/icon/play-store.webp') }}" alt="icon">
                         </div>
                         <div class="content">
                             <span>{{ __('Get It On') }}</span>
                             <h5 class="title">{{ __('Google Play') }}</h5>
                         </div>
                         <div class="icon">
-                            <img src="{{ asset('public/frontend/images/element/qr-icon.webp') }}" alt="element">
+                            <img src="{{ asset('frontend/images/element/qr-icon.webp') }}" alt="element">
                         </div>
                         <div class="app-qr">
                             <img src="https://qrcode.tec-it.com/API/QRCode?data={{ $app_link->android_url }}" alt="element">
@@ -37,14 +37,14 @@
                     </a>
                     <a href="{{ $app_link->iso_url }}" class="app-btn">
                         <div class="app-icon">
-                            <img src="{{ asset('public/frontend/images/icon/apple-store.webp') }}" alt="icon">
+                            <img src="{{ asset('frontend/images/icon/apple-store.webp') }}" alt="icon">
                         </div>
                         <div class="content">
                             <span>{{ __('Download On') }}</span>
                             <h5 class="title">{{ __('Apple Store') }}</h5>
                         </div>
                         <div class="icon">
-                            <img src="{{ asset('public/frontend/images/element/qr-icon.webp') }}" alt="element">
+                            <img src="{{ asset('frontend/images/element/qr-icon.webp') }}" alt="element">
                         </div>
                         <div class="app-qr">
                             <img src="https://qrcode.tec-it.com/API/QRCode?data={{ $app_link->iso_url }}" alt="element">

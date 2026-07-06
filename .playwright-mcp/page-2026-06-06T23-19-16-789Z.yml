@@ -1,0 +1,315 @@
+- generic [active] [ref=e1]:
+  - link " top" [ref=e2] [cursor=pointer]:
+    - /url: "#"
+    - generic [ref=e3]: 
+    - generic [ref=e4]: top
+  - banner [ref=e5]:
+    - navigation [ref=e10]:
+      - link "site-logo" [ref=e11] [cursor=pointer]:
+        - /url: http://127.0.0.1:8001
+        - img "site-logo" [ref=e12]
+      - button "Toggle navigation" [ref=e13] [cursor=pointer]:
+        - generic [ref=e14]: 
+  - generic [ref=e17]:
+    - generic [ref=e19]:
+      - heading "Dora Alaseel - Drive Your Adventure, Book Your Journey" [level=1] [ref=e20]:
+        - generic [ref=e21]: Dora Alaseel -
+        - text: Drive Your Adventure, Book Your Journey
+      - paragraph [ref=e22]: Discover effortless car bookings with CarBo. Choose your ride, explore endless destinations, and experience the freedom of the road. Start your adventure today—where every journey becomes extraordinary!
+      - generic [ref=e23]:
+        - link "Booking a Car" [ref=e24] [cursor=pointer]:
+          - /url: http://127.0.0.1:8001/find/car
+        - link "Join as Vendor" [ref=e25] [cursor=pointer]:
+          - /url: http://127.0.0.1:8001/vendor/register
+    - generic [ref=e27]:
+      - img "img" [ref=e28]
+      - img "img" [ref=e30]
+  - generic [ref=e36]:
+    - generic [ref=e37]:
+      - heading "Find & booking a car" [level=2] [ref=e38]
+      - paragraph [ref=e39]: Whether it’s a business trip, family vacation, or daily commute, we’ve got the perfect car for you. Book hassle-free and drive your way!
+      - link "Booking your Now" [ref=e41] [cursor=pointer]:
+        - /url: http://127.0.0.1:8001/find/car
+    - img [ref=e43]
+  - generic [ref=e45]:
+    - generic [ref=e48]:
+      - heading "Our Key Features" [level=4] [ref=e49]
+      - generic [ref=e51]:
+        - heading "Follow Our Key Features " [level=2] [ref=e52]:
+          - text: Follow Our Key Features
+          - generic [ref=e53]: 
+        - paragraph [ref=e54]: Explore the Power-Packed Features of Your Ultimate Journey Companion!
+    - generic [ref=e58]:
+      - list [ref=e59]:
+        - listitem [ref=e60]:
+          - generic [ref=e61]: 
+          - text: Simple User Registration
+        - listitem [ref=e62]:
+          - generic [ref=e63]: 
+          - text: Smart Car Booking System
+        - listitem [ref=e64]:
+          - generic [ref=e65]: 
+          - text: 24/7 Service Access
+        - listitem [ref=e66]:
+          - generic [ref=e67]: 
+          - text: Instant Booking Confirmation
+        - listitem [ref=e68]:
+          - generic [ref=e69]: 
+          - text: Comprehensive User Dashboard
+        - listitem [ref=e70]:
+          - generic [ref=e71]: 
+          - text: Effortless Car Listing Management
+        - listitem [ref=e72]:
+          - generic [ref=e73]: 
+          - text: Flexible Booking Requests
+        - listitem [ref=e74]:
+          - generic [ref=e75]: 
+          - text: All-in-One Multi-Vendor Marketplace
+      - generic [ref=e76]:
+        - heading "Checking Our Key Features" [level=3] [ref=e77]
+        - paragraph [ref=e78]: Embark on a revolutionary travel experience with CarBo, where our key features redefine how you journey. From effortless booking to seamless transaction management, CarBo simplifies every step. With 24/7 customer support and an intuitive platform, your travels are not just convenient but memorable too. Discover the joy of travel, reimagined—CarBo, your journey, your way.
+        - link "Contact Us " [ref=e80] [cursor=pointer]:
+          - /url: index
+          - text: Contact Us
+          - generic [ref=e81]: 
+  - generic [ref=e83]:
+    - generic [ref=e84]:
+      - heading "Security" [level=4] [ref=e85]
+      - generic [ref=e87]:
+        - heading "Your Security is Our Top Priority" [level=2] [ref=e88]
+        - paragraph [ref=e89]: At CarBo, we understand the importance of keeping your data and transactions secure. Our platform is built with robust security features to give you peace of mind while booking or managing rides. Your trust is vital to us, and we use the best tools available to safeguard your information.
+    - generic [ref=e91]:
+      - generic [ref=e93]:
+        - generic [ref=e95]: 
+        - generic [ref=e96]:
+          - heading "Data Encryption" [level=3] [ref=e97]
+          - paragraph [ref=e98]: All user and vendor data is encrypted, ensuring that sensitive information stays protected at all times.
+      - generic [ref=e100]:
+        - generic [ref=e102]: 
+        - generic [ref=e103]:
+          - heading "Secure Payments" [level=3] [ref=e104]
+          - paragraph [ref=e105]: CarBo supports trusted payment gateways like PayPal, Stripe, and Razorpay, ensuring your transactions are safe and secure.
+      - generic [ref=e107]:
+        - generic [ref=e109]: 
+        - generic [ref=e110]:
+          - heading "Two-Factor Authentication (2FA)" [level=3] [ref=e111]
+          - paragraph [ref=e112]: Added layer of security through two-factor authentication to protect accounts from unauthorized access.
+      - generic [ref=e114]:
+        - generic [ref=e116]: 
+        - generic [ref=e117]:
+          - heading "Fraud Prevention System:" [level=3] [ref=e118]
+          - paragraph [ref=e119]: Our built-in fraud detection mechanism helps prevent unauthorized activities on the platform, offering safe bookings.
+      - generic [ref=e121]:
+        - generic [ref=e123]: 
+        - generic [ref=e124]:
+          - heading "Regular Security Audits" [level=3] [ref=e125]
+          - paragraph [ref=e126]: We conduct routine security audits to identify potential vulnerabilities and address them immediately.
+      - generic [ref=e128]:
+        - generic [ref=e130]: 
+        - generic [ref=e131]:
+          - heading "Privacy Policy" [level=3] [ref=e132]
+          - paragraph [ref=e133]: CarBo values your privacy, and our comprehensive privacy policy ensures that your personal information is not shared without your consent.
+  - generic [ref=e135]:
+    - generic [ref=e137]:
+      - heading "Why Choose CarBo?" [level=4] [ref=e139]
+      - heading "The Ultimate Car Booking Experience" [level=2] [ref=e141]
+      - paragraph [ref=e143]: With CarBo, you’re not just booking a car; you're gaining access to a seamless, secure, and tailored travel experience. Here’s why CarBo stands out from the rest.
+    - generic [ref=e145]:
+      - generic [ref=e147]:
+        - heading "1." [level=3] [ref=e149]
+        - paragraph [ref=e151]: Effortlessly book a ride with a few clicks, all from the convenience of your phone or desktop.
+      - generic [ref=e153]:
+        - heading "2." [level=3] [ref=e155]
+        - paragraph [ref=e157]: Choose from a diverse fleet of cars that match your needs, whether you're traveling for business, leisure, or adventure.
+      - generic [ref=e159]:
+        - heading "3." [level=3] [ref=e161]
+        - paragraph [ref=e163]: Enjoy peace of mind with multiple, trusted payment gateways available to make your transactions smooth and safe.
+      - generic [ref=e165]:
+        - heading "4." [level=3] [ref=e167]
+        - paragraph [ref=e169]: Keep track of your bookings, vehicle status, and driver updates with real-time tracking for a stress-free experience.
+      - generic [ref=e171]:
+        - heading "5." [level=3] [ref=e173]
+        - paragraph [ref=e175]: Receive dedicated customer support whenever you need help, ensuring you're never alone throughout your journey.
+      - generic [ref=e177]:
+        - heading "6." [level=3] [ref=e179]
+        - paragraph [ref=e181]: Manage your fleet and bookings with ease, and grow your business by reaching a wide audience of potential customers.
+  - generic [ref=e183]:
+    - generic [ref=e186]:
+      - heading "Our Services" [level=4] [ref=e188]
+      - heading "Comprehensive Solutions for Every Journey" [level=2] [ref=e190]
+      - paragraph [ref=e192]: Whether you're a user or a vendor, CarBo offers a range of services designed to make your journey and business experience smoother, faster, and more convenient. Discover the services that set us apart.
+    - generic [ref=e193]:
+      - generic [ref=e195]:
+        - generic [ref=e197]: 
+        - generic [ref=e198]:
+          - heading "Easy Car Booking" [level=4] [ref=e199]
+          - paragraph [ref=e200]: Book a car effortlessly via our app or website, with real-time availability, various vehicle options, and seamless payment options.
+      - generic [ref=e202]:
+        - generic [ref=e204]: 
+        - generic [ref=e205]:
+          - heading "Vendor Fleet Management" [level=4] [ref=e206]
+          - paragraph [ref=e207]: As a vendor, manage your entire fleet in one place, from adding vehicles to tracking bookings and ensuring optimal availability.
+      - generic [ref=e209]:
+        - generic [ref=e211]: 
+        - generic [ref=e212]:
+          - heading "Secure Payment Gateways" [level=4] [ref=e213]
+          - paragraph [ref=e214]: With multiple payment options like PayPal, Stripe, and Razorpay, transactions are fast, reliable, and encrypted for your security.
+      - generic [ref=e216]:
+        - generic [ref=e218]: 
+        - generic [ref=e219]:
+          - heading "User & Vendor Communication" [level=4] [ref=e220]
+          - paragraph [ref=e221]: Built-in chat feature allows smooth, direct communication between users and vendors, ensuring clarity and quick resolutions.
+      - generic [ref=e223]:
+        - generic [ref=e225]: 
+        - generic [ref=e226]:
+          - heading "Real-Time Ride Tracking" [level=4] [ref=e227]
+          - paragraph [ref=e228]: Users can track the status and location of their ride in real-time, ensuring peace of mind and transparency throughout the journey.
+      - generic [ref=e230]:
+        - generic [ref=e232]: 
+        - generic [ref=e233]:
+          - heading "24/7 Customer Support" [level=4] [ref=e234]
+          - paragraph [ref=e235]: Whether you're a user or vendor, our dedicated support team is available around the clock to assist you with any questions or issues you may have.
+  - generic [ref=e237]:
+    - generic [ref=e238]:
+      - heading "Statistics" [level=4] [ref=e239]
+      - generic [ref=e241]:
+        - heading "Our Impact at a Glance" [level=2] [ref=e242]
+        - paragraph [ref=e243]: CarBo is making waves in the car rental industry by providing a seamless booking experience for both users and vendors. Discover the numbers behind our success and the growing impact of our platform
+    - generic [ref=e244]:
+      - img "car" [ref=e247]
+      - generic [ref=e249]:
+        - generic [ref=e251]:
+          - generic [ref=e253]: 
+          - heading "0" [level=2] [ref=e255]:
+            - generic [ref=e261]: "0"
+          - heading "Cars Listed" [level=4] [ref=e262]
+        - generic [ref=e264]:
+          - generic [ref=e266]: 
+          - heading "0" [level=2] [ref=e268]:
+            - generic [ref=e274]: "0"
+          - heading "Active Users" [level=4] [ref=e275]
+        - generic [ref=e277]:
+          - generic [ref=e279]: 
+          - heading "0" [level=2] [ref=e281]:
+            - generic [ref=e287]: "0"
+          - heading "Vendors Onboarded" [level=4] [ref=e288]
+        - generic [ref=e290]:
+          - generic [ref=e292]: 
+          - heading "0" [level=2] [ref=e294]:
+            - generic [ref=e300]: "0"
+          - heading "Completed Bookings" [level=4] [ref=e301]
+  - generic [ref=e303]:
+    - generic [ref=e306]:
+      - 'heading "CarBo: The Power of Mobility in Your Pocket" [level=2] [ref=e308]'
+      - paragraph [ref=e309]: Experience the ultimate convenience with the CarBo mobile app. Whether you're a user booking a ride or a vendor managing your fleet, our intuitive app ensures seamless and efficient experiences wherever you go. Available on both Android and iOS, CarBo puts your travel needs just a tap away.
+    - generic [ref=e310]:
+      - generic [ref=e312]:
+        - link "icon Get It On Google Play element element" [ref=e313] [cursor=pointer]:
+          - /url: https://play.google.com/
+          - img "icon" [ref=e315]
+          - generic [ref=e316]:
+            - generic [ref=e317]: Get It On
+            - heading "Google Play" [level=5] [ref=e318]
+          - img "element" [ref=e320]
+          - generic:
+            - img "element"
+        - link "icon Download On Apple Store element element" [ref=e321] [cursor=pointer]:
+          - /url: https://www.apple.com/app-store/
+          - img "icon" [ref=e323]
+          - generic [ref=e324]:
+            - generic [ref=e325]: Download On
+            - heading "Apple Store" [level=5] [ref=e326]
+          - img "element" [ref=e328]
+          - generic:
+            - img "element"
+      - img "img" [ref=e331]
+  - contentinfo [ref=e332]:
+    - list [ref=e336]:
+      - listitem [ref=e337]:
+        - link " Facebook" [ref=e338] [cursor=pointer]:
+          - /url: https://www.facebook.com/
+          - generic [ref=e339]: 
+          - text: Facebook
+      - listitem [ref=e340]:
+        - link " Twitter" [ref=e341] [cursor=pointer]:
+          - /url: https://www.facebook.com/
+          - generic [ref=e342]: 
+          - text: Twitter
+    - generic [ref=e346]:
+      - generic [ref=e349]:
+        - img "site-logo" [ref=e350]
+        - paragraph [ref=e351]: CarBo is your trusted partner in car bookings and rentals, offering a seamless experience for users and vendors alike. With easy-to-use features, secure payments, and real-time tracking, we’re redefining the way you travel. Drive with freedom, book with ease, and manage your fleet with confidence.
+      - generic [ref=e353]:
+        - heading "Useful Links" [level=3] [ref=e355]
+        - list:
+          - listitem [ref=e356]:
+            - link "Privacy Policy" [ref=e357] [cursor=pointer]:
+              - /url: http://127.0.0.1:8001/global/useful/page/privacy-policy
+          - listitem [ref=e358]:
+            - link "Refund Policy" [ref=e359] [cursor=pointer]:
+              - /url: http://127.0.0.1:8001/global/useful/page/refund-policy
+      - generic [ref=e361]:
+        - heading "Subscribe" [level=3] [ref=e363]
+        - paragraph [ref=e365]: Stay connected with CarBo! Subscribe to our newsletter for the latest updates, special offers, and travel tips right in your inbox.
+        - generic [ref=e367]:
+          - textbox "Email Address" [ref=e368]
+          - button "" [ref=e369] [cursor=pointer]:
+            - generic [ref=e370]: 
+    - paragraph [ref=e381]:
+      - text: Copyright © 2026 All rights reserved
+      - link "Dora Alaseel" [ref=e382] [cursor=pointer]:
+        - /url: http://127.0.0.1:8001
+  - generic [ref=e383]:
+    - generic [ref=e384]:
+      - img [ref=e385]
+      - paragraph [ref=e392]:
+        - text: We may use cookies or any other tracking technologies when you visit our website, including any other media form, mobile website, or mobile application related or connected to help customize the Site and improve your experience.
+        - link "Privacy Policy" [ref=e393] [cursor=pointer]:
+          - /url: http://127.0.0.1:8001/global/useful/page/privacy-policy
+    - generic [ref=e394]:
+      - button "Allow" [ref=e395] [cursor=pointer]
+      - button "Decline" [ref=e396] [cursor=pointer]
+  - generic [ref=e397]:
+    - generic [ref=e399]:
+      - generic [ref=e401]:
+        - generic [ref=e402] [cursor=pointer]:
+          - text: 
+          - generic: Request
+        - text: 
+        - generic [ref=e403] [cursor=pointer]:
+          - text: 
+          - generic: Timeline
+        - text: 
+        - generic [ref=e404] [cursor=pointer]:
+          - text: 
+          - generic: Views
+          - generic [ref=e405]: "17"
+        - generic [ref=e406] [cursor=pointer]:
+          - text: 
+          - generic: Queries
+          - generic [ref=e407]: "32"
+        - generic [ref=e408] [cursor=pointer]:
+          - text: 
+          - generic: Models
+          - generic [ref=e409]: "57"
+        - text:  
+      - generic [ref=e410]:
+        - generic [ref=e412] [cursor=pointer]:
+          - generic: 
+        - generic [ref=e415] [cursor=pointer]:
+          - generic: 
+        - generic [ref=e416] [cursor=pointer]:
+          - generic: 
+          - generic: 269ms
+        - generic [ref=e417]:
+          - generic: 
+          - generic: 5MB
+        - generic [ref=e418]:
+          - generic: 
+          - generic: 10.x
+        - generic [ref=e419] [cursor=pointer]:
+          - generic: 
+          - generic: GET /
+    - text:                                                                                                                                                                                                                                                                  
+  - text: 
+  - img

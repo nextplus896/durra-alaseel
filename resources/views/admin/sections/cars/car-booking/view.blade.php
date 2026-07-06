@@ -76,6 +76,17 @@
                                 <li>{{ __("TRX ID") }}: <span>{{ ($booking->payment_type == Str::slug(payment_gateway_const()::ONLINEPAYMENT)) ? __($booking->trx_id) : __(__("N/A")) }} </span></li>
                                 <li>{{ __("Total Distance") }}: <span>{{ ($booking->distance== 0) ? __("N/A") : get_amount($booking->distance,__("KM"),2) }} </span></li>
                                 <li>{{ __("Payable Amount") }}:<span>{{ ($booking->amount== 0) ? __("N/A") : get_amount($booking->amount,$default_currency->code) }}</span></li>
+                                {{-- Insurance breakdown --}}
+                                @if($booking->insurance_type)
+                                    <li>{{ __("Rental") }}:<span>{{ get_amount($booking->amount, $default_currency->code) }}</span></li>
+                                    @if($booking->insurance_type === 'daily' && $booking->insurance_total > 0)
+                                        <li>{{ __("Daily Insurance") }}:<span>{{ get_amount($booking->insurance_total, $default_currency->code) }}</span></li>
+                                    @endif
+                                    <li><strong>{{ __("Grand Total") }}</strong>:<span><strong>{{ get_amount($booking->total_amount, $default_currency->code) }}</strong></span></li>
+                                    @if($booking->insurance_type === 'deductible' && $booking->deductible_insurance > 0)
+                                        <li style="color:#e67e22;">{{ __("Deductible Insurance (Excess)") }}:<span style="color:#e67e22;">{{ get_amount($booking->deductible_insurance, $default_currency->code) }} &mdash; {{ __('informational only, not charged') }}</span></li>
+                                    @endif
+                                @endif
                             </ul>
                         </div>
                     </div>

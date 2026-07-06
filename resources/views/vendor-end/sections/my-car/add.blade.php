@@ -166,6 +166,33 @@
                                         <span class="charge-currency">{{ get_default_currency_code() }}</span>
                                     </div>
 
+                                    {{-- Insurance Settings Section --}}
+                                    <div class="col-xl-12 col-lg-12 mb-10 mt-20">
+                                        <div class="dashboard-header-wrapper">
+                                            <h5 class="title">{{ __('Insurance') }}</h5>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
+                                        <label>{{ __('Daily Insurance') }} <span>*</span></label>
+                                        <input type="number" step="0.01" min="0" class="form--control"
+                                            name="daily_insurance"
+                                            placeholder="{{ __('e.g. 20.00') }}"
+                                            value="{{ old('daily_insurance', 0) }}" required>
+                                        <span class="charge-currency">{{ get_default_currency_code() }}</span>
+                                        <small class="text-muted d-block mt-1">{{ __('Charged per rental day and included in the booking total.') }}</small>
+                                    </div>
+
+                                    <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
+                                        <label>{{ __('Deductible Insurance (Excess)') }} <span>*</span></label>
+                                        <input type="number" step="0.01" min="0" class="form--control"
+                                            name="deductible_insurance"
+                                            placeholder="{{ __('e.g. 3500.00') }}"
+                                            value="{{ old('deductible_insurance', 0) }}" required>
+                                        <span class="charge-currency">{{ get_default_currency_code() }}</span>
+                                        <small class="text-muted d-block mt-1">{{ __('Customer liability in case of accident. Displayed only — never charged.') }}</small>
+                                    </div>
+
                                     {{-- Delivery Settings Section --}}
                                     <div class="col-xl-12 col-lg-12 mb-10 mt-20">
                                         <div class="dashboard-header-wrapper">
