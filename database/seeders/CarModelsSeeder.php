@@ -3,91 +3,46 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Models\Admin\Cars\CarModel;
 use App\Models\Admin\Cars\CarType;
 
 class CarModelsSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
     public function run()
     {
-        // Get existing car types
         $carTypes = CarType::all();
 
-        // If no car types exist, create sample ones
         if ($carTypes->isEmpty()) {
-            $this->command->info('No car types found. Creating sample car types...');
-
-            $sampleTypes = [
-                ['name' => 'Sedan', 'slug' => Str::slug('Sedan'), 'status' => true, 'last_edit_by' => 1],
-                ['name' => 'SUV', 'slug' => Str::slug('SUV'), 'status' => true, 'last_edit_by' => 1],
-                ['name' => 'Luxury', 'slug' => Str::slug('Luxury'), 'status' => true, 'last_edit_by' => 1],
-                ['name' => 'Compact', 'slug' => Str::slug('Compact'), 'status' => true, 'last_edit_by' => 1],
-                ['name' => 'Van', 'slug' => Str::slug('Van'), 'status' => true, 'last_edit_by' => 1],
-            ];
-
-            foreach ($sampleTypes as $typeData) {
-                CarType::create($typeData);
-            }
-
-            $carTypes = CarType::all();
-            $this->command->info('Created ' . count($sampleTypes) . ' car types.');
+            $this->command->warn('No car types found. Run TypeSeeder first.');
+            return;
         }
 
-        // Sample car models data
+        // Map your exact type names/slugs to their models
         $modelsData = [
-            // Sedan models
             'Sedan' => [
-                'Toyota Camry',
-                'Honda Accord',
-                'BMW 3 Series',
-                'Mercedes-Benz C-Class',
-                'Audi A4',
+                ['name' => 'Toyota Camry',        'image' => 'toyota-camry-2024.webp'],
+                ['name' => 'Hyundai Sonata',      'image' => 'hyundai-sonata-2024.webp'],
+                ['name' => 'Nissan Sunny',        'image' => 'nissan-sunny-2023.webp'],
             ],
-            // SUV models
-            'SUV' => [
-                'Toyota RAV4',
-                'Honda CR-V',
-                'Ford Explorer',
-                'Jeep Grand Cherokee',
-                'Nissan Pathfinder',
+            'Car' => [
+                ['name' => 'Toyota Yaris',         'image' => 'toyota-yaris-2024.webp'],
+                ['name' => 'Toyota Hiace',         'image' => 'toyota-hiace-2024.webp'],
             ],
-            // Luxury models
-            'Luxury' => [
-                'Mercedes-Benz S-Class',
-                'BMW 7 Series',
-                'Audi A8',
-                'Lexus LS',
-                'Porsche Panamera',
-            ],
-            // Compact models
-            'Compact' => [
-                'Toyota Corolla',
-                'Honda Civic',
-                'Volkswagen Golf',
-                'Mazda 3',
-                'Hyundai Elantra',
-            ],
-            // Van models
-            'Van' => [
-                'Toyota Hiace',
-                'Mercedes-Benz Sprinter',
-                'Ford Transit',
-                'Nissan NV',
-                'Honda Odyssey',
+            'Suv' => [
+                ['name' => 'Toyota RAV4',          'image' => 'toyota-rav4-2024.webp'],
+                ['name' => 'Nissan Patrol',        'image' => 'nissan-patrol-2024.webp'],
+                ['name' => 'Toyota Land Cruiser',  'image' => 'toyota-land-cruiser-2024.webp'],
+                ['name' => 'Mitsubishi Pajero',    'image' => 'mitsubishi-pajero-2023.webp'],
             ],
         ];
+
+        $createdCount = 0;
 
         foreach ($carTypes as $type) {
             $typeName = $type->name;
 
-            // Find matching models for this type
+            // Match type by name (case-insensitive)
             $models = [];
             foreach ($modelsData as $category => $modelList) {
                 if (stripos($typeName, $category) !== false) {
@@ -96,26 +51,28 @@ class CarModelsSeeder extends Seeder
                 }
             }
 
-            // If no specific match, add some generic models
             if (empty($models)) {
-                $models = [
-                    $typeName . ' Model A',
-                    $typeName . ' Model B',
-                    $typeName . ' Model C',
-                ];
+                continue; // Skip types with no matching models (e.g. old generic types)
             }
 
-            // Create models for this type
-            foreach ($models as $modelName) {
-                CarModel::create([
-                    'car_type_id' => $type->id,
-                    'name' => $modelName,
-                    'image' => null, // Images can be added later via admin panel
-                    'status' => true,
-                ]);
+            foreach ($models as $modelData) {
+                // Prevent duplicates if re-run
+                $exists = CarModel::where('car_type_id', $type->id)
+                    ->where('name', $modelData['name'])
+                    ->exists();
+
+                if (!$exists) {
+                    CarModel::create([
+                        'car_type_id' => $type->id,
+                        'name'        => $modelData['name'],
+                        'image'       => $modelData['image'],
+                        'status'      => true,
+                    ]);
+                    $createdCount++;
+                }
             }
         }
 
-        $this->command->info('Car models seeded successfully!');
+        $this->command->info("Seeded {$createdCount} car models.");
     }
 }

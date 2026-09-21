@@ -19,7 +19,8 @@
                 <div class="dashboard-card-item">
                     <div class="card-title">
                         <span class="title">{{ __('Wallet Balance') }}</span>
-                        <h4 class="sub-title text--base">{{ get_amount(auth()->guard('vendor')->user()->wallets->balance) }}
+                        <h4 class="sub-title text--base">
+                            {{ get_amount(optional(auth()->guard('vendor')->user()->wallets)->balance ?? 0) }}
                             <span>{{ get_default_currency_code() }}</span>
                         </h4>
                     </div>
@@ -33,7 +34,7 @@
                     <div class="card-title">
                         <span class="title">{{ __('Due Payment') }}</span>
                         <h4 class="sub-title text--base">
-                            {{ get_amount(auth()->guard('vendor')->user()->wallets->due_payment) }}
+                            {{ get_amount(optional(auth()->guard('vendor')->user()->wallets)->due_payment ?? 0) }}
                             <span>{{ get_default_currency_code() }}</span>
                         </h4>
                     </div>
@@ -81,7 +82,7 @@
                 <div class="dashboard-card-item bg-overlay  bg_img" data-background="assets/images/element/card-bg.webp">
                     <div class="card-title">
                         <span class="title">{{ __('Total Income') }}</span>
-                        <h4 class="sub-title text--base">{{ get_amount($total_income,get_default_currency_code()) }}</h4>
+                        <h4 class="sub-title text--base">{{ get_amount($total_income, get_default_currency_code()) }}</h4>
                     </div>
                     <div class="card-icon">
                         <i class="las la-dollar-sign"></i>
@@ -418,7 +419,8 @@
                         </div>
                         <div class="col-xl-12 col-lg-12 form-group d-flex align-items-center justify-content-between mt-4">
                             <button type="button" class="btn btn--danger modal-close">{{ __('Close') }}</button>
-                            <button type="button" class="btn btn--danger" id="set-amount">{{ __('Max Amount') }}</button>
+                            <button type="button" class="btn btn--danger"
+                                id="set-amount">{{ __('Max Amount') }}</button>
                             <button type="submit" class="btn btn--base">{{ __('Action') }}</button>
                         </div>
                     </div>
@@ -550,20 +552,20 @@
 
         var options = {
             series: [{
-                name: '{{ __("Accept") }}',
-                color: "#4eade5",
-                data: JSON.parse(booking_accept)
-            }, {
-                name: '{{ __("Complete") }}',
-                color: "#5ea2c9",
-                data: JSON.parse(booking_complete),
-            },
-            {
-                name: '{{ __("Reject") }}',
-                color: "#2781B9",
-                data: JSON.parse(booking_reject),
-            }
-        ],
+                    name: '{{ __('Accept') }}',
+                    color: "#4eade5",
+                    data: JSON.parse(booking_accept)
+                }, {
+                    name: '{{ __('Complete') }}',
+                    color: "#5ea2c9",
+                    data: JSON.parse(booking_complete),
+                },
+                {
+                    name: '{{ __('Reject') }}',
+                    color: "#2781B9",
+                    data: JSON.parse(booking_reject),
+                }
+            ],
             chart: {
                 height: 350,
                 type: 'area'
@@ -592,9 +594,9 @@
         chart.render();
     </script>
     <script>
-        $(document).ready(function(){
-            let due = "{{ auth()->user()->wallets->due_payment }}";
-            $("#set-amount").click(function(){
+        $(document).ready(function() {
+            let due = "{{ optional(auth()->guard('vendor')->user()->wallets)->due_payment ?? 0 }}";
+            $("#set-amount").click(function() {
                 $("input[name='amount']").val();
                 $("input[name='amount']").val(due); // Change 100 to any desired value
             });

@@ -47,28 +47,7 @@ class WalletService
         }
 
         return DB::transaction(function () use ($user, $amount, $dto) {
-            // Lock the wallet row for the default currency to prevent concurrent updates
-            $wallet = UserWallet::lockForUpdate()
-                ->where('user_id', $user->id)
-                ->whereHas('currency', fn($q) => $q->where('default', true))
-                ->firstOrFail();
-
-            $balanceBefore = (float) $wallet->balance;
-            $balanceAfter  = $balanceBefore + $amount;
-
-            $wallet->update(['balance' => $balanceAfter]);
-
-            $user = User::find($user->id);
-            $transaction = $this->repository->createTransaction($user, $dto, $balanceBefore, $balanceAfter);
-
-            // Queue notification
-            try {
-                $user->notify((new WalletChargedNotification($amount, $balanceAfter))->locale('ar'));
-            } catch (\Throwable $e) {
-                Log::warning('WalletService: Charge notification failed', ['error' => $e->getMessage()]);
-            }
-
-            return $transaction;
+            return $this->creditWallet($user, $amount, $dto, WalletChargedNotification::class);
         });
     }
 
@@ -92,25 +71,26 @@ class WalletService
         }
 
         return DB::transaction(function () use ($user, $amount, $dto) {
+            // Lock the wallet row for the default currency to prevent concurrent updates
             $wallet = UserWallet::lockForUpdate()
                 ->where('user_id', $user->id)
                 ->whereHas('currency', fn($q) => $q->where('default', true))
                 ->firstOrFail();
 
-            $balanceBefore = (float) $wallet->balance;
+            $balanceBefore = (string) $wallet->balance;
 
-            if ($balanceBefore < $amount) {
+            // bccomp returns 0 if equal, 1 if left > right, -1 if left < right
+            if (bccomp($balanceBefore, (string) $amount, 8) < 0) {
                 throw new Exception(__('Insufficient balance. Please recharge your account.'));
             }
 
-            $balanceAfter = $balanceBefore - $amount;
+            $balanceAfter = bcsub($balanceBefore, (string) $amount, 8);
             $wallet->update(['balance' => $balanceAfter]);
 
-            $user = User::find($user->id);
             $transaction = $this->repository->createTransaction($user, $dto, $balanceBefore, $balanceAfter);
 
             try {
-                $user->notify((new WalletDeductedNotification($amount, $balanceAfter, $dto->description))->locale('ar'));
+                $user->notify((new WalletDeductedNotification($amount, (float) $balanceAfter, $dto->description))->locale('ar'));
             } catch (\Throwable $e) {
                 Log::warning('WalletService: Deduction notification failed', ['error' => $e->getMessage()]);
             }
@@ -139,34 +119,65 @@ class WalletService
         }
 
         return DB::transaction(function () use ($user, $amount, $dto) {
-            $wallet = UserWallet::lockForUpdate()
-                ->where('user_id', $user->id)
-                ->whereHas('currency', fn($q) => $q->where('default', true))
-                ->firstOrFail();
-
-            $balanceBefore = (float) $wallet->balance;
-            $balanceAfter  = $balanceBefore + $amount;
-
-            $wallet->update(['balance' => $balanceAfter]);
-
-            $user = User::find($user->id);
-            $transaction = $this->repository->createTransaction($user, $dto, $balanceBefore, $balanceAfter);
-
-            try {
-                $user->notify((new WalletRefundNotification($amount, $balanceAfter, $dto->description))->locale('ar'));
-            } catch (\Throwable $e) {
-                Log::warning('WalletService: Refund notification failed', ['error' => $e->getMessage()]);
-            }
-
-            return $transaction;
+            return $this->creditWallet($user, $amount, $dto, WalletRefundNotification::class);
         });
     }
 
     /**
-     * Get user's current wallet balance.
+     * Get user's current wallet balance from the authoritative source (user_wallets table).
      */
-    public function getBalance(User $user): float
+    public function getBalance(User $user): string
     {
-        return (float) $user->balance;
+        $wallet = UserWallet::where('user_id', $user->id)
+            ->whereHas('currency', fn($q) => $q->where('default', true))
+            ->value('balance');
+
+        return $wallet ?? '0.00000000';
+    }
+
+    /**
+     * Get the user's default wallet model instance.
+     */
+    public function getWallet(User $user): UserWallet
+    {
+        return UserWallet::where('user_id', $user->id)
+            ->whereHas('currency', fn($q) => $q->where('default', true))
+            ->firstOrFail();
+    }
+
+    // ─── Private Helpers ─────────────────────────────────────────
+
+    /**
+     * Shared credit logic used by both deposit() and refund().
+     *
+     * @param class-string $notificationClass
+     */
+    private function creditWallet(User $user, float $amount, WalletTransactionDTO $dto, string $notificationClass): BalanceTransaction
+    {
+        // Lock the wallet row for the default currency to prevent concurrent updates
+        $wallet = UserWallet::lockForUpdate()
+            ->where('user_id', $user->id)
+            ->whereHas('currency', fn($q) => $q->where('default', true))
+            ->firstOrFail();
+
+        $balanceBefore = (string) $wallet->balance;
+        $balanceAfter = bcadd($balanceBefore, (string) $amount, 8);
+
+        $wallet->update(['balance' => $balanceAfter]);
+
+        $transaction = $this->repository->createTransaction($user, $dto, $balanceBefore, $balanceAfter);
+
+        // Queue notification
+        try {
+            $notificationMessage = $dto->description ?: __('Wallet credit');
+            $user->notify((new $notificationClass($amount, (float) $balanceAfter, $notificationMessage))->locale('ar'));
+        } catch (\Throwable $e) {
+            Log::warning('WalletService: Credit notification failed', [
+                'notification' => $notificationClass,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        return $transaction;
     }
 }

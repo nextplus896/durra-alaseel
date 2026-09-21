@@ -452,17 +452,43 @@ class CarBookingController extends Controller
                 'user_id'        => $userId,
                 'delivery_price' => $deliveryPrice,
                 'insurance_type' => $insuranceType,
-                'insurance_total'=> $insuranceBreakdown['insurance_total'],
+                'insurance_total' => $insuranceBreakdown['insurance_total'],
                 'pricing_total'  => $pricingBreakdown['total'] ?? null,
                 'tax_percentage' => $pricingBreakdown['tax_percentage'] ?? null,
             ]);
 
             // Add rental-specific details to pricing breakdown
-            $pricingBreakdown['rental_days'] = $rentalDays;
-            $pricingBreakdown['allowance_km'] = intval($request->allowance_km ?? 0);
+            $pricingBreakdown['rental_days']        = $rentalDays;
+            $pricingBreakdown['allowance_km']       = intval($request->allowance_km ?? 0);
             $pricingBreakdown['price_rule_applied'] = $rentalCalculation['price_rule_applied'];
-            $pricingBreakdown['tax_rate'] = $pricingBreakdown['tax_percentage']; // Alias for frontend compatibility
+            $pricingBreakdown['base_price']         = (float) $rentalCalculation['base_price'];
+            $pricingBreakdown['tax_rate']           = $pricingBreakdown['tax_percentage'];
+            // ── Lightweight mode: skip heavy data for real-time pricing cards ──
+            $pricingOnly = $request->boolean('pricing_only');
 
+            if ($pricingOnly) {
+                Log::info('API car-booking.preview success (lightweight)', [
+                    'request_id' => $requestId,
+                    'user_id' => $userId,
+                ]);
+
+                return Response::success(
+                    [__('Pricing calculated')],
+                    [
+                        'pricing_breakdown'  => $pricingBreakdown,
+                        'insurance_breakdown' => [
+                            'insurance_type'       => (string) $insuranceBreakdown['insurance_type'],
+                            'daily_insurance'      => (float)  $insuranceBreakdown['daily_insurance'],
+                            'insurance_total'      => (float)  $insuranceBreakdown['insurance_total'],
+                            'deductible_insurance' => (float)  $insuranceBreakdown['deductible_insurance'],
+                        ],
+                        'delivery_info'      => $deliveryInfo,
+                    ],
+                    200,
+                );
+            }
+
+            // ── Full mode: original behavior for the preview/confirm screen ──
             $payment_gateways = PaymentGateway::addMoney()->active()->with('currencies')->has('currencies')->get();
 
             Log::info('API car-booking.preview gateways loaded', [
@@ -471,7 +497,6 @@ class CarBookingController extends Controller
                 'gateway_count' => $payment_gateways->count(),
             ]);
 
-            // Transform payment gateways to minimal structure to prevent JSON truncation
             $payment_gateways_minimal = $payment_gateways->map(function ($gateway) {
                 return [
                     'id' => (int) $gateway->id,
@@ -490,10 +515,8 @@ class CarBookingController extends Controller
                 ];
             })->values();
 
-            // Clean booking_details to prevent circular references or large objects
             $cleanBookingDetails = is_object($booking_data) ? (array) $booking_data : $booking_data;
 
-            // Ensure only primitive types in booking_details
             $cleanBookingDetails = array_map(function ($value) {
                 if (is_object($value)) {
                     return (array) $value;
@@ -501,12 +524,10 @@ class CarBookingController extends Controller
                 return $value;
             }, $cleanBookingDetails);
 
-            // Format dates and times for display
             if (isset($cleanBookingDetails['pickup_date'])) {
                 try {
                     $cleanBookingDetails['pickup_date'] = Carbon::parse($cleanBookingDetails['pickup_date'])->format('d-m-Y');
                 } catch (\Exception $e) {
-                    // Keep original if parsing fails
                 }
             }
 
@@ -514,7 +535,6 @@ class CarBookingController extends Controller
                 try {
                     $cleanBookingDetails['pickup_time'] = Carbon::parse($cleanBookingDetails['pickup_time'])->format('h:i A');
                 } catch (\Exception $e) {
-                    // Keep original if parsing fails
                 }
             }
 
@@ -522,7 +542,6 @@ class CarBookingController extends Controller
                 try {
                     $cleanBookingDetails['round_pickup_date'] = Carbon::parse($cleanBookingDetails['round_pickup_date'])->format('d-m-Y');
                 } catch (\Exception $e) {
-                    // Keep original if parsing fails
                 }
             }
 
@@ -530,11 +549,10 @@ class CarBookingController extends Controller
                 try {
                     $cleanBookingDetails['round_pickup_time'] = Carbon::parse($cleanBookingDetails['round_pickup_time'])->format('h:i A');
                 } catch (\Exception $e) {
-                    // Keep original if parsing fails
                 }
             }
 
-            Log::info('API car-booking.preview success', [
+            Log::info('API car-booking.preview success (full)', [
                 'request_id' => $requestId,
                 'user_id' => $userId,
             ]);
@@ -1167,41 +1185,53 @@ class CarBookingController extends Controller
 
     public function bookingNotification($confirm_booking, $basic_setting)
     {
-        if (auth()->check()) {
-            $notification_content = [
-                'title' => __('Booking', [], 'ar'),
-                'message' => __('Your have a incoming booking request (Car Model: :model, Car Number: :number, Pick-up Date: :date, Pick-up Time: :time).', [
-                    'model'  => $confirm_booking->cars->car_model,
-                    'number' => $confirm_booking->cars->car_number,
-                    'date'   => $confirm_booking->pickup_date ? Carbon::parse($confirm_booking->pickup_date)->format('d-m-Y') : '',
-                    'time'   => $confirm_booking->pickup_time ? Carbon::parse($confirm_booking->pickup_time)->format('h:i A') : '',
-                ], 'ar'),
-            ];
-            VendorNotification::create([
+        $notification_content = [
+            'title' => __('Booking', [], 'ar'),
+            'message' => __('Your have a incoming booking request (Car Model: :model, Car Number: :number, Pick-up Date: :date, Pick-up Time: :time).', [
+                'model'  => $confirm_booking->cars->car_model,
+                'number' => $confirm_booking->cars->car_number,
+                'date'   => $confirm_booking->pickup_date ? Carbon::parse($confirm_booking->pickup_date)->format('d-m-Y') : '',
+                'time'   => $confirm_booking->pickup_time ? Carbon::parse($confirm_booking->pickup_time)->format('h:i A') : '',
+            ], 'ar'),
+            'time'  => now()->diffForHumans(),
+            'image' => files_asset_path('profile-default'),
+        ];
+
+        VendorNotification::create([
+            'vendor_id' => $confirm_booking->cars->vendor_id,
+            'message'   => $notification_content,
+        ]);
+
+        // Fire real-time broadcast to vendor
+        try {
+            broadcast(new \App\Events\Vendor\NotificationEvent((object)[
                 'vendor_id' => $confirm_booking->cars->vendor_id,
-                'message' => $notification_content,
-            ]);
-            try {
-                if ($basic_setting->email_notification) {
-                    Notification::route('mail', $confirm_booking->email)->notify(new CarBookingNotification($confirm_booking));
-                }
-                if ($basic_setting->vendor_push_notification) {
-                    (new PushNotificationHelper())
-                        ->prepare(
-                            [$confirm_booking->cars->vendor_id],
-                            [
-                                'title' => $notification_content['title'],
-                                'desc' => $notification_content['message'],
-                                'user_type' => 'vendor',
-                            ],
-                        )
-                        ->send();
-                }
-            } catch (Exception $e) {
+                'message'   => $notification_content,
+            ]));
+        } catch (Exception $e) {
+            Log::error('Vendor broadcast failed (API): ' . $e->getMessage());
+        }
+
+        try {
+            if ($basic_setting->email_notification) {
+                Notification::route('mail', $confirm_booking->email)->notify(new CarBookingNotification($confirm_booking));
             }
+            if ($basic_setting->vendor_push_notification) {
+                (new PushNotificationHelper())
+                    ->prepare(
+                        [$confirm_booking->cars->vendor_id],
+                        [
+                            'title'     => $notification_content['title'],
+                            'desc'      => $notification_content['message'],
+                            'user_type' => 'vendor',
+                        ],
+                    )
+                    ->send();
+            }
+        } catch (Exception $e) {
+            Log::error('Vendor notification send failed (API): ' . $e->getMessage());
         }
     }
-
     public function automaticSubmit(Request $request)
     {
         try {
@@ -2090,34 +2120,45 @@ class CarBookingController extends Controller
             return Response::error([__('Booking not found.')], [], 404);
         }
 
-        // Only pending (status=0) or booked (status=1) bookings can be cancelled by the user
         if (!in_array((int) $booking->status, [0, 1])) {
             return Response::error([__('Only pending or unstarted bookings can be cancelled.')], [], 422);
         }
 
         DB::beginTransaction();
         try {
-            $booking->update(['status' => 5]); // 5 = user_cancelled
+            $refundService = app(\App\Services\CancellationRefundService::class);
+            $refundDto = $refundService->calculate($booking);
 
-            // Auto-refund if paid from wallet balance
-            if ($booking->paid_from_balance && $booking->balance_deducted > 0) {
+            $booking->update([
+                'status'           => 5,
+                'rejection_reason' => $request->input('reason', ''),
+            ]);
+
+            if ($refundDto->refund_amount > 0) {
                 $balanceService = new BookingBalanceService();
                 $balanceService->refundBalance(
                     $user,
                     $booking,
-                    (float) $booking->balance_deducted,
+                    $refundDto->refund_amount,
                     __('Booking cancelled by user', [], 'ar'),
                 );
             }
 
             DB::commit();
 
-            // Send booking-cancelled notification to user
-            $this->notifyUserOnBookingCancelled($user, $booking);
+            if (method_exists($this, 'notifyUserOnBookingCancelled')) {
+                $this->notifyUserOnBookingCancelled($user, $booking);
+            }
 
             return Response::success([__('Booking cancelled successfully.')], [
-                'booking_id' => $booking->id,
-                'refunded'   => $booking->paid_from_balance ? number_format($booking->balance_deducted, 2) : '0.00',
+                'booking_id'         => $booking->id,
+                'booking_status'     => 5,
+                'total_charged'      => number_format($refundDto->rental_amount, 2),
+                'deduction_amount'   => number_format($refundDto->deduction_amount, 2),
+                'service_fee_amount' => number_format($refundDto->service_fee_amount, 2),
+                'refund_amount'      => number_format($refundDto->refund_amount, 2),
+                'is_within_window'   => $refundDto->is_within_window,
+                'hours_until_pickup' => $refundDto->hours_until_pickup,
             ], 200);
         } catch (Exception $e) {
             DB::rollBack();
@@ -2125,6 +2166,7 @@ class CarBookingController extends Controller
                 'booking_id' => $request->booking_id,
                 'user_id'    => $user->id,
                 'error'      => $e->getMessage(),
+                'trace'      => $e->getTraceAsString(),
             ]);
 
             return Response::error([__('Failed to cancel booking. Please try again.')], [], 500);

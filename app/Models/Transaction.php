@@ -33,14 +33,14 @@ class Transaction extends Model
         'reject_reason' => 'string',
         'callback_ref' => 'string',
         'details' => 'object',
-        'receive_amount' => 'double',
-        'exchange_rate' => 'double',
-        'percent_charge' => 'double',
-        'fixed_charge' => 'double',
-        'total_charge' => 'double',
-        'total_payable' => 'double',
-        'request_amount' => 'double',
-        'available_balance' => 'double',
+        'receive_amount' => 'decimal:8',
+        'exchange_rate' => 'decimal:8',
+        'percent_charge' => 'decimal:8',
+        'fixed_charge' => 'decimal:8',
+        'total_charge' => 'decimal:8',
+        'total_payable' => 'decimal:8',
+        'request_amount' => 'decimal:8',
+        'available_balance' => 'decimal:8',
         'booking_token' => 'string',
         'status' => 'integer',
         'refundable' => 'integer',
@@ -55,7 +55,7 @@ class Transaction extends Model
 
     public function vendor()
     {
-        return $this->belongsTo(Vendor::class,'vendor_id','id');
+        return $this->belongsTo(Vendor::class, 'vendor_id', 'id');
     }
 
     public function admin()
@@ -240,7 +240,6 @@ class Transaction extends Model
     public function scopeVendorAuthApi($query)
     {
         return $query->where('user_type', GlobalConst::VENDOR)->where('vendor_id', auth()->guard('vendor_api')->user()->id);
-
     }
 
     public function scopeMoneyTransfer($query)

@@ -47,10 +47,12 @@ class WalletController extends Controller
                 ->limit(10)
                 ->get();
 
+            $walletBalance = $this->walletService->getBalance($user);
+
             return Response::success(
                 [__('Wallet data fetched successfully')],
                 [
-                    'balance'             => (float) round($user->balance, 2),
+                    'balance'             => (float) round($walletBalance, 2),
                     'currency'            => get_default_currency_code(),
                     'recent_transactions' => $transactions,
                 ],

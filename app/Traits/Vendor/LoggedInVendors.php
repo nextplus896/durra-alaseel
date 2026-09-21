@@ -10,14 +10,16 @@ use App\Models\Vendor\VendorWallet;
 use Exception;
 use Jenssegers\Agent\Agent;
 
-trait LoggedInVendors {
+trait LoggedInVendors
+{
 
-    protected function refreshUserWallets($user) {
-        $user_wallets = $user->wallets->pluck("currency_id")->toArray();
+    protected function refreshUserWallets($user)
+    {
+        $user_wallets = $user->wallets ? $user->wallets->pluck("currency_id")->toArray() : [];
         $currencies = Currency::active()->roleHasOne()->pluck("id")->toArray();
-        $new_currencies = array_diff($currencies,$user_wallets);
+        $new_currencies = array_diff($currencies, $user_wallets);
         $new_wallets = [];
-        foreach($new_currencies as $item) {
+        foreach ($new_currencies as $item) {
             $new_wallets[] = [
                 'vendor_id'     => $user->id,
                 'currency_id'   => $item,
@@ -28,14 +30,15 @@ trait LoggedInVendors {
             ];
         }
 
-        try{
+        try {
             VendorWallet::insert($new_wallets);
-        }catch(Exception $e) {
+        } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
     }
 
-    protected function createLoginLog($user) {
+    protected function createLoginLog($user)
+    {
         $client_ip = request()->ip() ?? false;
         $location = geoip()->getLocation($client_ip);
 
@@ -59,9 +62,9 @@ trait LoggedInVendors {
             'os'            => $agent->platform() ?? "",
         ];
 
-        try{
+        try {
             VendorLoginLog::create($data);
-        }catch(Exception $e) {
+        } catch (Exception $e) {
             // return false;
         }
     }

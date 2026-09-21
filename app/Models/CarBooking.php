@@ -60,6 +60,7 @@ class CarBooking extends Model
         'return_date'          => 'date',
         'extension_count'      => 'integer',
         'total_extension_days' => 'integer',
+        'rejection_reason' => 'string',
         'created_at'           => 'datetime',
         'updated_at'           => 'datetime',
     ];

@@ -1,0 +1,1917 @@
+├── .dockerignore
+├── .editorconfig
+├── .env
+├── .env.docker
+├── .env.example
+├── .env.local
+├── .env.production
+├── .gitattributes
+├── .gitignore
+├── .htaccess
+├── .phpunit.result.cache
+├── .rnd
+├── .treerc
+├── app
+│  ├── Console
+│  │  ├── Commands
+│  │  │  ├── MigrateFilesToStorage.php
+│  │  │  └── PusherDebugCommand.php
+│  │  └── Kernel.php
+│  ├── Constants
+│  │  ├── AdminRoleConst.php
+│  │  ├── CancellationPolicyConst.php
+│  │  ├── CarBookingConst.php
+│  │  ├── ExtensionConst.php
+│  │  ├── GlobalConst.php
+│  │  ├── LanguageConst.php
+│  │  ├── NotificationConst.php
+│  │  ├── PaymentGatewayConst.php
+│  │  ├── SiteSectionConst.php
+│  │  └── SupportTicketConst.php
+│  ├── DTO
+│  │  ├── CancellationRefundDTO.php
+│  │  └── WalletTransactionDTO.php
+│  ├── Events
+│  │  ├── Admin
+│  │  │  ├── NotificationEvent.php
+│  │  │  └── SupportConversationEvent.php
+│  │  ├── User
+│  │  │  └── NotificationEvent.php
+│  │  └── Vendor
+│  │    └── NotificationEvent.php
+│  ├── Exceptions
+│  │  └── Handler.php
+│  ├── Exports
+│  │  └── ContactRequestExport.php
+│  ├── Http
+│  │  ├── Controllers
+│  │  │  ├── Admin
+│  │  │  │  ├── AddMoneyController.php
+│  │  │  │  ├── AdminCareController.php
+│  │  │  │  ├── AppOnboardScreensController.php
+│  │  │  │  ├── AppSettingsController.php
+│  │  │  │  ├── Auth
+│  │  │  │  │  ├── ForgotPasswordController.php
+│  │  │  │  │  ├── LoginController.php
+│  │  │  │  │  └── ResetPasswordController.php
+│  │  │  │  ├── AuthorizationController.php
+│  │  │  │  ├── BalanceTransactionController.php
+│  │  │  │  ├── BookingController.php
+│  │  │  │  ├── BranchController.php
+│  │  │  │  ├── BroadcastingController.php
+│  │  │  │  ├── CancellationPolicyController.php
+│  │  │  │  ├── Cars
+│  │  │  │  │  ├── CarAreaController.php
+│  │  │  │  │  ├── CarController.php
+│  │  │  │  │  ├── CarModelController.php
+│  │  │  │  │  └── CarTypeController.php
+│  │  │  │  ├── ContactMessageController.php
+│  │  │  │  ├── CookieController.php
+│  │  │  │  ├── CryptoAssetController.php
+│  │  │  │  ├── CurrencyController.php
+│  │  │  │  ├── DashboardController.php
+│  │  │  │  ├── ErrorLogsController.php
+│  │  │  │  ├── ExtensionsController.php
+│  │  │  │  ├── LanguageController.php
+│  │  │  │  ├── MoneyOutController.php
+│  │  │  │  ├── PaymentGatewayCurrencyController.php
+│  │  │  │  ├── PaymentGatewaysController.php
+│  │  │  │  ├── ProfileController.php
+│  │  │  │  ├── PushNotificationController.php
+│  │  │  │  ├── ServerInfoController.php
+│  │  │  │  ├── SetupEmailController.php
+│  │  │  │  ├── SetupKycController.php
+│  │  │  │  ├── SetupNotificationController.php
+│  │  │  │  ├── SetupPagesController.php
+│  │  │  │  ├── SetupSectionsController.php
+│  │  │  │  ├── SubscriberController.php
+│  │  │  │  ├── SupportTicketController.php
+│  │  │  │  ├── SystemMaintenanceController.php
+│  │  │  │  ├── TaxSettingController.php
+│  │  │  │  ├── TrxSettingsController.php
+│  │  │  │  ├── TwilioUsageController.php
+│  │  │  │  ├── UsefulLinkController.php
+│  │  │  │  ├── UserCareController.php
+│  │  │  │  ├── VendorCareController.php
+│  │  │  │  └── WebSettingsController.php
+│  │  │  ├── Api
+│  │  │  │  └── V1
+│  │  │  │    ├── CarListController.php
+│  │  │  │    ├── OtpController.php
+│  │  │  │    ├── Swagger
+│  │  │  │    │  ├── AuthApiDocs.php
+│  │  │  │    │  ├── BookingApiDocs.php
+│  │  │  │    │  ├── PaymentApiDocs.php
+│  │  │  │    │  ├── SwaggerBaseInfo.php
+│  │  │  │    │  ├── UserApiDocs.php
+│  │  │  │    │  └── WalletApiDocs.php
+│  │  │  │    ├── User
+│  │  │  │    │  ├── AddMoneyController.php
+│  │  │  │    │  ├── Auth
+│  │  │  │    │  │  ├── AuthorizationController.php
+│  │  │  │    │  │  ├── ForgotPasswordController.php
+│  │  │  │    │  │  ├── LoginController.php
+│  │  │  │    │  │  └── RegisterController.php
+│  │  │  │    │  ├── BalanceController.php
+│  │  │  │    │  ├── BranchController.php
+│  │  │  │    │  ├── CancellationPolicyController.php
+│  │  │  │    │  ├── CarBookingController.php
+│  │  │  │    │  ├── DashboardController.php
+│  │  │  │    │  ├── DeliveryController.php
+│  │  │  │    │  ├── IdentificationController.php
+│  │  │  │    │  ├── PaymentController.php
+│  │  │  │    │  ├── ProfileController.php
+│  │  │  │    │  ├── SettingController.php
+│  │  │  │    │  ├── TransactionController.php
+│  │  │  │    │  └── WalletController.php
+│  │  │  │    └── Vendor
+│  │  │  │      ├── AddMoneyController.php
+│  │  │  │      ├── Auth
+│  │  │  │      │  ├── AuthorizationController.php
+│  │  │  │      │  ├── ForgotPasswordController.php
+│  │  │  │      │  ├── LoginController.php
+│  │  │  │      │  └── RegisterController.php
+│  │  │  │      ├── BookingController.php
+│  │  │  │      ├── BookingHistoryController.php
+│  │  │  │      ├── CarController.php
+│  │  │  │      ├── DashboardController.php
+│  │  │  │      ├── ProfileController.php
+│  │  │  │      ├── SettingController.php
+│  │  │  │      ├── TransactionController.php
+│  │  │  │      └── WithdrawController.php
+│  │  │  ├── Controller.php
+│  │  │  ├── FileController.php
+│  │  │  ├── Frontend
+│  │  │  │  ├── AnnouncementController.php
+│  │  │  │  └── IndexController.php
+│  │  │  ├── GlobalController.php
+│  │  │  ├── HomeController.php
+│  │  │  ├── User
+│  │  │  │  ├── AddMoneyController.php
+│  │  │  │  ├── Auth
+│  │  │  │  │  ├── ForgotPasswordController.php
+│  │  │  │  │  ├── LoginController.php
+│  │  │  │  │  ├── RegisterController.php
+│  │  │  │  │  └── SocialAuthentication.php
+│  │  │  │  ├── AuthorizationController.php
+│  │  │  │  ├── BookingHistoryController.php
+│  │  │  │  ├── CarBookingController.php
+│  │  │  │  ├── DashboardController.php
+│  │  │  │  ├── InvoiceController.php
+│  │  │  │  ├── KycController.php
+│  │  │  │  ├── MoneyExchangeController.php
+│  │  │  │  ├── MoneyRequestController.php
+│  │  │  │  ├── ProfileController.php
+│  │  │  │  ├── SecurityController.php
+│  │  │  │  ├── SettingsController.php
+│  │  │  │  ├── SupportTicketController.php
+│  │  │  │  ├── UserController.php
+│  │  │  │  └── WithdrawalController.php
+│  │  │  ├── Vendor
+│  │  │  │  ├── Auth
+│  │  │  │  │  ├── ForgotPasswordController.php
+│  │  │  │  │  ├── LoginController.php
+│  │  │  │  │  └── RegisterController.php
+│  │  │  │  ├── AuthorizationController.php
+│  │  │  │  ├── BookingHistoryController.php
+│  │  │  │  ├── BookingRequestController.php
+│  │  │  │  ├── BranchDeliverySettingController.php
+│  │  │  │  ├── CarController.php
+│  │  │  │  ├── DashboardController.php
+│  │  │  │  ├── KycController.php
+│  │  │  │  ├── ProfileController.php
+│  │  │  │  ├── SecurityController.php
+│  │  │  │  ├── SupportTicketController.php
+│  │  │  │  ├── WalletController.php
+│  │  │  │  └── WithdrawalController.php
+│  │  │  └── Webhooks
+│  │  │    ├── MoyasarWebhookController.php
+│  │  │    └── TwilioWebhookController.php
+│  │  ├── Helpers
+│  │  │  ├── Api
+│  │  │  │  └── helpers.php
+│  │  │  ├── helpers.php
+│  │  │  ├── PaymentGateway.php
+│  │  │  ├── PushNotificationHelper.php
+│  │  │  └── Response.php
+│  │  ├── Kernel.php
+│  │  ├── Middleware
+│  │  │  ├── Admin
+│  │  │  │  ├── AdminDeleteGuard.php
+│  │  │  │  ├── AppModeGuard.php
+│  │  │  │  ├── Checkpage.php
+│  │  │  │  ├── GoogleTwoFactor.php
+│  │  │  │  ├── Localization.php
+│  │  │  │  ├── LoginGuard.php
+│  │  │  │  ├── MailGuard.php
+│  │  │  │  ├── RoleDeleteGuard.php
+│  │  │  │  ├── RoleGuard.php
+│  │  │  │  ├── SystemMaintenance.php
+│  │  │  │  └── SystemMaintenanceApi.php
+│  │  │  ├── Api
+│  │  │  │  └── V1
+│  │  │  │    ├── HandleLocalization.php
+│  │  │  │    ├── User
+│  │  │  │    │  └── AuthGuard.php
+│  │  │  │    └── Vendor
+│  │  │  │      └── AuthGuard.php
+│  │  │  ├── Authenticate.php
+│  │  │  ├── EncryptCookies.php
+│  │  │  ├── ForceScheme.php
+│  │  │  ├── KycVerificationGuard.php
+│  │  │  ├── PreventRequestsDuringMaintenance.php
+│  │  │  ├── RedirectIfAuthenticated.php
+│  │  │  ├── RegistrationPermission.php
+│  │  │  ├── StartingPoint.php
+│  │  │  ├── TrimStrings.php
+│  │  │  ├── TrustHosts.php
+│  │  │  ├── TrustProxies.php
+│  │  │  ├── URLBlocker.php
+│  │  │  ├── User
+│  │  │  │  └── GoogleTwoFactor.php
+│  │  │  ├── ValidateSignature.php
+│  │  │  ├── Vendor
+│  │  │  │  ├── GoogleTwoFactor.php
+│  │  │  │  └── VerificationGuard.php
+│  │  │  ├── VerificationGuard.php
+│  │  │  └── VerifyCsrfToken.php
+│  │  ├── Requests
+│  │  │  └── Admin
+│  │  │    └── StoreCancellationPolicyRequest.php
+│  │  └── Resources
+│  │    └── Api
+│  │      ├── CancellationPolicyResource.php
+│  │      ├── CancellationRefundResource.php
+│  │      ├── CarBookingExtensionResource.php
+│  │      ├── CarBookingResource.php
+│  │      └── CarResource.php
+│  ├── Imports
+│  │  └── LanguageImport.php
+│  ├── Mail
+│  │  ├── Admin
+│  │  │  └── PasswordReset.php
+│  │  ├── UserConfirmMail.php
+│  │  ├── UserEmail.php
+│  │  ├── UserForgotPasswordCode.php
+│  │  ├── UserGroupEmail.php
+│  │  └── UserRegister.php
+│  ├── Models
+│  │  ├── Admin
+│  │  │  ├── Admin.php
+│  │  │  ├── AdminHasRole.php
+│  │  │  ├── AdminLoginLogs.php
+│  │  │  ├── AdminNotification.php
+│  │  │  ├── AdminProfit.php
+│  │  │  ├── AdminRole.php
+│  │  │  ├── AdminRoleHasPermission.php
+│  │  │  ├── AdminRolePermission.php
+│  │  │  ├── AppOnboardScreens.php
+│  │  │  ├── AppSettings.php
+│  │  │  ├── BasicSettings.php
+│  │  │  ├── Branch.php
+│  │  │  ├── CancellationPolicy.php
+│  │  │  ├── Cars
+│  │  │  │  ├── AreaHasType.php
+│  │  │  │  ├── CarArea.php
+│  │  │  │  ├── CarModel.php
+│  │  │  │  └── CarType.php
+│  │  │  ├── CryptoAsset.php
+│  │  │  ├── CryptoTransaction.php
+│  │  │  ├── Currency.php
+│  │  │  ├── Extension.php
+│  │  │  ├── Language.php
+│  │  │  ├── PaymentGateway.php
+│  │  │  ├── PaymentGatewayCurrency.php
+│  │  │  ├── PushNotificationRecord.php
+│  │  │  ├── SetupKyc.php
+│  │  │  ├── SetupPage.php
+│  │  │  ├── SetupPageHasSection.php
+│  │  │  ├── SetupSeo.php
+│  │  │  ├── SiteSections.php
+│  │  │  ├── SystemMaintenance.php
+│  │  │  ├── TransactionSetting.php
+│  │  │  ├── UsefulLink.php
+│  │  │  └── VendorAppOnboardScreen.php
+│  │  ├── BalanceTransaction.php
+│  │  ├── BookingExtension.php
+│  │  ├── BranchDeliverySetting.php
+│  │  ├── BranchWorkingHour.php
+│  │  ├── CarBooking.php
+│  │  ├── CarBookingTransaction.php
+│  │  ├── Frontend
+│  │  │  ├── Announcement.php
+│  │  │  ├── AnnouncementCategory.php
+│  │  │  ├── ContactRequest.php
+│  │  │  └── Subscribe.php
+│  │  ├── PaymentTransaction.php
+│  │  ├── PhoneVerification.php
+│  │  ├── TemporaryData.php
+│  │  ├── Transaction.php
+│  │  ├── TwilioMessage.php
+│  │  ├── User.php
+│  │  ├── UserAuthorization.php
+│  │  ├── UserKycData.php
+│  │  ├── UserLoginLog.php
+│  │  ├── UserMailLog.php
+│  │  ├── UserNotification.php
+│  │  ├── UserPasswordReset.php
+│  │  ├── UserProfile.php
+│  │  ├── UserSupportChat.php
+│  │  ├── UserSupportTicket.php
+│  │  ├── UserSupportTicketAttachment.php
+│  │  ├── UserWallet.php
+│  │  └── Vendor
+│  │    ├── Cars
+│  │    │  └── Car.php
+│  │    ├── Vendor.php
+│  │    ├── VendorAuthorization.php
+│  │    ├── VendorKycData.php
+│  │    ├── VendorLoginLog.php
+│  │    ├── VendorMailLog.php
+│  │    ├── VendorNotification.php
+│  │    ├── VendorPasswordReset.php
+│  │    └── VendorWallet.php
+│  ├── Notifications
+│  │  ├── Admin
+│  │  │  ├── Auth
+│  │  │  │  └── ResetPassword.php
+│  │  │  ├── NewAdminCredential.php
+│  │  │  ├── NewUserNotification.php
+│  │  │  ├── NewVendorNotification.php
+│  │  │  ├── SendEmailToAll.php
+│  │  │  ├── SendTestMail.php
+│  │  │  └── SupportTicketNotification.php
+│  │  ├── User
+│  │  │  ├── AddMoney
+│  │  │  │  ├── ApprovedByAdminMail.php
+│  │  │  │  ├── ApprovedMail.php
+│  │  │  │  ├── ManualMail.php
+│  │  │  │  └── RejectedByAdminMail.php
+│  │  │  ├── Auth
+│  │  │  │  ├── PasswordResetEmail.php
+│  │  │  │  └── SendAuthorizationCode.php
+│  │  │  ├── bookingConfirmation.php
+│  │  │  ├── BookingExtendedNotification.php
+│  │  │  ├── CarBookingNotification.php
+│  │  │  ├── rideComplete.php
+│  │  │  ├── SendMail.php
+│  │  │  ├── WalletChargedNotification.php
+│  │  │  ├── WalletDeductedNotification.php
+│  │  │  └── WalletRefundNotification.php
+│  │  ├── Vendor
+│  │  │  ├── Auth
+│  │  │  │  ├── PasswordResetEmail.php
+│  │  │  │  └── SendAuthorizationCode.php
+│  │  │  └── MoneyOut
+│  │  │    ├── ApprovedByAdminMail.php
+│  │  │    └── RejectedByAdminMail.php
+│  │  └── websiteSubscribeNotification.php
+│  ├── Observers
+│  │  └── UserObserver.php
+│  ├── Providers
+│  │  ├── Admin
+│  │  │  ├── BasicSettingsProvider.php
+│  │  │  └── CurrencyProvider.php
+│  │  ├── AppServiceProvider.php
+│  │  ├── AuthServiceProvider.php
+│  │  ├── BroadcastServiceProvider.php
+│  │  ├── CustomServiceProvider.php
+│  │  ├── EventServiceProvider.php
+│  │  └── RouteServiceProvider.php
+│  ├── Repositories
+│  │  └── WalletRepository.php
+│  ├── Services
+│  │  ├── BookingBalanceService.php
+│  │  ├── CancellationRefundService.php
+│  │  ├── CarBookingExtensionService.php
+│  │  ├── DeliveryRadiusService.php
+│  │  ├── MoyasarService.php
+│  │  ├── PayTabsService.php
+│  │  ├── TwilioService.php
+│  │  └── WalletService.php
+│  └── Traits
+│    ├── ControlDynamicInputFields.php
+│    ├── PaymentGateway
+│    │  ├── Authorize.php
+│    │  ├── CoinGate.php
+│    │  ├── Flutterwave.php
+│    │  ├── Gpay.php
+│    │  ├── Paypal.php
+│    │  ├── PerfectMoney.php
+│    │  ├── QRPay.php
+│    │  ├── Razorpay.php
+│    │  ├── SslCommerz.php
+│    │  ├── Stripe.php
+│    │  └── Tatum.php
+│    ├── User
+│    │  ├── LoggedInUsers.php
+│    │  └── RegisteredUsers.php
+│    └── Vendor
+│      └── LoggedInVendors.php
+├── artisan
+├── BOOKING_PREVIEW_RESPONSE_SCHEMA.json
+├── bootstrap
+│  ├── app.php
+│  └── cache
+│    ├── .gitignore
+│    ├── packages.php
+│    └── services.php
+├── build_context.ps1
+├── CLAUDE.md
+├── composer.json
+├── composer.lock
+├── config
+│  ├── app.php
+│  ├── auth.php
+│  ├── broadcasting.php
+│  ├── cache.php
+│  ├── coinbase.php
+│  ├── cors.php
+│  ├── database.php
+│  ├── excel.php
+│  ├── filesystems.php
+│  ├── geoip.php
+│  ├── hashing.php
+│  ├── image.php
+│  ├── l5-swagger.php
+│  ├── logging.php
+│  ├── mail.php
+│  ├── moyasar.php
+│  ├── paypal.php
+│  ├── paystack.php
+│  ├── paytabs.php
+│  ├── queue.php
+│  ├── services.php
+│  ├── session.php
+│  ├── starting-point.php
+│  ├── system-role-permissions.php
+│  └── view.php
+├── context.txt
+├── credit_wallet copy.php
+├── credit_wallet.php
+├── css
+│  └── style.css
+├── database
+│  ├── .gitignore
+│  ├── factories
+│  │  ├── Admin
+│  │  │  ├── AdminFactory.php
+│  │  │  ├── BasicSettingsFactory.php
+│  │  │  ├── BranchFactory.php
+│  │  │  ├── Cars
+│  │  │  │  ├── CarModelFactory.php
+│  │  │  │  └── CarTypeFactory.php
+│  │  │  └── CurrencyFactory.php
+│  │  ├── CancellationPolicyFactory.php
+│  │  ├── CarBookingFactory.php
+│  │  ├── UserFactory.php
+│  │  ├── UserProfileFactory.php
+│  │  └── Vendor
+│  │    ├── Cars
+│  │    │  └── CarFactory.php
+│  │    └── VendorFactory.php
+│  ├── migrations
+│  │  ├── 2014_10_12_000000_create_users_table.php
+│  │  ├── 2014_10_12_100000_create_password_resets_table.php
+│  │  ├── 2019_08_19_000000_create_failed_jobs_table.php
+│  │  ├── 2019_12_14_000001_create_personal_access_tokens_table.php
+│  │  ├── 2022_12_11_061454_create_admins_table.php
+│  │  ├── 2022_12_13_060252_create_transaction_settings_table.php
+│  │  ├── 2022_12_14_103353_create_currencies_table.php
+│  │  ├── 2022_12_17_104923_create_basic_settings_table.php
+│  │  ├── 2022_12_18_093156_create_setup_seos_table.php
+│  │  ├── 2022_12_19_072039_create_app_settings_table.php
+│  │  ├── 2022_12_24_071800_create_site_sections_table.php
+│  │  ├── 2022_12_24_110923_create_app_onboard_screens_table.php
+│  │  ├── 2022_12_25_082623_create_payment_gateways_table.php
+│  │  ├── 2022_12_26_060705_create_payment_gateway_currencies_table.php
+│  │  ├── 2023_01_03_095454_create_extensions_table.php
+│  │  ├── 2023_01_04_061756_create_setup_kycs_table.php
+│  │  ├── 2023_01_07_053411_create_user_profiles_table.php
+│  │  ├── 2023_01_08_133258_create_push_notification_records_table.php
+│  │  ├── 2023_01_10_105235_create_user_password_resets_table.php
+│  │  ├── 2023_01_10_115626_create_admin_login_logs_table.php
+│  │  ├── 2023_01_11_121649_create_admin_roles_table.php
+│  │  ├── 2023_01_11_122240_create_user_login_logs_table.php
+│  │  ├── 2023_01_12_052750_create_admin_role_permissions_table.php
+│  │  ├── 2023_01_12_055705_create_user_wallets_table.php
+│  │  ├── 2023_01_14_154700_create_admin_role_has_permissions_table.php
+│  │  ├── 2023_01_15_051638_create_admin_has_roles_table.php
+│  │  ├── 2023_01_16_095331_create_temporary_datas_table.php
+│  │  ├── 2023_01_18_043653_create_admin_notifications_table.php
+│  │  ├── 2023_01_18_102653_create_languages_table.php
+│  │  ├── 2023_01_19_060838_create_coinbase_webhook_calls_table.php
+│  │  ├── 2023_01_28_075936_create_user_support_tickets_table.php
+│  │  ├── 2023_01_28_081512_create_user_support_chats_table.php
+│  │  ├── 2023_01_28_101246_create_user_support_ticket_attachments_table.php
+│  │  ├── 2023_02_06_070418_create_user_mail_logs_table.php
+│  │  ├── 2023_02_06_143558_create_user_authorizations_table.php
+│  │  ├── 2023_02_07_154740_create_user_kyc_data_table.php
+│  │  ├── 2023_02_09_083658_create_setup_pages_table.php
+│  │  ├── 2023_07_24_155431_create_announcement_categories_table.php
+│  │  ├── 2023_07_24_156942_create_announcements_table.php
+│  │  ├── 2023_07_24_172330_create_subscribes_table.php
+│  │  ├── 2023_07_26_105947_create_contact_requests_table.php
+│  │  ├── 2023_07_31_110211_create_useful_links_table.php
+│  │  ├── 2023_10_30_163112_create_crypto_assets_table.php
+│  │  ├── 2023_11_02_180143_create_crypto_transactions_table.php
+│  │  ├── 2024_11_12_072501_create_vendors_table.php
+│  │  ├── 2024_11_13_044134_create_vendor_login_logs_table.php
+│  │  ├── 2024_11_13_094455_create_vendor_authorizations_table.php
+│  │  ├── 2024_11_13_124555_create_vendor_password_resets_table.php
+│  │  ├── 2024_11_13_133927_create_notifications_table.php
+│  │  ├── 2024_11_20_052149_create_vendor_mail_logs_table.php
+│  │  ├── 2024_11_20_130508_create_vendor_kyc_data_table.php
+│  │  ├── 2024_11_25_074947_create_car_areas_table.php
+│  │  ├── 2024_11_25_081533_create_car_types_table.php
+│  │  ├── 2024_11_25_095801_create_area_has_types_table.php
+│  │  ├── 2024_11_25_113251_create_cars_table.php
+│  │  ├── 2024_11_26_000001_create_car_models_table.php
+│  │  ├── 2024_11_26_000002_add_car_model_id_to_cars_table.php
+│  │  ├── 2024_11_27_090749_create_car_bookings_table.php
+│  │  ├── 2024_11_29_052914_create_user_notifications_table.php
+│  │  ├── 2024_12_12_194400_create_vendor_wallets_table.php
+│  │  ├── 2024_12_12_194401_create_transactions_table.php
+│  │  ├── 2024_12_12_194402_create_transaction_devices_table.php
+│  │  ├── 2024_12_20_061139_create_vendor_notifications_table.php
+│  │  ├── 2025_01_23_102457_create_vendor_app_onboard_screens_table.php
+│  │  ├── 2025_01_29_035345_create_admin_profits_table.php
+│  │  ├── 2025_01_30_050233_create_system_maintenances_table.php
+│  │  ├── 2025_09_11_050711_add_column_to_basic_settings_table.php
+│  │  ├── 2025_09_11_120849_create_setup_page_has_sections_table.php
+│  │  ├── 2025_09_12_102636_add_column_to_user_support_tickets.php
+│  │  ├── 2025_11_17_000001_create_phone_verifications_table.php
+│  │  ├── 2025_11_17_000002_create_twilio_messages_table.php
+│  │  ├── 2025_11_18_000001_update_twilio_messages_columns.php
+│  │  ├── 2025_11_26_000010_make_car_area_id_nullable_in_cars_table.php
+│  │  ├── 2025_11_26_000011_make_car_fields_nullable.php
+│  │  ├── 2025_11_26_000012_add_year_to_cars_table.php
+│  │  ├── 2025_11_28_000001_create_branches_table.php
+│  │  ├── 2025_11_28_000002_create_branch_delivery_settings_table.php
+│  │  ├── 2025_11_28_000003_create_tax_settings_table.php
+│  │  ├── 2025_11_28_000004_create_balance_transactions_table.php
+│  │  ├── 2025_11_28_000005_add_branch_and_delivery_to_cars_table.php
+│  │  ├── 2025_11_28_000006_add_balance_and_tax_fields_to_car_bookings_table.php
+│  │  ├── 2025_11_28_000007_add_balance_to_users_table.php
+│  │  ├── 2025_11_28_012225_add_vendor_price_to_branch_delivery_settings_table.php
+│  │  ├── 2026_01_23_164148_add_driving_license_to_users_table.php
+│  │  ├── 2026_01_24_131514_add_tiered_pricing_to_cars_table.php
+│  │  ├── 2026_01_24_131516_add_rental_fields_to_car_bookings_table.php
+│  │  ├── 2026_01_24_135913_add_allowance_km_to_cars_table.php
+│  │  ├── 2026_01_24_141119_add_allowance_price_per_km_to_cars_table.php
+│  │  ├── 2026_01_24_151417_add_pickup_location_fields_to_car_bookings_table.php
+│  │  ├── 2026_01_27_000001_make_destination_nullable_in_car_bookings_table.php
+│  │  ├── 2026_01_27_000002_make_distance_nullable_default_in_car_bookings_table.php
+│  │  ├── 2026_02_14_000001_add_national_id_to_users_table.php
+│  │  ├── 2026_02_15_210950_add_rejection_reason_to_car_bookings_table.php
+│  │  ├── 2026_02_22_000001_create_car_booking_extensions_table.php
+│  │  ├── 2026_02_22_000002_add_extension_fields_to_car_bookings_table.php
+│  │  ├── 2026_02_23_000001_create_car_booking_transactions_table.php
+│  │  ├── 2026_02_23_000001_migrate_trip_id_to_short_booking_id.php
+│  │  ├── 2026_02_23_000002_add_daily_rate_to_car_booking_transactions_table.php
+│  │  ├── 2026_02_23_000003_merge_extensions_into_transactions_table.php
+│  │  ├── 2026_03_05_192456_add_delivery_zone_to_branches_table.php
+│  │  ├── 2026_03_06_000001_add_wallet_fields_to_balance_transactions_table.php
+│  │  ├── 2026_03_06_000002_create_payment_transactions_table.php
+│  │  ├── 2026_03_08_000001_drop_balance_from_users_table.php
+│  │  ├── 2026_04_05_000001_move_tax_columns_to_basic_settings.php
+│  │  ├── 2026_04_05_021222_create_jobs_table.php
+│  │  ├── 2026_04_06_000001_convert_trip_id_to_numeric_format.php
+│  │  ├── 2026_04_08_000001_refactor_rental_days_and_return_date_in_car_bookings.php
+│  │  ├── 2026_04_08_000002_create_booking_extensions_table.php
+│  │  ├── 2026_04_08_000003_migrate_extensions_to_booking_extensions_table.php
+│  │  ├── 2026_04_08_000004_add_payment_fields_to_booking_extensions_table.php
+│  │  ├── 2026_04_10_000001_add_contact_fields_to_branches_table.php
+│  │  ├── 2026_04_10_000002_create_branch_working_hours_table.php
+│  │  ├── 2026_05_17_000311_create_sessions_table.php
+│  │  ├── 2026_06_30_000001_add_insurance_fields_to_cars_table.php
+│  │  ├── 2026_06_30_000001_create_cancellation_policies_table.php
+│  │  ├── 2026_06_30_000002_add_insurance_fields_to_car_bookings_table.php
+│  │  ├── 2026_07_16_153413_fix_transactions_wallet_fk.php
+│  │  └── 2026_07_16_153432_add_balance_transactions_composite_index.php
+│  └── seeders
+│    ├── Admin
+│    │  ├── AdminHasRoleSeeder.php
+│    │  ├── AdminSeeder.php
+│    │  ├── AnnouncementCategorySeeder.php
+│    │  ├── AnnouncementSeeder.php
+│    │  ├── AppOnBoardSeeder.php
+│    │  ├── AppSettingsSeeder.php
+│    │  ├── BasicSettingsSeeder.php
+│    │  ├── CancellationPolicySeeder.php
+│    │  ├── CurrencySeeder.php
+│    │  ├── ExtensionSeeder.php
+│    │  ├── LanguageSeeder.php
+│    │  ├── PaymentGatewaySeeder.php
+│    │  ├── RoleSeeder.php
+│    │  ├── SectionHasPageSeeder.php
+│    │  ├── SetupKycSeeder.php
+│    │  ├── SetupPageSeeder.php
+│    │  ├── SetupSeoSeeder.php
+│    │  ├── SiteSectionsSeeder.php
+│    │  ├── SystemMaintenanceSeeder.php
+│    │  ├── TransactionSettingSeeder.php
+│    │  ├── UsefulLinkSeeder.php
+│    │  └── VendorAppOnBoardScreenSeeder.php
+│    ├── BranchSeeder.php
+│    ├── Car
+│    │  ├── AreaHasTypesSeeder.php
+│    │  ├── AreaSeeder.php
+│    │  ├── CarSeeder.php
+│    │  └── TypeSeeder.php
+│    ├── CarModelsSeeder.php
+│    ├── DatabaseSeeder.php
+│    ├── FreshSeeder
+│    │  └── BasicSettingsSeeder.php
+│    ├── UpdateFeatureSeeder.php
+│    ├── User
+│    │  ├── UserSeeder.php
+│    │  └── UserWalletSeeder.php
+│    └── Vendor
+│      ├── VendorSeeder.php
+│      └── VendorWalletSeeder.php
+├── docker
+│  └── ssl
+│    ├── local.crt
+│    └── local.key
+├── docker-compose.yml
+├── DOCKER-DEPLOY.md
+├── docker-entrypoint.sh
+├── Dockerfile
+├── Dorra Alaseel - Complete API v1 Collection.postman_collection.json
+├── Dorra_Alaseel_Complete_API.postman_collection.json
+├── html
+├── index.php
+├── input.txt
+├── lang
+│  ├── ar.json
+│  ├── en
+│  │  ├── auth.php
+│  │  ├── pagination.php
+│  │  ├── passwords.php
+│  │  └── validation.php
+│  ├── en.json
+│  ├── es.json
+│  ├── fr.json
+│  └── predefined_keys.json
+├── ltr-full.png
+├── openapi
+│  ├── cars-api-v1.openapi.yaml
+│  ├── dorra-alaseel-api-v1.openapi.yaml
+│  ├── openapi.yaml
+│  └── twilio-otp.openapi.yaml
+├── package-lock.json
+├── package.json
+├── phpunit.xml
+├── project-files.tree
+├── project.tree
+├── public
+│  ├── .htaccess
+│  ├── backend
+│  │  ├── css
+│  │  │  ├── animate.css
+│  │  │  ├── bootstrap.min.css
+│  │  │  ├── colorpicker.css
+│  │  │  ├── filepond-plugin-image-preview.min.css
+│  │  │  ├── filepond.min.css
+│  │  │  ├── fontawesome-all.min.css
+│  │  │  ├── fontawesome-iconpicker.min.css
+│  │  │  ├── lightcase.css
+│  │  │  ├── line-awesome.min.css
+│  │  │  ├── nice-select.css
+│  │  │  ├── rte_theme_default.css
+│  │  │  ├── select2.min.css
+│  │  │  └── style.css
+│  │  ├── files
+│  │  │  ├── junk-files
+│  │  │  │  ├── 0a3903cf-4c19-41a9-b092-2c2e95c3b8ec.jpg
+│  │  │  │  ├── 1f4159b6-e5c3-4409-ad59-24efa7334ebe.jpg
+│  │  │  │  ├── 2374c603-dca6-4764-bc87-857aa6f6b180.jpg
+│  │  │  │  ├── 2e410ff6-2c77-4050-97da-ed36784c6ed2.jpg
+│  │  │  │  ├── 32b3bd48-a0cc-46f2-ab11-d6b675505243.jpg
+│  │  │  │  ├── 32d30c38-ee99-4fc6-8ffd-4dd0e17886e6.jpg
+│  │  │  │  ├── 3423aae3-fe95-47f1-af61-ccc598fc6200.jpg
+│  │  │  │  ├── 4556a075-2a65-434c-8f5e-ff8c268c3990.jpg
+│  │  │  │  ├── 4f36ac2f-7f66-46a5-8a6b-5e29abc688e6.jpg
+│  │  │  │  ├── 64f1fc84-9f66-4135-a433-6cbf403f3a5b.jpg
+│  │  │  │  ├── 77bd2945-2cba-4502-99c0-c0515172aff1.jpg
+│  │  │  │  ├── 7a53f2d4-d9ba-4ca7-b421-febf109913e1.jpg
+│  │  │  │  ├── 7f2ff668-7d5b-4d59-b8d3-aa46aad13a7e.jpg
+│  │  │  │  ├── 9b2b798f-5ee7-4e7c-b64e-bafb2f59ffb2.jpg
+│  │  │  │  ├── 9c2c5109-f360-43e0-b4c9-5200f800d9f7.jpg
+│  │  │  │  ├── b213ac14-b2f8-42db-9d2d-9485386c1717.jpg
+│  │  │  │  ├── b4536af2-6c37-4c58-92e9-ed8efb725c45.jpg
+│  │  │  │  ├── c122ae00-5fe6-414d-b129-6ebe51eb3af9.jpg
+│  │  │  │  ├── c5419140-8547-4264-8aae-7c7ad1e84167.jpg
+│  │  │  │  ├── cbd017b8-5ee4-4d4a-a870-6775ff101b4a.jpg
+│  │  │  │  ├── ce5f8537-9ded-4b2b-b1d9-d2df885ebe9c.jpg
+│  │  │  │  ├── d9f2aaf7-6370-4ee3-8643-9c1bb6be4bb8.jpg
+│  │  │  │  ├── dd1469c7-3a2f-490c-a3c7-429fb12ba551.jpg
+│  │  │  │  ├── e0bcd779-9d3c-4ca3-bbd4-2d3940d2e365.jpg
+│  │  │  │  ├── ec874456-1f43-494e-881f-0f0a9f8c5284.jpg
+│  │  │  │  ├── f0b9b1e6-cc4b-4aed-b5c7-07b2577d172d.jpg
+│  │  │  │  └── f508308f-31f9-4be7-8d75-2d2f8b272508.jpg
+│  │  │  ├── kyc-files
+│  │  │  │  ├── 1bfc3f41-4711-48f2-bacd-dc2834cd1f2b.webp
+│  │  │  │  ├── 1c331363-d75e-49db-916f-b2abc832d9e0.webp
+│  │  │  │  ├── 1dae558b-559f-4e69-abc1-2dfddcbbe5da.webp
+│  │  │  │  ├── 2a0ef671-9585-4890-ac7e-0ac2fc79c2fd.webp
+│  │  │  │  ├── 49056c3f-fb4b-4cb8-ab36-fa6679ab1bac.webp
+│  │  │  │  ├── 5c000dab-5372-4c16-9c78-5e8f4448c9f7.webp
+│  │  │  │  ├── 722d4697-d420-494a-9fdc-cfb55d65d0b3.webp
+│  │  │  │  ├── 943bca54-20ec-4005-bfde-46be08826b73.webp
+│  │  │  │  ├── a6cec6bd-8379-491f-b2f0-0e44563a57a8.webp
+│  │  │  │  ├── bf5a207d-7d56-4ced-97f0-6fba074726ef.webp
+│  │  │  │  ├── ef24e5d0-4bcb-4eed-9bf7-7ef8a2476990.webp
+│  │  │  │  ├── f5693cdd-acd1-48b3-9c7a-00d8daa37785.webp
+│  │  │  │  ├── fb1abafb-469e-42bc-b87a-339d5b02af89.webp
+│  │  │  │  └── fec69ab0-bb67-4af1-8f8f-ce6d000dceef.webp
+│  │  │  └── language
+│  │  │    └── language-2025-09-15.csv
+│  │  ├── fonts
+│  │  │  ├── la-brands-400.eot
+│  │  │  ├── la-brands-400.svg
+│  │  │  ├── la-brands-400.ttf
+│  │  │  ├── la-brands-400.woff
+│  │  │  ├── la-brands-400.woff2
+│  │  │  ├── la-regular-400.eot
+│  │  │  ├── la-regular-400.svg
+│  │  │  ├── la-regular-400.ttf
+│  │  │  ├── la-regular-400.woff
+│  │  │  ├── la-regular-400.woff2
+│  │  │  ├── la-solid-900.eot
+│  │  │  ├── la-solid-900.svg
+│  │  │  ├── la-solid-900.ttf
+│  │  │  ├── la-solid-900.woff
+│  │  │  ├── la-solid-900.woff2
+│  │  │  └── lightcase.woff
+│  │  ├── images
+│  │  │  ├── admin
+│  │  │  ├── app
+│  │  │  │  ├── 0e83a3b1-ca63-4dfb-852f-3781da89ca12.webp
+│  │  │  │  ├── 43650961-85a1-4adb-93d2-dbd4fc023851.webp
+│  │  │  │  ├── 51c7bbde-9097-45ed-aa0c-8f7adc8d069e.webp
+│  │  │  │  ├── 6ba74f57-43f3-44f5-8287-52baa0523ecf.webp
+│  │  │  │  ├── 6d84d060-d984-4462-969c-519f2eb5c6e8.webp
+│  │  │  │  ├── 719625e2-6a71-4f36-8e23-52542583fe75.webp
+│  │  │  │  ├── 7b6e2dde-ddce-448b-8bd4-5834e8af161f.webp
+│  │  │  │  ├── 93bb25ef-db5a-4cc3-b112-ba16bc401ef2.webp
+│  │  │  │  ├── aaa2d5d8-8940-45f9-abbf-66d317ef607b.webp
+│  │  │  │  ├── b276f831-2428-459f-a8c0-cb2da085d751.webp
+│  │  │  │  ├── c11cfe68-d093-41e4-a10b-9d972da0800d.webp
+│  │  │  │  ├── cda633e4-1e69-416b-b768-5cf37d0232d2.webp
+│  │  │  │  ├── d577ce71-5a1f-4ba8-b5c7-6737fa14970a.webp
+│  │  │  │  ├── e3352d8f-6545-430f-8d3e-c5be43422c7e.webp
+│  │  │  │  ├── e594e165-333c-4275-b22d-0b03f0f20ba7.webp
+│  │  │  │  ├── f5503b97-81af-4a20-be39-cbfb9577e53d.webp
+│  │  │  │  └── f6fd1c57-b606-4797-9fb7-4fa8d3e0e5dc.webp
+│  │  │  ├── car-models
+│  │  │  │  ├── 92620638-3ac0-401f-a4d1-7711ed131b57.webp
+│  │  │  │  ├── b96ef16c-4fc7-4daa-9eaf-80f2e5d0fc6c.webp
+│  │  │  │  ├── hyundai-sonata-2024.webp
+│  │  │  │  ├── mitsubishi-pajero-2023.webp
+│  │  │  │  ├── nissan-patrol-2024.webp
+│  │  │  │  ├── nissan-sunny-2023.webp
+│  │  │  │  ├── toyota-camry-2024.webp
+│  │  │  │  ├── toyota-hiace-2024.webp
+│  │  │  │  ├── toyota-land-cruiser-2024.webp
+│  │  │  │  ├── toyota-rav4-2024.webp
+│  │  │  │  └── toyota-yaris-2024.webp
+│  │  │  ├── currency-flag
+│  │  │  │  ├── 1e4551f9-2216-4fcc-83b3-3a9b85c5c379.webp
+│  │  │  │  └── seeder
+│  │  │  │    └── 1e4551f9-2216-4fcc-83b3-3a9b85c5c379.webp
+│  │  │  ├── default
+│  │  │  │  ├── default.webp
+│  │  │  │  └── profile-default.webp
+│  │  │  ├── extensions
+│  │  │  │  ├── instruction-tawk-to.png
+│  │  │  │  └── logo-tawk-to.png
+│  │  │  ├── icon
+│  │  │  │  ├── apache.png
+│  │  │  │  ├── app-debug.png
+│  │  │  │  ├── app-mode.png
+│  │  │  │  ├── app.png
+│  │  │  │  ├── customcaptcha.png
+│  │  │  │  ├── database.png
+│  │  │  │  ├── debug.png
+│  │  │  │  ├── facebook.png
+│  │  │  │  ├── flutter.png
+│  │  │  │  ├── google_analytics.png
+│  │  │  │  ├── host.jpeg
+│  │  │  │  ├── hosting.png
+│  │  │  │  ├── html.png
+│  │  │  │  ├── ip.png
+│  │  │  │  ├── laravel.png
+│  │  │  │  ├── news.png
+│  │  │  │  ├── notification.jpg
+│  │  │  │  ├── php.png
+│  │  │  │  ├── port.png
+│  │  │  │  ├── protocol.png
+│  │  │  │  ├── recaptcha.png
+│  │  │  │  ├── science.png
+│  │  │  │  ├── sports.png
+│  │  │  │  ├── sql.png
+│  │  │  │  ├── tawky.png
+│  │  │  │  ├── timezone.png
+│  │  │  │  └── user.png
+│  │  │  ├── payment-gateways
+│  │  │  │  ├── 204d872e-d945-4b41-a6e5-5f387d141a47.webp
+│  │  │  │  ├── 37446cdd-394d-4c90-9386-a9aa38d44ddd.webp
+│  │  │  │  ├── 4731ce1e-dc2d-42b2-9a53-4d11edbd5fdb.webp
+│  │  │  │  ├── 599dc59d-2060-46fa-a3a1-ff92ba6be3ce.webp
+│  │  │  │  ├── 5b65a93e-3c76-43c1-8aa2-d9aca1de0021.webp
+│  │  │  │  ├── 5dfa7d03-afe6-4bd2-90d2-8a77b888a07b.webp
+│  │  │  │  ├── 5eddfa39-3b3b-41b5-b6bb-960d6c1aabd9.webp
+│  │  │  │  ├── 7779fa70-ecb5-4470-b0e1-179730fbe2a1.webp
+│  │  │  │  ├── 877c3726-80a8-48bb-bb73-d0a0df64d831.webp
+│  │  │  │  ├── 9d36d417-5e79-4739-a4f8-f801c0753924.webp
+│  │  │  │  ├── 9dba1c11-9393-4a7c-b32e-34d1f8e22aec.webp
+│  │  │  │  ├── acf9f8e3-bab1-4689-9eb0-eb63da579019.webp
+│  │  │  │  ├── b3d79a1c-7d79-41d1-a8eb-10a17fa68879.webp
+│  │  │  │  ├── c2362973-c2f5-4e3b-a2dd-7ecec2074652.webp
+│  │  │  │  ├── d6dc8ede-db12-43e3-892b-30bdf9c24b19.webp
+│  │  │  │  ├── e0c403fc-e602-4053-865f-b1c2afc91d75.webp
+│  │  │  │  ├── e2020f6a-ef8a-4e92-bb08-7a4b13e2a6fb.webp
+│  │  │  │  ├── f1942abe-4237-48a2-97f5-ede4e0917026.webp
+│  │  │  │  ├── ff6ffb78-4b58-4554-b02e-47a66564fecd.webp
+│  │  │  │  └── seeder-copy
+│  │  │  │    ├── 0bb65be8-a0cf-4d63-b9d7-5f5d7d76ce35.webp
+│  │  │  │    ├── 147f7e97-d293-4f1d-8563-73630f2ce42c.webp
+│  │  │  │    ├── 27de2cd3-018f-4709-82e2-ef64cd33e5a2.webp
+│  │  │  │    ├── 357e631f-ee53-47cb-b603-71ee46b038c9.webp
+│  │  │  │    ├── 38e0dfa8-cc70-410a-a4ae-2e303b66b93d.webp
+│  │  │  │    ├── 56069c39-b494-48e4-a938-98dc00561580.webp
+│  │  │  │    ├── 5eddfa39-3b3b-41b5-b6bb-960d6c1aabd9.webp
+│  │  │  │    ├── 5f5ceacd-bd60-40ba-a8f2-438a90a47388.webp
+│  │  │  │    ├── 9ce51bcf-a572-4c23-b433-a1f03ca5e99f.webp
+│  │  │  │    ├── cd57993a-397b-49cd-bb66-5a630ea787af.webp
+│  │  │  │    └── f1942abe-4237-48a2-97f5-ede4e0917026.webp
+│  │  │  └── web-settings
+│  │  │    └── image-assets
+│  │  │      ├── 1bac8ff7-5e08-4cc5-816c-d3e2ca37d1fe.webp
+│  │  │      ├── 270b9bf4-99d3-48d3-ae77-63faab60872e.webp
+│  │  │      ├── 35859547-40ab-46dd-95cd-8602ba7c0bab.webp
+│  │  │      ├── 651f7e15-286e-4155-b908-eb29d0bd9451.webp
+│  │  │      ├── 852b5c52-acd2-42f9-8e7a-3da514c36264.webp
+│  │  │      ├── 9aa1bf41-821b-4542-9302-051a7d593380.webp
+│  │  │      ├── a46be0c7-5936-47d7-a3b5-2cd9df76deaa.webp
+│  │  │      ├── e605065b-286a-4443-9072-15c3de160211.webp
+│  │  │      ├── f25fa20e-c1c5-4196-8079-ef10dbbb05d1.webp
+│  │  │      ├── f4b41348-47d5-4c46-9998-bb5beb79508f.webp
+│  │  │      ├── f5f68355-df32-4e07-8d4e-48cbbe6afaf3.webp
+│  │  │      └── seeder
+│  │  ├── js
+│  │  │  ├── all_plugins.js
+│  │  │  ├── apexcharts.min.js
+│  │  │  ├── bootstrap-notify.min.js
+│  │  │  ├── bootstrap.bundle.min.js
+│  │  │  ├── chart.js
+│  │  │  ├── ckeditor.js
+│  │  │  ├── colorpicker.js
+│  │  │  ├── filepond-plugin-image-preview.min.js
+│  │  │  ├── filepond.min.js
+│  │  │  ├── fontawesome-iconpicker.js
+│  │  │  ├── jquery-3.6.0.min.js
+│  │  │  ├── jquery-ui.js
+│  │  │  ├── jquery.easypiechart.js
+│  │  │  ├── jquery.nice-select.js
+│  │  │  ├── lightcase.js
+│  │  │  ├── main.js
+│  │  │  ├── rte.js
+│  │  │  ├── select2.min.js
+│  │  │  └── smoothscroll.min.js
+│  │  ├── library
+│  │  │  └── popup
+│  │  │    ├── jquery.magnific-popup.js
+│  │  │    ├── jquery.magnific-popup.min.js
+│  │  │    └── magnific-popup.css
+│  │  ├── sass
+│  │  │  ├── abstracts
+│  │  │  │  ├── _abstracts.scss
+│  │  │  │  └── _variables.scss
+│  │  │  ├── base
+│  │  │  │  ├── _base.scss
+│  │  │  │  ├── _reset.scss
+│  │  │  │  └── _typography.scss
+│  │  │  ├── components
+│  │  │  │  ├── _animations.scss
+│  │  │  │  ├── _buttons.scss
+│  │  │  │  ├── _components.scss
+│  │  │  │  ├── _forms.scss
+│  │  │  │  └── _overlay.scss
+│  │  │  ├── layout
+│  │  │  │  ├── _footer.scss
+│  │  │  │  ├── _header.scss
+│  │  │  │  ├── _introduction.scss
+│  │  │  │  └── _layout.scss
+│  │  │  ├── pages
+│  │  │  │  ├── _pages.scss
+│  │  │  │  └── _sections.scss
+│  │  │  └── style.scss
+│  │  └── webfonts
+│  │    ├── fa-brands-400.eot
+│  │    ├── fa-brands-400.svg
+│  │    ├── fa-brands-400.ttf
+│  │    ├── fa-brands-400.woff
+│  │    ├── fa-brands-400.woff2
+│  │    ├── fa-regular-400.eot
+│  │    ├── fa-regular-400.svg
+│  │    ├── fa-regular-400.ttf
+│  │    ├── fa-regular-400.woff
+│  │    ├── fa-regular-400.woff2
+│  │    ├── fa-solid-900.eot
+│  │    ├── fa-solid-900.svg
+│  │    ├── fa-solid-900.ttf
+│  │    ├── fa-solid-900.woff
+│  │    ├── fa-solid-900.woff2
+│  │    ├── Karla
+│  │    │  ├── Karla-Italic-VariableFont_wght.ttf
+│  │    │  ├── Karla-VariableFont_wght.ttf
+│  │    │  ├── OFL.txt
+│  │    │  ├── README.txt
+│  │    │  └── static
+│  │    │    ├── Karla-Bold.ttf
+│  │    │    ├── Karla-BoldItalic.ttf
+│  │    │    ├── Karla-ExtraBold.ttf
+│  │    │    ├── Karla-ExtraBoldItalic.ttf
+│  │    │    ├── Karla-ExtraLight.ttf
+│  │    │    ├── Karla-ExtraLightItalic.ttf
+│  │    │    ├── Karla-Italic.ttf
+│  │    │    ├── Karla-Light.ttf
+│  │    │    ├── Karla-LightItalic.ttf
+│  │    │    ├── Karla-Medium.ttf
+│  │    │    ├── Karla-MediumItalic.ttf
+│  │    │    ├── Karla-Regular.eot
+│  │    │    ├── Karla-Regular.ttf
+│  │    │    ├── Karla-Regular.woff
+│  │    │    ├── Karla-SemiBold.ttf
+│  │    │    └── Karla-SemiBoldItalic.ttf
+│  │    └── Karla-VariableFont_wght.ttf
+│  ├── docs
+│  │  ├── api-docs.json
+│  │  └── api-docs.yaml
+│  ├── error-images
+│  │  ├── 0.png
+│  │  ├── 1.png
+│  │  ├── 3.png
+│  │  ├── 4-curve.png
+│  │  ├── 4.png
+│  │  ├── 401-(Unauthorized).png
+│  │  ├── 403-(Accress-Denied).png
+│  │  ├── 404_not_found.png
+│  │  ├── 404.png
+│  │  ├── 419-(Page-Expired).png
+│  │  ├── 419.png
+│  │  ├── 5.png
+│  │  ├── 500-(Server-Error).png
+│  │  ├── 9.png
+│  │  ├── electric-socket.png
+│  │  ├── maintenance-mode.webp
+│  │  ├── socket.png
+│  │  └── tester.png
+│  ├── favicon.ico
+│  ├── fileholder
+│  │  └── img
+│  │    ├── 09af3c0f-a211-4b9c-a526-d147e3ef4bbe.jpg
+│  │    ├── 1b9e4edf-59ec-4e1b-93a8-822fddc35950.jpg
+│  │    ├── 218e7108-023b-4c31-8dba-fa2bc423cfd3.png
+│  │    ├── 2a0f895a-e209-425d-a6a8-714a2e41380a.jpg
+│  │    ├── 3314270f-0e46-4232-a609-6aa5331ceda9.webp
+│  │    ├── 34a90e82-57df-4fc9-b3fa-54a51cc49744.png
+│  │    ├── 51b647aa-a156-4cec-a4af-9bdd8994e088.jpg
+│  │    ├── 543390a5-01ee-4382-a4dd-4a6a8aedb2ef.png
+│  │    ├── 5cbe2fcc-348c-4e55-8ff1-9af152ca3875.png
+│  │    ├── 613af7ba-c2b7-4ad6-adc1-891d6721668b.png
+│  │    ├── 67f67485-6d90-4242-8ef7-7626d98ac08f.jpg
+│  │    ├── 6926721c-dad2-46cd-880e-4cfd3df0cb68.jpg
+│  │    ├── 72d74e75-a887-47c6-85ff-f53fd7fad26c.jpg
+│  │    ├── 7885155f-5ac2-43bc-9a48-4a1c1fd188b0.png
+│  │    ├── 7b7715ff-f0be-4b44-aec7-f9216c722c3f.webp
+│  │    ├── 87875d56-f8a5-4007-af03-0d670997212e.png
+│  │    ├── 92e02a7e-1c9a-4156-9b1e-d0fa922fd597.jpg
+│  │    ├── a1c129f8-fabb-4291-87f1-73ad0b58789c.png
+│  │    ├── b1e4bc66-ee8f-4753-82ab-00c51d20a196.png
+│  │    ├── be84b7a1-107d-4b77-b1c2-daeb54e145e6.jpg
+│  │    ├── cdc3a0dd-d8d9-4086-b0a2-38c8550f73fd.jpg
+│  │    ├── d7de6444-17f9-4e8b-b730-a7cae8060368.jpg
+│  │    ├── dd0f009a-1ebd-4cf5-bb26-06ead7e8bdd9.png
+│  │    ├── dfba9ccc-bb07-40c9-ba31-6f838763fb29.jpg
+│  │    ├── ea16b382-973f-4fc1-a5b6-cbf8b5b46431.png
+│  │    ├── facc2a95-230a-451f-9abb-29d7de917905.png
+│  │    ├── fd9a1e49-a53b-41ad-9c68-8a55a331557a.png
+│  │    └── text.txt
+│  ├── frontend
+│  │  ├── assets
+│  │  │  └── audio
+│  │  │    └── notification.wav
+│  │  ├── css
+│  │  │  ├── animate.css
+│  │  │  ├── aos.css
+│  │  │  ├── bootstrap.css
+│  │  │  ├── bootstrap.rtl.css
+│  │  │  ├── fontawesome-all.css
+│  │  │  ├── lightcase.css
+│  │  │  ├── line-awesome.css
+│  │  │  ├── nice-select.css
+│  │  │  ├── odometer.css
+│  │  │  ├── prettify.css
+│  │  │  ├── select2.css
+│  │  │  ├── style.css
+│  │  │  ├── swiper.css
+│  │  │  └── typography.css
+│  │  ├── fonts
+│  │  │  ├── la-brands-400.eot
+│  │  │  ├── la-brands-400.svg
+│  │  │  ├── la-brands-400.ttf
+│  │  │  ├── la-brands-400.woff
+│  │  │  ├── la-brands-400.woff2
+│  │  │  ├── la-regular-400.eot
+│  │  │  ├── la-regular-400.svg
+│  │  │  ├── la-regular-400.ttf
+│  │  │  ├── la-regular-400.woff
+│  │  │  ├── la-regular-400.woff2
+│  │  │  ├── la-solid-900.eot
+│  │  │  ├── la-solid-900.svg
+│  │  │  ├── la-solid-900.ttf
+│  │  │  ├── la-solid-900.woff
+│  │  │  ├── la-solid-900.woff2
+│  │  │  └── lightcase.woff
+│  │  ├── images
+│  │  │  ├── banner
+│  │  │  │  ├── about-banner.webp
+│  │  │  │  ├── about-img.png
+│  │  │  │  ├── banner-bg.webp
+│  │  │  │  └── banner-img.webp
+│  │  │  ├── blog
+│  │  │  │  ├── blog-1.webp
+│  │  │  │  ├── blog-2.webp
+│  │  │  │  └── blog-3.webp
+│  │  │  ├── car
+│  │  │  │  ├── car-1.webp
+│  │  │  │  ├── car-10.webp
+│  │  │  │  ├── car-11.webp
+│  │  │  │  ├── car-12.webp
+│  │  │  │  ├── car-13.webp
+│  │  │  │  ├── car-14.webp
+│  │  │  │  ├── car-15.webp
+│  │  │  │  ├── car-16.webp
+│  │  │  │  ├── car-17.webp
+│  │  │  │  ├── car-18.webp
+│  │  │  │  ├── car-19.webp
+│  │  │  │  ├── car-2.webp
+│  │  │  │  ├── car-3.webp
+│  │  │  │  ├── car-4.webp
+│  │  │  │  ├── car-5.webp
+│  │  │  │  ├── car-6.webp
+│  │  │  │  ├── car-7.webp
+│  │  │  │  ├── car-8.webp
+│  │  │  │  └── car-9.webp
+│  │  │  ├── client
+│  │  │  │  ├── client-1.webp
+│  │  │  │  ├── client-2.webp
+│  │  │  │  ├── client-3.webp
+│  │  │  │  ├── user-1.webp
+│  │  │  │  ├── user-2.webp
+│  │  │  │  └── user-3.webp
+│  │  │  ├── element
+│  │  │  │  ├── about-img.webp
+│  │  │  │  ├── app-img.webp
+│  │  │  │  ├── app-qr.webp
+│  │  │  │  ├── autenticator.png
+│  │  │  │  ├── camry-img.webp
+│  │  │  │  ├── car.svg
+│  │  │  │  ├── corolla-car.webp
+│  │  │  │  ├── counter-img.webp
+│  │  │  │  ├── crown-car.webp
+│  │  │  │  ├── grass.svg
+│  │  │  │  ├── house-img.svg
+│  │  │  │  ├── loder.gif
+│  │  │  │  ├── play-qr.webp
+│  │  │  │  ├── prius-car.webp
+│  │  │  │  ├── profile-thumb.webp
+│  │  │  │  ├── qr-icon.webp
+│  │  │  │  ├── road.svg
+│  │  │  │  ├── sidebar-img.webp
+│  │  │  │  ├── vendor-account.webp
+│  │  │  │  └── vendor-bg.webp
+│  │  │  ├── icon
+│  │  │  │  ├── apple-store.webp
+│  │  │  │  └── play-store.webp
+│  │  │  ├── logo
+│  │  │  │  ├── fav_icon.webp
+│  │  │  │  └── web_logo.webp
+│  │  │  ├── site-section
+│  │  │  │  ├── 0480d7e3-bb1f-4c07-829f-253170c76b74.webp
+│  │  │  │  ├── 048d57f8-3f44-44ab-ad9d-64bca2469e39.webp
+│  │  │  │  ├── 0bbea18c-fb38-451e-95cd-da76843b1e33.webp
+│  │  │  │  ├── 18364534-24cb-408c-a216-a204a9ba03a6.webp
+│  │  │  │  ├── 1ebfcd51-5f44-4fa8-8e2c-a72142391535.webp
+│  │  │  │  ├── 29d199dc-7036-43a6-ad3c-74ff332a77d3.webp
+│  │  │  │  ├── 2c323a19-0d1e-4ac0-ad9d-c4cb36cc9f76.webp
+│  │  │  │  ├── 2c80c012-0060-4c06-a353-d5380a5b4251.webp
+│  │  │  │  ├── 35655a7d-abc6-4095-8fdd-5a275b339a97.webp
+│  │  │  │  ├── 373900f8-cafd-426c-aa99-4667045b0f5b.webp
+│  │  │  │  ├── 49e61581-523d-45a2-8065-cc9ecdf79e20.webp
+│  │  │  │  ├── 4a2f3d01-edaa-4ddd-8d3e-811c99757b4c.webp
+│  │  │  │  ├── 4c71c813-465b-401a-ba2e-218ada97c749.webp
+│  │  │  │  ├── 50b2cbca-a0c4-420b-bea8-b1588ca3ebbc.webp
+│  │  │  │  ├── 51b59553-18c1-40ce-8bb7-93a4753498ab.webp
+│  │  │  │  ├── 58478a6a-468d-4f55-84ac-00cb7df05945.webp
+│  │  │  │  ├── 5a35eb5e-deaa-4cee-9d7e-d2e6952f3fda.webp
+│  │  │  │  ├── 74825a4b-cb68-44ab-bdd7-b4ac2946bcfa.webp
+│  │  │  │  ├── 74f2b7db-493f-49db-8633-01c7696ac195.webp
+│  │  │  │  ├── 8d141eeb-50de-4c09-9745-1a641354f563.webp
+│  │  │  │  ├── 9436ee67-4cbb-41a4-a2b3-c4b50b9d5bcc.webp
+│  │  │  │  ├── 96c3cfc9-5bd9-4f59-941a-5d7034caa88f.webp
+│  │  │  │  ├── 9ba00090-b203-4f56-9348-58a55cd6ef17.webp
+│  │  │  │  ├── a9b9d6a8-b4c7-4116-ba41-41297b918ab3.webp
+│  │  │  │  ├── b028a815-faa0-4cd2-b53f-124263f56dc8.webp
+│  │  │  │  ├── bf0c07f2-e209-42fc-8da7-72729a29811f.webp
+│  │  │  │  ├── d72348ef-1bcb-4eeb-a537-20e0d2f14e98.webp
+│  │  │  │  ├── e06c51c2-7043-4223-ac63-b0fdc31fa74c.webp
+│  │  │  │  ├── e990c973-118d-4589-aabd-5d5a7e4dd84d.webp
+│  │  │  │  ├── f110bca0-fd58-4f61-9de1-16ba7e3ec172.webp
+│  │  │  │  └── seeder
+│  │  │  │    ├── 0480d7e3-bb1f-4c07-829f-253170c76b74.webp
+│  │  │  │    ├── 048d57f8-3f44-44ab-ad9d-64bca2469e39.webp
+│  │  │  │    ├── 0bbea18c-fb38-451e-95cd-da76843b1e33.webp
+│  │  │  │    ├── 18364534-24cb-408c-a216-a204a9ba03a6.webp
+│  │  │  │    ├── 1ebfcd51-5f44-4fa8-8e2c-a72142391535.webp
+│  │  │  │    ├── 29d199dc-7036-43a6-ad3c-74ff332a77d3.webp
+│  │  │  │    ├── 2c323a19-0d1e-4ac0-ad9d-c4cb36cc9f76.webp
+│  │  │  │    ├── 2c80c012-0060-4c06-a353-d5380a5b4251.webp
+│  │  │  │    ├── 35655a7d-abc6-4095-8fdd-5a275b339a97.webp
+│  │  │  │    ├── 373900f8-cafd-426c-aa99-4667045b0f5b.webp
+│  │  │  │    ├── 49e61581-523d-45a2-8065-cc9ecdf79e20.webp
+│  │  │  │    ├── 4a2f3d01-edaa-4ddd-8d3e-811c99757b4c.webp
+│  │  │  │    ├── 4c71c813-465b-401a-ba2e-218ada97c749.webp
+│  │  │  │    ├── 50b2cbca-a0c4-420b-bea8-b1588ca3ebbc.webp
+│  │  │  │    ├── 51b59553-18c1-40ce-8bb7-93a4753498ab.webp
+│  │  │  │    ├── 58478a6a-468d-4f55-84ac-00cb7df05945.webp
+│  │  │  │    ├── 5a35eb5e-deaa-4cee-9d7e-d2e6952f3fda.webp
+│  │  │  │    ├── 74825a4b-cb68-44ab-bdd7-b4ac2946bcfa.webp
+│  │  │  │    ├── 74f2b7db-493f-49db-8633-01c7696ac195.webp
+│  │  │  │    ├── 8d141eeb-50de-4c09-9745-1a641354f563.webp
+│  │  │  │    ├── 9436ee67-4cbb-41a4-a2b3-c4b50b9d5bcc.webp
+│  │  │  │    ├── 96c3cfc9-5bd9-4f59-941a-5d7034caa88f.webp
+│  │  │  │    ├── 9ba00090-b203-4f56-9348-58a55cd6ef17.webp
+│  │  │  │    ├── a9b9d6a8-b4c7-4116-ba41-41297b918ab3.webp
+│  │  │  │    ├── b028a815-faa0-4cd2-b53f-124263f56dc8.webp
+│  │  │  │    ├── bf0c07f2-e209-42fc-8da7-72729a29811f.webp
+│  │  │  │    ├── d72348ef-1bcb-4eeb-a537-20e0d2f14e98.webp
+│  │  │  │    ├── e06c51c2-7043-4223-ac63-b0fdc31fa74c.webp
+│  │  │  │    ├── e990c973-118d-4589-aabd-5d5a7e4dd84d.webp
+│  │  │  │    └── f110bca0-fd58-4f61-9de1-16ba7e3ec172.webp
+│  │  │  └── support-ticket
+│  │  │    └── attachment
+│  │  │      ├── 4222ca07-04b1-4271-b44b-63c5e5863862.webp
+│  │  │      └── 53dde1fa-2488-417e-b7ff-10605693c243.webp
+│  │  ├── js
+│  │  │  ├── aos.js
+│  │  │  ├── apexcharts.js
+│  │  │  ├── bootstrap.bundle.js
+│  │  │  ├── jquery-3.6.0.js
+│  │  │  ├── jquery.nice-select.js
+│  │  │  ├── lightcase.js
+│  │  │  ├── main.js
+│  │  │  ├── odometer.js
+│  │  │  ├── select2.js
+│  │  │  ├── smoothscroll.js
+│  │  │  ├── swiper.js
+│  │  │  └── viewport.jquery.js
+│  │  ├── sass
+│  │  │  ├── abstracts
+│  │  │  │  ├── _abstracts.scss
+│  │  │  │  └── _variables.scss
+│  │  │  ├── base
+│  │  │  │  ├── _base.scss
+│  │  │  │  ├── _reset.scss
+│  │  │  │  └── _typography.scss
+│  │  │  ├── components
+│  │  │  │  ├── _animations.scss
+│  │  │  │  ├── _buttons.scss
+│  │  │  │  ├── _components.scss
+│  │  │  │  ├── _forms.scss
+│  │  │  │  └── _overlay.scss
+│  │  │  ├── layout
+│  │  │  │  ├── _footer.scss
+│  │  │  │  ├── _header.scss
+│  │  │  │  ├── _introduction.scss
+│  │  │  │  └── _layout.scss
+│  │  │  ├── pages
+│  │  │  │  ├── _blog.scss
+│  │  │  │  ├── _pages.scss
+│  │  │  │  ├── _sections.scss
+│  │  │  │  ├── _team.scss
+│  │  │  │  ├── _testimonial.scss
+│  │  │  │  └── dashboard.scss
+│  │  │  └── style.scss
+│  │  ├── user
+│  │  │  ├── 1406998a-139c-4ea0-b016-04e43af0be59.webp
+│  │  │  ├── 53f870e2-a3c3-40ba-9886-b32f09fa7e7e.webp
+│  │  │  ├── 61e90750-6c8d-438a-9c92-9b14db79238f.webp
+│  │  │  ├── bee4fe55-1d6b-4f11-baec-af6a076d2cf5.webp
+│  │  │  ├── ce9b96e5-432f-4a0c-bea7-034980ec9fe2.webp
+│  │  │  ├── d89a61f5-1dae-486f-850e-3db6cdeeb63e.webp
+│  │  │  └── edef069c-fad6-4f3f-b7f1-c426c5fbc054.webp
+│  │  ├── user-driving-license
+│  │  │  ├── 762a9859-6af6-4fff-b4b7-7c44d67e0f11.webp
+│  │  │  └── eff02f3a-c3da-45cf-a41f-fe3defa2486f.webp
+│  │  ├── user-national-id
+│  │  │  ├── 3e339789-d7f3-4b11-ba15-dc9c08a53f9a.webp
+│  │  │  ├── 485e4085-7f68-49d8-808c-aa625061a1b1.webp
+│  │  │  ├── 77ec8343-181e-45e4-9da8-3593494ef3f8.webp
+│  │  │  └── d15b4e57-95da-413e-91e1-e4e8a00569d4.webp
+│  │  └── webfonts
+│  │    ├── fa-brands-400.eot
+│  │    ├── fa-brands-400.svg
+│  │    ├── fa-brands-400.ttf
+│  │    ├── fa-brands-400.woff
+│  │    ├── fa-brands-400.woff2
+│  │    ├── fa-regular-400.eot
+│  │    ├── fa-regular-400.svg
+│  │    ├── fa-regular-400.ttf
+│  │    ├── fa-regular-400.woff
+│  │    ├── fa-regular-400.woff2
+│  │    ├── fa-solid-900.eot
+│  │    ├── fa-solid-900.svg
+│  │    ├── fa-solid-900.ttf
+│  │    ├── fa-solid-900.woff
+│  │    └── fa-solid-900.woff2
+│  ├── index.php
+│  ├── robots.txt
+│  ├── service-worker.js
+│  └── transaction
+├── README.md
+├── resources
+│  ├── css
+│  │  └── app.css
+│  ├── installer
+│  │  ├── readme.md
+│  │  └── src
+│  │    ├── assets
+│  │    │  ├── css
+│  │    │  │  ├── bootstrap.min.css
+│  │    │  │  ├── lightcase.css
+│  │    │  │  ├── prettify.css
+│  │    │  │  └── style.css
+│  │    │  ├── images
+│  │    │  │  └── element
+│  │    │  │    └── search.webp
+│  │    │  ├── js
+│  │    │  │  ├── bootstrap.bundle.min.js
+│  │    │  │  ├── jquery-3.6.0.min.js
+│  │    │  │  ├── lightcase.js
+│  │    │  │  ├── main.js
+│  │    │  │  ├── prettify.js
+│  │    │  │  └── smoothscroll.min.js
+│  │    │  └── sass
+│  │    │    ├── abstracts
+│  │    │    │  ├── _abstracts.scss
+│  │    │    │  └── _variables.scss
+│  │    │    ├── base
+│  │    │    │  ├── _base.scss
+│  │    │    │  ├── _reset.scss
+│  │    │    │  └── _typography.scss
+│  │    │    ├── components
+│  │    │    │  ├── _animations.scss
+│  │    │    │  ├── _buttons.scss
+│  │    │    │  ├── _components.scss
+│  │    │    │  ├── _forms.scss
+│  │    │    │  └── _overlay.scss
+│  │    │    ├── layout
+│  │    │    │  ├── _footer.scss
+│  │    │    │  ├── _header.scss
+│  │    │    │  ├── _introduction.scss
+│  │    │    │  └── _layout.scss
+│  │    │    ├── pages
+│  │    │    │  ├── _pages.scss
+│  │    │    │  └── _sections.scss
+│  │    │    └── style.scss
+│  │    ├── config
+│  │    │  └── installer.php
+│  │    ├── Controllers
+│  │    │  └── BaseController.php
+│  │    ├── Helpers
+│  │    │  ├── ConfigHelper.php
+│  │    │  ├── DBHelper.php
+│  │    │  ├── ErrorHelper.php
+│  │    │  ├── Helper.php
+│  │    │  ├── RequirementHelper.php
+│  │    │  ├── URLHelper.php
+│  │    │  └── ValidationHelper.php
+│  │    ├── routes
+│  │    │  └── web.php
+│  │    └── views
+│  │      └── installer
+│  │        ├── layouts
+│  │        │  └── app.blade.php
+│  │        └── pages
+│  │          ├── admin-setup.blade.php
+│  │          ├── cancel.blade.php
+│  │          ├── database-config.blade.php
+│  │          ├── error.blade.php
+│  │          ├── finish.blade.php
+│  │          ├── migration.blade.php
+│  │          ├── requirements.blade.php
+│  │          ├── validation-form.blade.php
+│  │          └── welcome.blade.php
+│  ├── js
+│  │  ├── app.js
+│  │  └── bootstrap.js
+│  ├── sass
+│  │  ├── _variables.scss
+│  │  └── app.scss
+│  ├── views
+│  │  ├── admin
+│  │  │  ├── auth
+│  │  │  │  ├── authorize
+│  │  │  │  │  └── verify-google-2fa.blade.php
+│  │  │  │  ├── layouts
+│  │  │  │  │  └── auth-master.blade.php
+│  │  │  │  ├── login.blade.php
+│  │  │  │  └── password-forgot
+│  │  │  │    ├── forgot.blade.php
+│  │  │  │    └── reset.blade.php
+│  │  │  ├── components
+│  │  │  │  ├── alerts
+│  │  │  │  │  ├── empty.blade.php
+│  │  │  │  │  └── warning.blade.php
+│  │  │  │  ├── breadcrumb.blade.php
+│  │  │  │  ├── button
+│  │  │  │  │  ├── custom.blade.php
+│  │  │  │  │  └── form-btn.blade.php
+│  │  │  │  ├── data-table
+│  │  │  │  │  ├── add-money-table.blade.php
+│  │  │  │  │  ├── admin-table.blade.php
+│  │  │  │  │  ├── car-booking-table.blade.php
+│  │  │  │  │  ├── crypto-address-transaction-table.blade.php
+│  │  │  │  │  ├── currency-table.blade.php
+│  │  │  │  │  ├── money-out-table.blade.php
+│  │  │  │  │  ├── user-table.blade.php
+│  │  │  │  │  └── vendor-table.blade.php
+│  │  │  │  ├── form
+│  │  │  │  │  ├── hidden-input.blade.php
+│  │  │  │  │  ├── input-amount.blade.php
+│  │  │  │  │  ├── input-file.blade.php
+│  │  │  │  │  ├── input-password.blade.php
+│  │  │  │  │  ├── input-text-rich.blade.php
+│  │  │  │  │  ├── input.blade.php
+│  │  │  │  │  ├── radio-button.blade.php
+│  │  │  │  │  ├── select.blade.php
+│  │  │  │  │  ├── switcher.blade.php
+│  │  │  │  │  └── textarea.blade.php
+│  │  │  │  ├── link
+│  │  │  │  │  ├── add-default.blade.php
+│  │  │  │  │  ├── custom.blade.php
+│  │  │  │  │  ├── delete-default.blade.php
+│  │  │  │  │  ├── edit-default.blade.php
+│  │  │  │  │  └── info-default.blade.php
+│  │  │  │  ├── modals
+│  │  │  │  │  ├── add-admin.blade.php
+│  │  │  │  │  ├── add-currency.blade.php
+│  │  │  │  │  ├── add-onboard-screen.blade.php
+│  │  │  │  │  ├── add-vendor-onboard-screen.blade.php
+│  │  │  │  │  ├── admin-permission-add.blade.php
+│  │  │  │  │  ├── admin-permission-assign.blade.php
+│  │  │  │  │  ├── admin-permission-edit.blade.php
+│  │  │  │  │  ├── admin-role-add.blade.php
+│  │  │  │  │  ├── admin-role-edit.blade.php
+│  │  │  │  │  ├── car-model
+│  │  │  │  │  │  ├── add.blade.php
+│  │  │  │  │  │  └── edit.blade.php
+│  │  │  │  │  ├── car-types
+│  │  │  │  │  │  ├── add.blade.php
+│  │  │  │  │  │  └── edit.blade.php
+│  │  │  │  │  ├── edit-admin.blade.php
+│  │  │  │  │  ├── edit-currency.blade.php
+│  │  │  │  │  ├── edit-onboard-screen.blade.php
+│  │  │  │  │  ├── edit-vendor-onboard-screen.blade.php
+│  │  │  │  │  ├── extension-edit.blade.php
+│  │  │  │  │  ├── kyc-reject.blade.php
+│  │  │  │  │  ├── language
+│  │  │  │  │  │  ├── add.blade.php
+│  │  │  │  │  │  ├── edit.blade.php
+│  │  │  │  │  │  └── import.blade.php
+│  │  │  │  │  ├── money-out-reject.blade.php
+│  │  │  │  │  ├── send-mail-user.blade.php
+│  │  │  │  │  ├── send-mail-vendor.blade.php
+│  │  │  │  │  ├── send-text-mail.blade.php
+│  │  │  │  │  ├── site-section
+│  │  │  │  │  │  ├── add-about-page-item.blade.php
+│  │  │  │  │  │  ├── add-about-us-item.blade.php
+│  │  │  │  │  │  ├── add-brand-item.blade.php
+│  │  │  │  │  │  ├── add-choose-item.blade.php
+│  │  │  │  │  │  ├── add-client-feedback-item.blade.php
+│  │  │  │  │  │  ├── add-faq-page-item.blade.php
+│  │  │  │  │  │  ├── add-feature-page-item.blade.php
+│  │  │  │  │  │  ├── add-security-item.blade.php
+│  │  │  │  │  │  ├── add-service-item.blade.php
+│  │  │  │  │  │  ├── add-social-icon.blade.php
+│  │  │  │  │  │  ├── add-solution-item.blade.php
+│  │  │  │  │  │  ├── add-stat-item.blade.php
+│  │  │  │  │  │  ├── add-vendor-item.blade.php
+│  │  │  │  │  │  ├── add-vendor-safety-item.blade.php
+│  │  │  │  │  │  ├── requirements-details-section
+│  │  │  │  │  │  │  ├── add.blade.php
+│  │  │  │  │  │  │  └── edit.blade.php
+│  │  │  │  │  │  └── vendor-requirements-section
+│  │  │  │  │  │    ├── add.blade.php
+│  │  │  │  │  │    └── edit.blade.php
+│  │  │  │  │  └── subsciber-send-mail.blade.php
+│  │  │  │  ├── page-title.blade.php
+│  │  │  │  ├── payment-gateway
+│  │  │  │  │  ├── automatic
+│  │  │  │  │  │  ├── credentials.blade.php
+│  │  │  │  │  │  ├── gateway-currency.blade.php
+│  │  │  │  │  │  └── supported-currencies.blade.php
+│  │  │  │  │  └── manual
+│  │  │  │  │    ├── charges.blade.php
+│  │  │  │  │    ├── gateway-header.blade.php
+│  │  │  │  │    └── input-field-generator.blade.php
+│  │  │  │  ├── search
+│  │  │  │  │  ├── add-money
+│  │  │  │  │  │  └── transaction_search.blade.php
+│  │  │  │  │  ├── admin-search.blade.php
+│  │  │  │  │  ├── car-booking
+│  │  │  │  │  │  └── booking-search.blade.php
+│  │  │  │  │  ├── crypto-transaction-search.blade.php
+│  │  │  │  │  ├── currency-search.blade.php
+│  │  │  │  │  ├── money-out
+│  │  │  │  │  │  └── transaction_search.blade.php
+│  │  │  │  │  └── user-search.blade.php
+│  │  │  │  ├── search-input.blade.php
+│  │  │  │  ├── side-nav
+│  │  │  │  │  ├── dropdown-link.blade.php
+│  │  │  │  │  ├── link-group.blade.php
+│  │  │  │  │  └── link.blade.php
+│  │  │  │  ├── side-nav-mini
+│  │  │  │  │  └── support
+│  │  │  │  │    └── link.blade.php
+│  │  │  │  ├── support-ticket
+│  │  │  │  │  ├── conversation
+│  │  │  │  │  │  ├── connection-admin.blade.php
+│  │  │  │  │  │  ├── connection-user.blade.php
+│  │  │  │  │  │  └── message-input.blade.php
+│  │  │  │  │  ├── counter-card.blade.php
+│  │  │  │  │  └── details.blade.php
+│  │  │  │  └── trx-settings-charge-block.blade.php
+│  │  │  ├── layouts
+│  │  │  │  └── master.blade.php
+│  │  │  ├── mails
+│  │  │  │  └── password-reset.blade.php
+│  │  │  ├── partials
+│  │  │  │  ├── auth-control.blade.php
+│  │  │  │  ├── footer.blade.php
+│  │  │  │  ├── notify.blade.php
+│  │  │  │  ├── push-notification.blade.php
+│  │  │  │  ├── right-settings.blade.php
+│  │  │  │  ├── script.blade.php
+│  │  │  │  ├── side-nav-mini.blade.php
+│  │  │  │  └── side-nav.blade.php
+│  │  │  └── sections
+│  │  │    ├── add-money
+│  │  │    │  ├── details.blade.php
+│  │  │    │  └── index.blade.php
+│  │  │    ├── admin-care
+│  │  │    │  ├── email-to-admins.blade.php
+│  │  │    │  ├── index.blade.php
+│  │  │    │  └── role
+│  │  │    │    ├── assign-permission.blade.php
+│  │  │    │    ├── index.blade.php
+│  │  │    │    ├── permission-create.blade.php
+│  │  │    │    ├── permission-edit.blade.php
+│  │  │    │    ├── permissions.blade.php
+│  │  │    │    └── view-permission.blade.php
+│  │  │    ├── admin-notification
+│  │  │    │  └── index.blade.php
+│  │  │    ├── app-settings
+│  │  │    │  ├── onboard-screens.blade.php
+│  │  │    │  ├── splash-screen.blade.php
+│  │  │    │  ├── urls.blade.php
+│  │  │    │  ├── vendor-onboard-screens.blade.php
+│  │  │    │  ├── vendor-splash-screen.blade.php
+│  │  │    │  └── vendor-urls.blade.php
+│  │  │    ├── balance-transactions
+│  │  │    │  ├── details.blade.php
+│  │  │    │  └── index.blade.php
+│  │  │    ├── booking
+│  │  │    │  ├── detail.blade.php
+│  │  │    │  └── index.blade.php
+│  │  │    ├── branch
+│  │  │    │  ├── create.blade.php
+│  │  │    │  ├── delivery-settings.blade.php
+│  │  │    │  ├── edit.blade.php
+│  │  │    │  ├── index.blade.php
+│  │  │    │  └── working-hours.blade.php
+│  │  │    ├── cancellation-policy
+│  │  │    │  └── index.blade.php
+│  │  │    ├── cars
+│  │  │    │  ├── car
+│  │  │    │  │  └── index.blade.php
+│  │  │    │  ├── car-area
+│  │  │    │  │  ├── create.blade.php
+│  │  │    │  │  ├── edit.blade.php
+│  │  │    │  │  └── index.blade.php
+│  │  │    │  ├── car-booking
+│  │  │    │  │  ├── index.blade.php
+│  │  │    │  │  └── view.blade.php
+│  │  │    │  ├── car-model
+│  │  │    │  │  └── index.blade.php
+│  │  │    │  ├── car-type
+│  │  │    │  │  └── index.blade.php
+│  │  │    │  ├── create.blade.php
+│  │  │    │  ├── edit.blade.php
+│  │  │    │  ├── index.blade.php
+│  │  │    │  └── verify-booking.blade.php
+│  │  │    ├── contact-request
+│  │  │    │  └── index.blade.php
+│  │  │    ├── cookie
+│  │  │    │  └── index.blade.php
+│  │  │    ├── crypto-assets
+│  │  │    │  ├── gateway
+│  │  │    │  │  └── index.blade.php
+│  │  │    │  └── wallet
+│  │  │    │    └── transactions.blade.php
+│  │  │    ├── currency
+│  │  │    │  └── index.blade.php
+│  │  │    ├── dashboard
+│  │  │    │  └── index.blade.php
+│  │  │    ├── error-logs
+│  │  │    │  └── index.blade.php
+│  │  │    ├── extensions
+│  │  │    │  └── index.blade.php
+│  │  │    ├── language
+│  │  │    │  ├── index.blade.php
+│  │  │    │  └── info.blade.php
+│  │  │    ├── money-out
+│  │  │    │  ├── details.blade.php
+│  │  │    │  └── index.blade.php
+│  │  │    ├── payment-gateways
+│  │  │    │  ├── add-money
+│  │  │    │  │  ├── automatic
+│  │  │    │  │  │  ├── edit.blade.php
+│  │  │    │  │  │  └── index.blade.php
+│  │  │    │  │  └── manual
+│  │  │    │  │    ├── create.blade.php
+│  │  │    │  │    ├── edit.blade.php
+│  │  │    │  │    └── index.blade.php
+│  │  │    │  └── money-out
+│  │  │    │    └── manual
+│  │  │    │      ├── create.blade.php
+│  │  │    │      ├── edit.blade.php
+│  │  │    │      └── index.blade.php
+│  │  │    ├── profile
+│  │  │    │  ├── 2fa
+│  │  │    │  │  └── google.blade.php
+│  │  │    │  ├── change-password.blade.php
+│  │  │    │  └── index.blade.php
+│  │  │    ├── push-notification
+│  │  │    │  ├── config.blade.php
+│  │  │    │  └── send.blade.php
+│  │  │    ├── server-info
+│  │  │    │  └── index.blade.php
+│  │  │    ├── setup-email
+│  │  │    │  ├── config.blade.php
+│  │  │    │  └── default-template.blade.php
+│  │  │    ├── setup-kyc
+│  │  │    │  ├── edit.blade.php
+│  │  │    │  └── index.blade.php
+│  │  │    ├── setup-pages
+│  │  │    │  ├── details.blade.php
+│  │  │    │  └── index.blade.php
+│  │  │    ├── setup-sections
+│  │  │    │  ├── about-page-section.blade.php
+│  │  │    │  ├── about-us-section.blade.php
+│  │  │    │  ├── announcement
+│  │  │    │  │  ├── category
+│  │  │    │  │  │  └── index.blade.php
+│  │  │    │  │  ├── create.blade.php
+│  │  │    │  │  ├── edit.blade.php
+│  │  │    │  │  └── index.blade.php
+│  │  │    │  ├── announcement-section.blade.php
+│  │  │    │  ├── app-section.blade.php
+│  │  │    │  ├── auth-section.blade.php
+│  │  │    │  ├── banner-section.blade.php
+│  │  │    │  ├── best-item-section.blade.php
+│  │  │    │  ├── brand-section.blade.php
+│  │  │    │  ├── choose-us-section.blade.php
+│  │  │    │  ├── clients-feedback-section.blade.php
+│  │  │    │  ├── contact-us-section.blade.php
+│  │  │    │  ├── faq-section.blade.php
+│  │  │    │  ├── feature-section.blade.php
+│  │  │    │  ├── features-section.blade.php
+│  │  │    │  ├── find-car-section.blade.php
+│  │  │    │  ├── footer-section.blade.php
+│  │  │    │  ├── glance-section.blade.php
+│  │  │    │  ├── how-it-work-section.blade.php
+│  │  │    │  ├── intro-section.blade.php
+│  │  │    │  ├── latest-item-section.blade.php
+│  │  │    │  ├── monitoring-section.blade.php
+│  │  │    │  ├── requirements-details-section.blade.php
+│  │  │    │  ├── security-section.blade.php
+│  │  │    │  ├── services-section.blade.php
+│  │  │    │  ├── solutions-section.blade.php
+│  │  │    │  ├── statistics-section.blade.php
+│  │  │    │  ├── vendor-auth-section.blade.php
+│  │  │    │  ├── vendor-requirements-section.blade.php
+│  │  │    │  └── vendor-safety-section.blade.php
+│  │  │    ├── subscriber
+│  │  │    │  └── index.blade.php
+│  │  │    ├── support-ticket
+│  │  │    │  ├── conversation.blade.php
+│  │  │    │  ├── create.blade.php
+│  │  │    │  └── index.blade.php
+│  │  │    ├── system-maintenance
+│  │  │    │  └── index.blade.php
+│  │  │    ├── tax-settings
+│  │  │    │  └── index.blade.php
+│  │  │    ├── trx-settings
+│  │  │    │  └── index.blade.php
+│  │  │    ├── twilio-usage
+│  │  │    │  └── index.blade.php
+│  │  │    ├── useful-links
+│  │  │    │  ├── edit.blade.php
+│  │  │    │  └── index.blade.php
+│  │  │    ├── user-care
+│  │  │    │  ├── create.blade.php
+│  │  │    │  ├── details.blade.php
+│  │  │    │  ├── email-to-users.blade.php
+│  │  │    │  ├── index.blade.php
+│  │  │    │  ├── kyc-details.blade.php
+│  │  │    │  ├── login-logs.blade.php
+│  │  │    │  └── mail-logs.blade.php
+│  │  │    ├── vendor-care
+│  │  │    │  ├── create.blade.php
+│  │  │    │  ├── details.blade.php
+│  │  │    │  ├── email-to-users.blade.php
+│  │  │    │  ├── index.blade.php
+│  │  │    │  ├── kyc-details.blade.php
+│  │  │    │  ├── login-logs.blade.php
+│  │  │    │  └── mail-logs.blade.php
+│  │  │    └── web-settings
+│  │  │      ├── basic-settings.blade.php
+│  │  │      ├── image-assets.blade.php
+│  │  │      └── setup-seo.blade.php
+│  │  ├── errors
+│  │  │  ├── 401.blade.php
+│  │  │  ├── 402.blade.php
+│  │  │  ├── 403.blade.php
+│  │  │  ├── 404.blade.php
+│  │  │  ├── 419.blade.php
+│  │  │  ├── 429.blade.php
+│  │  │  ├── 500.blade.php
+│  │  │  ├── 503.blade.php
+│  │  │  ├── custom-layouts-503.blade.php
+│  │  │  ├── custom-layouts.blade.php
+│  │  │  ├── layout.blade.php
+│  │  │  └── minimal.blade.php
+│  │  ├── frontend
+│  │  │  ├── layouts
+│  │  │  │  └── master.blade.php
+│  │  │  ├── pages
+│  │  │  │  ├── about-us.blade.php
+│  │  │  │  ├── blog-details.blade.php
+│  │  │  │  ├── blog.blade.php
+│  │  │  │  ├── cars.blade.php
+│  │  │  │  ├── category-blog.blade.php
+│  │  │  │  ├── contact.blade.php
+│  │  │  │  ├── find-car.blade.php
+│  │  │  │  ├── index.blade.php
+│  │  │  │  ├── services.blade.php
+│  │  │  │  ├── usefull_pages.blade.php
+│  │  │  │  └── vendor.blade.php
+│  │  │  ├── partials
+│  │  │  │  ├── extensions
+│  │  │  │  │  └── tawk-to.blade.php
+│  │  │  │  ├── footer.blade.php
+│  │  │  │  ├── header.blade.php
+│  │  │  │  ├── preloader.blade.php
+│  │  │  │  └── scroll-to-top.blade.php
+│  │  │  └── sections
+│  │  │    ├── about-us-section.blade.php
+│  │  │    ├── announcement-section.blade.php
+│  │  │    ├── app-section.blade.php
+│  │  │    ├── banner-section.blade.php
+│  │  │    ├── blog-detail.blade.php
+│  │  │    ├── car-search.blade.php
+│  │  │    ├── category-blog.blade.php
+│  │  │    ├── choose-us-section.blade.php
+│  │  │    ├── contact-us-section.blade.php
+│  │  │    ├── demo.blade.php
+│  │  │    ├── faq-section.blade.php
+│  │  │    ├── feature-section.blade.php
+│  │  │    ├── find-section.blade.php
+│  │  │    ├── search-result.blade.php
+│  │  │    ├── security-section.blade.php
+│  │  │    ├── services-section.blade.php
+│  │  │    ├── statistics-section.blade.php
+│  │  │    ├── vendor-banner-section.blade.php
+│  │  │    ├── vendor-requirements-section.blade.php
+│  │  │    └── vendor-safety-section.blade.php
+│  │  ├── layouts
+│  │  │  ├── master.blade.php
+│  │  │  └── old_master.blade.php
+│  │  ├── mail-templates
+│  │  │  └── admin
+│  │  │    └── auth
+│  │  │      └── password-reset.blade.php
+│  │  ├── partials
+│  │  │  ├── footer-asset.blade.php
+│  │  │  ├── header-asset.blade.php
+│  │  │  └── vendor-header-asset.blade.php
+│  │  ├── payment-gateway
+│  │  │  ├── btn-pay
+│  │  │  │  └── razorpay.blade.php
+│  │  │  └── redirect-form.blade.php
+│  │  ├── user
+│  │  │  ├── auth
+│  │  │  │  ├── auth.blade.php
+│  │  │  │  ├── authorize
+│  │  │  │  │  ├── verify-kyc.blade.php
+│  │  │  │  │  └── verify-mail.blade.php
+│  │  │  │  ├── forgot-password
+│  │  │  │  │  ├── forgot.blade.php
+│  │  │  │  │  ├── reset.blade.php
+│  │  │  │  │  └── verify.blade.php
+│  │  │  │  ├── login.blade.php
+│  │  │  │  └── register.blade.php
+│  │  │  ├── components
+│  │  │  │  ├── breadcrumb.blade.php
+│  │  │  │  ├── generate-kyc-fields.blade.php
+│  │  │  │  └── profile
+│  │  │  │    └── kyc.blade.php
+│  │  │  ├── dashboard.blade.php
+│  │  │  ├── email
+│  │  │  │  ├── booking-confirmation.blade.php
+│  │  │  │  └── ride-complete.blade.php
+│  │  │  ├── layouts
+│  │  │  │  └── master.blade.php
+│  │  │  ├── partials
+│  │  │  │  ├── old_side-nav.blade.php
+│  │  │  │  ├── push-notification.blade.php
+│  │  │  │  ├── side-nav.blade.php
+│  │  │  │  └── top-nav.blade.php
+│  │  │  └── sections
+│  │  │    ├── add-money
+│  │  │    │  ├── automatic
+│  │  │    │  │  └── authorize.blade.php
+│  │  │    │  ├── index.blade.php
+│  │  │    │  └── payment
+│  │  │    │    └── crypto
+│  │  │    │      └── address.blade.php
+│  │  │    ├── car-booking
+│  │  │    │  ├── booking-complete.blade.php
+│  │  │    │  ├── booking-confirmation.blade.php
+│  │  │    │  ├── booking-history.blade.php
+│  │  │    │  ├── booking-preview.blade.php
+│  │  │    │  └── car-booking.blade.php
+│  │  │    ├── kyc
+│  │  │    │  └── index.blade.php
+│  │  │    ├── manual-payment
+│  │  │    │  ├── manual-payment-section.blade.php
+│  │  │    │  └── manual-repayment-section.blade.php
+│  │  │    ├── profile
+│  │  │    │  ├── index.blade.php
+│  │  │    │  └── old_index.blade.php
+│  │  │    └── support-ticket
+│  │  │      ├── conversation.blade.php
+│  │  │      ├── create.blade.php
+│  │  │      ├── index.blade.php
+│  │  │      ├── old_conversation.blade.php
+│  │  │      ├── old_create.blade.php
+│  │  │      └── old_index.blade.php
+│  │  └── vendor-end
+│  │    ├── auth
+│  │    │  ├── auth.blade.php
+│  │    │  ├── authorize
+│  │    │  │  ├── verify-google-2fa.blade.php
+│  │    │  │  ├── verify-kyc.blade.php
+│  │    │  │  └── verify-mail.blade.php
+│  │    │  ├── forgot-password
+│  │    │  │  ├── forgot.blade.php
+│  │    │  │  ├── reset.blade.php
+│  │    │  │  └── verify.blade.php
+│  │    │  ├── login.blade.php
+│  │    │  └── register.blade.php
+│  │    ├── components
+│  │    │  ├── breadcrumb.blade.php
+│  │    │  ├── form
+│  │    │  │  └── switcher.blade.php
+│  │    │  ├── generate-kyc-fields.blade.php
+│  │    │  ├── modals
+│  │    │  │  └── booking-reject.blade.php
+│  │    │  ├── money-out
+│  │    │  │  └── generate-dy-input.blade.php
+│  │    │  └── profile
+│  │    │    └── kyc.blade.php
+│  │    ├── layouts
+│  │    │  └── master.blade.php
+│  │    ├── partials
+│  │    │  ├── old_side-nav.blade.php
+│  │    │  ├── push-notification.blade.php
+│  │    │  ├── side-nav.blade.php
+│  │    │  └── top-nav.blade.php
+│  │    └── sections
+│  │      ├── add-money
+│  │      │  └── index.blade.php
+│  │      ├── booking
+│  │      │  ├── booking-history.blade.php
+│  │      │  ├── booking-request.blade.php
+│  │      │  ├── booking-request.blade.php.bak
+│  │      │  └── details.blade.php
+│  │      ├── branch-settings
+│  │      │  └── index.blade.php
+│  │      ├── dashboard
+│  │      │  └── index.blade.php
+│  │      ├── kyc
+│  │      │  ├── form.blade.php
+│  │      │  └── index.blade.php
+│  │      ├── money-out
+│  │      │  ├── index.blade.php
+│  │      │  ├── instructions.blade.php
+│  │      │  └── withdraw-logs.blade.php
+│  │      ├── my-car
+│  │      │  ├── add.blade.php
+│  │      │  ├── edit.blade.php
+│  │      │  └── index.blade.php
+│  │      ├── profile
+│  │      │  ├── index.blade.php
+│  │      │  └── old_index.blade.php
+│  │      ├── security
+│  │      │  └── google-2fa.blade.php
+│  │      └── support-ticket
+│  │        ├── conversation.blade.php
+│  │        ├── create.blade.php
+│  │        └── index.blade.php
+│  └── world
+│    ├── cities.json
+│    ├── countries.json
+│    └── states.json
+├── router.php
+├── routes
+│  ├── admin.php
+│  ├── api
+│  │  └── v1
+│  │    ├── agent.php
+│  │    ├── auth.php
+│  │    ├── global.php
+│  │    ├── merchant.php
+│  │    ├── user.php
+│  │    └── vendor.php
+│  ├── api.php
+│  ├── auth.php
+│  ├── channels.php
+│  ├── console.php
+│  ├── frontend.php
+│  ├── global.php
+│  ├── user.php
+│  ├── vendor.php
+│  └── web.php
+├── scripts
+│  └── generate-openapi.js
+├── server.php
+├── service-worker.js
+├── symlink.php
+├── test-beams-auth.php
+├── test-pusher-connectivity.php
+├── test-pusher-endpoint.php
+├── TESTING_REPORT.md
+├── tests
+│  ├── CreatesApplication.php
+│  ├── Feature
+│  │  ├── Api
+│  │  │  └── V1
+│  │  │    ├── User
+│  │  │    │  ├── Auth
+│  │  │    │  │  └── UserLoginTest.php
+│  │  │    │  ├── BookingExtensionTest.php
+│  │  │    │  ├── CancellationPolicyApiTest.php
+│  │  │    │  ├── CarBookingTest.php
+│  │  │    │  └── WalletTest.php
+│  │  │    └── Vendor
+│  │  │      └── Auth
+│  │  │        └── VendorLoginTest.php
+│  │  ├── Commands
+│  │  │  └── MigrateFilesToStorageTest.php
+│  │  └── ExampleTest.php
+│  ├── TestCase.php
+│  └── Unit
+│    ├── DTO
+│    │  └── WalletTransactionDTOTest.php
+│    ├── ExampleTest.php
+│    ├── Helpers
+│    │  └── FileHelperStorageTest.php
+│    ├── Models
+│    │  └── CarBookingTest.php
+│    └── Services
+│      ├── BookingBalanceServiceTest.php
+│      ├── BookingInsuranceTest.php
+│      ├── CancellationRefundServiceTest.php
+│      ├── CarBookingExtensionServiceTest.php
+│      └── WalletServiceTest.php
+├── tinker
+├── Twilio_OTP_Postman_Collection.json
+├── vendor_booking_details.png
+└── vite.config.js

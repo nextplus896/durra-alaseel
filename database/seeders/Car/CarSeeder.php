@@ -2,29 +2,253 @@
 
 namespace Database\Seeders\Car;
 
+use App\Models\Admin\Branch;
+use App\Models\Admin\Cars\CarModel;
+use App\Models\Admin\Cars\CarType;
 use App\Models\Vendor\Cars\Car;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class CarSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Car fleet definitions.
      *
-     * @return void
+     * Each car template defines:
+     *  - model_name: must exist in car_models table (matched by name)
+     *  - type_slug:  matched against car_types.slug (sedan / suv / car)
+     *  - image:      filename inside public/backend/images/car-models/
+     *  - seats, year, allowance_km, prices, insurance
+     *
+     * Prices in SAR.
      */
-    public function run()
+    private function fleetTemplates(): array
     {
-        $data = [
-            ['id' => '1', 'vendor_id' => '1', 'car_area_id' => '2', 'car_type_id' => '3', 'slug' => '53830420-1f87-4199-b879-a4579b18b42c', 'car_title' => '{"en":{"car_title":"hello"},"fr":{"car_title":"ki"},"es":{"car_title":"kill"},"ar":{"car_title":"aki"}}', 'car_model' => 'Toyota', 'seat' => '4', 'experience' => '4', 'car_number' => 'K-911', 'fees' => '20.00000000', 'image' => '58478a6a-468d-4f55-84ac-00cb7df05945.webp', 'status' => '1', 'approval' => '1', 'created_at' => '2025-01-08 07:23:34', 'updated_at' => '2025-02-03 04:42:06'],
-            ['id' => '2', 'vendor_id' => '1', 'car_area_id' => '3', 'car_type_id' => '2', 'slug' => '083a1311-794e-4de8-a1a3-695b65a9563d', 'car_title' => '{"en":{"car_title":"hello"},"fr":{"car_title":"ki"},"es":{"car_title":"kill"},"ar":{"car_title":"aki"}}', 'car_model' => 'Sedan', 'seat' => '4', 'experience' => '4', 'car_number' => 'K-187', 'fees' => '25.00000000', 'image' => '50b2cbca-a0c4-420b-bea8-b1588ca3ebbc.webp', 'status' => '1', 'approval' => '1', 'created_at' => '2025-01-08 07:24:46', 'updated_at' => '2025-02-03 04:42:24'],
-            ['id' => '3', 'vendor_id' => '1', 'car_area_id' => '1', 'car_type_id' => '3', 'slug' => 'c9ce8095-0d61-4c61-8a71-3531cb8569ba', 'car_title' => '{"en":{"car_title":"hello"},"fr":{"car_title":"ki"},"es":{"car_title":"kill"},"ar":{"car_title":"aki"}}', 'car_model' => 'Ford', 'seat' => '6', 'experience' => '4', 'car_number' => 'J-878', 'fees' => '35.00000000', 'image' => '96c3cfc9-5bd9-4f59-941a-5d7034caa88f.webp', 'status' => '1', 'approval' => '1', 'created_at' => '2025-01-08 07:25:43', 'updated_at' => '2025-02-03 04:42:51'],
-            ['id' => '4', 'vendor_id' => '2', 'car_area_id' => '2', 'car_type_id' => '3', 'slug' => '18d94a85-b5df-47c6-9bce-9e6e2958c1d8', 'car_title' => '{"en":{"car_title":"hello"},"fr":{"car_title":"ki"},"es":{"car_title":"kill"},"ar":{"car_title":"aki"}}', 'car_model' => 'Ford', 'seat' => '6', 'experience' => '5', 'car_number' => 'F-104', 'fees' => '20.00000000', 'image' => '74825a4b-cb68-44ab-bdd7-b4ac2946bcfa.webp', 'status' => '1', 'approval' => '1', 'created_at' => '2025-01-08 09:10:23', 'updated_at' => '2025-01-08 09:12:58'],
-            ['id' => '5', 'vendor_id' => '2', 'car_area_id' => '3', 'car_type_id' => '2', 'slug' => '634174c1-a34d-4c65-b2b6-0ef747d24ebc', 'car_title' => '{"en":{"car_title":"hello"},"fr":{"car_title":"ki"},"es":{"car_title":"kill"},"ar":{"car_title":"aki"}}', 'car_model' => 'Ford', 'seat' => '4', 'experience' => '2', 'car_number' => 'F-828', 'fees' => '60.00000000', 'image' => 'a9b9d6a8-b4c7-4116-ba41-41297b918ab3.webp', 'status' => '1', 'approval' => '1', 'created_at' => '2025-01-08 09:11:13', 'updated_at' => '2025-01-08 09:12:58'],
-            ['id' => '6', 'vendor_id' => '2', 'car_area_id' => '1', 'car_type_id' => '1', 'slug' => '583e8422-c187-4cc3-b76c-42fe4af4881c', 'car_title' => '{"en":{"car_title":"hello"},"fr":{"car_title":"ki"},"es":{"car_title":"kill"},"ar":{"car_title":"aki"}}', 'car_model' => 'KIA-12', 'seat' => '4', 'experience' => '5', 'car_number' => 'k-987', 'fees' => '80.00000000', 'image' => 'e06c51c2-7043-4223-ac63-b0fdc31fa74c.webp', 'status' => '1', 'approval' => '1', 'created_at' => '2025-01-08 09:12:24', 'updated_at' => '2025-01-08 09:12:56'],
-            ['id' => '7', 'vendor_id' => '2', 'car_area_id' => '1', 'car_type_id' => '3', 'slug' => 'a1f61317-3501-4bd4-b102-e784ae92eb15', 'car_title' => '{"en":{"car_title":"hello"},"fr":{"car_title":"ki"},"es":{"car_title":"kill"},"ar":{"car_title":"aki"}}', 'car_model' => 'Jeep-44', 'seat' => '6', 'experience' => '5', 'car_number' => 'j-696', 'fees' => '90.00000000', 'image' => '048d57f8-3f44-44ab-ad9d-64bca2469e39.webp', 'status' => '1', 'approval' => '1', 'created_at' => '2025-01-08 09:13:55', 'updated_at' => '2025-01-08 09:14:09'],
-        ];
+        return [
+            // ── Sedans ──────────────────────────────────────────
+            [
+                'model_name'             => 'Toyota Camry',
+                'type_slug'              => 'sedan',
+                'image'                  => 'toyota-camry-2024.webp',
+                'seats'                  => 5,
+                'year'                   => 2024,
+                'allowance_km'           => 300,
+                'allowance_price_per_km' => 1.00,
+                'daily_insurance'        => 35.00000000,
+                'deductible_insurance'   => 1500.00000000,
+                'price_per_day'          => 200.00000000,
+                'price_per_week'         => 170.00000000,
+                'price_per_month'        => 150.00000000,
+            ],
+            [
+                'model_name'             => 'Hyundai Sonata',
+                'type_slug'              => 'sedan',
+                'image'                  => 'hyundai-sonata-2024.webp',
+                'seats'                  => 5,
+                'year'                   => 2024,
+                'allowance_km'           => 300,
+                'allowance_price_per_km' => 1.00,
+                'daily_insurance'        => 30.00000000,
+                'deductible_insurance'   => 1500.00000000,
+                'price_per_day'          => 180.00000000,
+                'price_per_week'         => 155.00000000,
+                'price_per_month'        => 140.00000000,
+            ],
+            [
+                'model_name'             => 'Nissan Sunny',
+                'type_slug'              => 'sedan',
+                'image'                  => 'nissan-sunny-2023.webp',
+                'seats'                  => 5,
+                'year'                   => 2023,
+                'allowance_km'           => 250,
+                'allowance_price_per_km' => 0.80,
+                'daily_insurance'        => 25.00000000,
+                'deductible_insurance'   => 2000.00000000,
+                'price_per_day'          => 120.00000000,
+                'price_per_week'         => 100.00000000,
+                'price_per_month'        => 90.00000000,
+            ],
 
-        Car::insert($data);
+            // ── Economy / Compact ───────────────────────────────
+            [
+                'model_name'             => 'Toyota Yaris',
+                'type_slug'              => 'car',
+                'image'                  => 'toyota-yaris-2024.webp',
+                'seats'                  => 5,
+                'year'                   => 2024,
+                'allowance_km'           => 200,
+                'allowance_price_per_km' => 0.75,
+                'daily_insurance'        => 20.00000000,
+                'deductible_insurance'   => 2000.00000000,
+                'price_per_day'          => 100.00000000,
+                'price_per_week'         => 85.00000000,
+                'price_per_month'        => 75.00000000,
+            ],
+
+            // ── SUVs ────────────────────────────────────────────
+            [
+                'model_name'             => 'Toyota RAV4',
+                'type_slug'              => 'suv',
+                'image'                  => 'toyota-rav4-2024.webp',
+                'seats'                  => 5,
+                'year'                   => 2024,
+                'allowance_km'           => 300,
+                'allowance_price_per_km' => 1.50,
+                'daily_insurance'        => 45.00000000,
+                'deductible_insurance'   => 2000.00000000,
+                'price_per_day'          => 300.00000000,
+                'price_per_week'         => 260.00000000,
+                'price_per_month'        => 230.00000000,
+            ],
+            [
+                'model_name'             => 'Nissan Patrol',
+                'type_slug'              => 'suv',
+                'image'                  => 'nissan-patrol-2024.webp',
+                'seats'                  => 7,
+                'year'                   => 2024,
+                'allowance_km'           => 350,
+                'allowance_price_per_km' => 2.00,
+                'daily_insurance'        => 60.00000000,
+                'deductible_insurance'   => 3000.00000000,
+                'price_per_day'          => 600.00000000,
+                'price_per_week'         => 520.00000000,
+                'price_per_month'        => 450.00000000,
+            ],
+            [
+                'model_name'             => 'Toyota Land Cruiser',
+                'type_slug'              => 'suv',
+                'image'                  => 'toyota-land-cruiser-2024.webp',
+                'seats'                  => 7,
+                'year'                   => 2024,
+                'allowance_km'           => 350,
+                'allowance_price_per_km' => 2.00,
+                'daily_insurance'        => 65.00000000,
+                'deductible_insurance'   => 3000.00000000,
+                'price_per_day'          => 700.00000000,
+                'price_per_week'         => 600.00000000,
+                'price_per_month'        => 520.00000000,
+            ],
+            [
+                'model_name'             => 'Mitsubishi Pajero',
+                'type_slug'              => 'suv',
+                'image'                  => 'mitsubishi-pajero-2023.webp',
+                'seats'                  => 7,
+                'year'                   => 2023,
+                'allowance_km'           => 300,
+                'allowance_price_per_km' => 1.50,
+                'daily_insurance'        => 50.00000000,
+                'deductible_insurance'   => 2500.00000000,
+                'price_per_day'          => 400.00000000,
+                'price_per_week'         => 350.00000000,
+                'price_per_month'        => 300.00000000,
+            ],
+
+            // ── Vans ────────────────────────────────────────────
+            [
+                'model_name'             => 'Toyota Hiace',
+                'type_slug'              => 'car',
+                'image'                  => 'toyota-hiace-2024.webp',
+                'seats'                  => 14,
+                'year'                   => 2024,
+                'allowance_km'           => 400,
+                'allowance_price_per_km' => 2.00,
+                'daily_insurance'        => 50.00000000,
+                'deductible_insurance'   => 3000.00000000,
+                'price_per_day'          => 450.00000000,
+                'price_per_week'         => 390.00000000,
+                'price_per_month'        => 350.00000000,
+            ],
+        ];
+    }
+
+    public function run(): void
+    {
+        // Build lookup maps
+        $typesBySlug  = CarType::whereIn('slug', ['sedan', 'suv', 'car'])->get()->keyBy('slug');
+        $modelsByName = CarModel::all()->keyBy('name');
+
+        // Verify required models exist
+        $requiredModels = collect($this->fleetTemplates())->pluck('model_name')->unique();
+        $missing = $requiredModels->diff($modelsByName->keys());
+        if ($missing->isNotEmpty()) {
+            $this->command->warn('Missing car models in DB: ' . $missing->join(', '));
+            $this->command->warn('Run CarModelsSeeder first, or add these models via the admin panel.');
+            $this->command->warn('Skipping CarSeeder.');
+            return;
+        }
+
+        // Get active branches (exclude under-construction)
+        $activeBranches = Branch::where('status', true)->get();
+        if ($activeBranches->isEmpty()) {
+            $this->command->warn('No active branches found. Run BranchSeeder first.');
+            return;
+        }
+
+        $templates    = $this->fleetTemplates();
+        $vendorId     = 1;
+        $insertCount  = 0;
+        $plateCounters = [];
+
+        foreach ($activeBranches as $branch) {
+            // Each active branch gets the full fleet
+            foreach ($templates as $tpl) {
+                $carModel = $modelsByName->get($tpl['model_name']);
+                $carType  = $typesBySlug->get($tpl['type_slug']);
+
+                if (!$carModel || !$carType) {
+                    continue;
+                }
+
+                // Generate sequential plate numbers per model
+                $modelKey = $tpl['model_name'];
+                if (!isset($plateCounters[$modelKey])) {
+                    $plateCounters[$modelKey] = 1;
+                }
+                $seq = str_pad($plateCounters[$modelKey]++, 3, '0', STR_PAD_LEFT);
+
+                // Arabic title
+                $titleAr = $tpl['model_name'] . ' ' . $tpl['year'];
+                $titleEn = $tpl['model_name'] . ' ' . $tpl['year'];
+                $carTitle = json_encode([
+                    'ar' => ['car_title' => $titleAr],
+                    'en' => ['car_title' => $titleEn],
+                ]);
+
+                Car::create([
+                    'vendor_id'              => $vendorId,
+                    'car_area_id'            => null,
+                    'car_type_id'            => $carType->id,
+                    'car_model_id'           => $carModel->id,
+                    'branch_id'              => $branch->id,
+                    'slug'                   => Str::slug($tpl['model_name'] . '-' . $branch->slug . '-' . $seq),
+                    'car_title'              => $carTitle,
+                    'car_model'              => $tpl['model_name'],
+                    'car_number'             => 'درة ' . $seq,
+                    'seat'                   => $tpl['seats'],
+                    'year'                   => $tpl['year'],
+                    'experience'             => null,
+                    'fees'                   => 0.00000000,
+                    'image'                  => $tpl['image'],
+                    'allowance_km'           => $tpl['allowance_km'],
+                    'allowance_price_per_km' => $tpl['allowance_price_per_km'],
+                    'daily_insurance'        => $tpl['daily_insurance'],
+                    'deductible_insurance'   => $tpl['deductible_insurance'],
+                    'price_per_day'          => $tpl['price_per_day'],
+                    'price_per_week'         => $tpl['price_per_week'],
+                    'price_per_month'        => $tpl['price_per_month'],
+                    'status'                 => true,
+                    'approval'               => 1,
+                ]);
+
+                $insertCount++;
+            }
+        }
+
+        $this->command->info("Seeded {$insertCount} cars across {$activeBranches->count()} active branches ({$this->countTemplates()} models each).");
+    }
+
+    private function countTemplates(): int
+    {
+        return count($this->fleetTemplates());
     }
 }

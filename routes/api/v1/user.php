@@ -210,7 +210,7 @@ Route::prefix('user')
             Route::post('search/car', 'searchCar');
             Route::get('car/details', 'viewCar');
             Route::post('temp/store', 'store');
-            Route::get('preview', 'preview');
+            Route::post('preview', 'preview');
             Route::post('confirm', 'confirm');
             // Automatic Gateway Response Routes
             Route::get('success/response/{gateway}', 'success')->withoutMiddleware(['auth:api'])->name('payment.success');

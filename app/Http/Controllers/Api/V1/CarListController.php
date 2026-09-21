@@ -152,6 +152,10 @@ class CarListController extends Controller
             }
         }
 
+        $carItems = method_exists($cars, 'getCollection')
+            ? $cars->getCollection()
+            : collect($cars->items());
+
         // Transform data for response
         $data = [
             'available_filters' => [
@@ -172,7 +176,7 @@ class CarListController extends Controller
                         ];
                     }),
             ],
-            'cars' => $cars->getCollection()->map(function ($car) use ($userLat, $userLng) {
+            'cars' => $carItems->map(function ($car) use ($userLat, $userLng) {
                 $feesRaw = (float) $car->fees;
                 $formattedFees = ((int) $feesRaw == $feesRaw) ? (string) ((int) $feesRaw) : number_format($feesRaw, 2, '.', '');
                 return [
@@ -183,13 +187,18 @@ class CarListController extends Controller
                     'car_number'   => $car->car_number,
                     'seat'         => $car->seat,
                     'year'         => $car->year,
-                    'fees'         => $formattedFees,
-                    'price'        => $formattedFees, // alias for Flutter convenience
+                    'fees'             => $formattedFees,
+                    'price'            => (float) ($car->price_per_day ?? 0),
+                    'price_per_day'    => (float) ($car->price_per_day ?? 0),
+                    'price_per_week'   => $car->price_per_week ? (float) $car->price_per_week : null,
+                    'price_per_month'  => $car->price_per_month ? (float) $car->price_per_month : null,
                     'image'        => $car->image,
                     'image_url'    => $car->image_url,
                     'status'       => $car->status,
                     'is_delivery'  => $car->isDeliveryAvailable(),
                     'delivery_price' => $car->getDeliveryPrice(),
+                    'daily_insurance'      => (float) ($car->daily_insurance ?? 0),
+                    'deductible_insurance' => (float) ($car->deductible_insurance ?? 0),
                     'car_type' => $car->type ? [
                         'id'   => $car->type->id,
                         'name' => $car->type->name,
@@ -198,7 +207,9 @@ class CarListController extends Controller
                     'car_model_info' => $car->carModel ? [
                         'id'        => $car->carModel->id,
                         'name'      => $car->carModel->name,
-                        'image_url' => $car->carModel->image_url,
+                        'image_url' => $car->carModel->image
+                            ? files_asset_path('car-models') . '/' . $car->carModel->image
+                            : files_asset_path('default'),
                     ] : null,
                     'area' => $car->area ? [
                         'id'   => $car->area->id,
@@ -397,6 +408,8 @@ class CarListController extends Controller
                 'status'       => $car->status,
                 'is_delivery'  => $car->isDeliveryAvailable(),
                 'delivery_price' => $car->getDeliveryPrice(),
+                'daily_insurance'      => (float) ($car->daily_insurance ?? 0),
+                'deductible_insurance' => (float) ($car->deductible_insurance ?? 0),
                 'car_type' => $car->type ? [
                     'id'   => $car->type->id,
                     'name' => $car->type->name,

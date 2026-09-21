@@ -16,10 +16,10 @@ use Carbon\Carbon;
 use Exception;
 use App\Events\User\NotificationEvent as UserNotificationEvent;
 use App\Models\Admin\BasicSettings;
-use App\Models\Vendor\Vendor;
 use App\Models\Vendor\VendorNotification;
 use App\Notifications\User\AddMoney\RejectedByAdminMail;
-use App\Providers\Admin\BasicSettingsProvider;
+use App\Models\Vendor\VendorWallet;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -27,56 +27,50 @@ class AddMoneyController extends Controller
 {
     /**
      * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
      */
     public function index()
     {
         $page_title = __('All Logs');
         $page_slug  = Str::slug(CarBookingConst::CAR_INDEX);
         $transactions = Transaction::with('user:id,firstname,email,username,mobile', 'payment_gateway:id,name')->where('type', 'add-money')->paginate(20);
-        return view('admin.sections.add-money.index', compact('page_title','page_slug','transactions'));
+        return view('admin.sections.add-money.index', compact('page_title', 'page_slug', 'transactions'));
     }
 
     /**
      * Pending Add Money Logs View.
-     * @return view $pending-add-money-logs
      */
     public function pending()
     {
         $page_title = __('Pending Logs');
         $page_slug  = Str::slug(CarBookingConst::CAR_PENDING);
-        $transactions = Transaction::with('user:id,firstname,email,username,mobile', 'payment_gateway:id,name')->where('type', 'add-money')->where('status', 2)->paginate(20);
-        return view('admin.sections.add-money.index', compact('page_title','page_slug','transactions'));
+        $transactions = Transaction::with('user:id,firstname,email,username,mobile', 'payment_gateway:id,name')->where('type', 'add-money')->where('status', PaymentGatewayConst::STATUSPENDING)->paginate(20);
+        return view('admin.sections.add-money.index', compact('page_title', 'page_slug', 'transactions'));
     }
 
     /**
      * Complete Add Money Logs View.
-     * @return view $complete-add-money-logs
      */
     public function complete()
     {
         $page_title = __('Complete Logs');
         $page_slug  = Str::slug(CarBookingConst::CAR_COMPLETE);
-        $transactions = Transaction::with('user:id,firstname,email,username,mobile', 'payment_gateway:id,name')->where('type', 'add-money')->where('status', 1)->paginate(20);
-        return view('admin.sections.add-money.index', compact('page_title','page_slug','transactions'));
+        $transactions = Transaction::with('user:id,firstname,email,username,mobile', 'payment_gateway:id,name')->where('type', 'add-money')->where('status', PaymentGatewayConst::STATUSSUCCESS)->paginate(20);
+        return view('admin.sections.add-money.index', compact('page_title', 'page_slug', 'transactions'));
     }
 
     /**
      * Canceled Add Money Logs View.
-     * @return view $canceled-add-money-logs
      */
     public function canceled()
     {
         $page_title = __('Canceled Logs');
         $page_slug  = Str::slug(CarBookingConst::CAR_CENCEL);
-        $transactions = Transaction::with('user:id,first_name,email,username,mobile', 'payment_gateway:id,name')->where('type', 'add-money')->where('status', 0)->paginate(20);
-        return view('admin.sections.add-money.index', compact('page_title','page_slug','transactions'));
+        $transactions = Transaction::with('user:id,firstname,email,username,mobile', 'payment_gateway:id,name')->where('type', 'add-money')->where('status', PaymentGatewayConst::STATUSREJECTED)->paginate(20);
+        return view('admin.sections.add-money.index', compact('page_title', 'page_slug', 'transactions'));
     }
 
     /**
-     * Canceled Add Money Logs View.
-     * @return view $canceled-add-money-logs
+     * Refund Logs View.
      */
     public function refund()
     {
@@ -90,7 +84,7 @@ class AddMoneyController extends Controller
                 });
             })
             ->paginate(20);
-        return view('admin.sections.add-money.index', compact('page_title','page_slug','transactions'));
+        return view('admin.sections.add-money.index', compact('page_title', 'page_slug', 'transactions'));
     }
 
     public function addMoneyDetails($id)
@@ -99,6 +93,11 @@ class AddMoneyController extends Controller
         $page_title = __('Payment details for') . '  ' . $data->trx_id;
         return view('admin.sections.add-money.details', compact('page_title', 'data'));
     }
+
+    /**
+     * Approve a pending add-money transaction.
+     * Uses DB::transaction + lockForUpdate to prevent concurrent double-approval.
+     */
     public function approved(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -107,72 +106,91 @@ class AddMoneyController extends Controller
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
-        $data = Transaction::where('id', $request->id)
-            ->where('status', 2)
-            ->where('type', 'add-money')
-            ->first();
 
         try {
-            if ($data->bookings->status == CarBookingConst::STATUSCOMPLETE) {
+            DB::transaction(function () use ($request) {
+                $data = Transaction::lockForUpdate()
+                    ->where('id', $request->id)
+                    ->where('status', PaymentGatewayConst::STATUSPENDING)
+                    ->where('type', 'add-money')
+                    ->first();
+
+                if (!$data) {
+                    throw new Exception(__('Transaction not found or already processed.'));
+                }
+
                 $amount = $data->receive_amount;
-                $vendor_wallet = $data->bookings->cars->vendor->wallets;
-                //update transaction
-                $vendor_wallet->update([
-                    'balance' => $amount + $vendor_wallet->balance,
+
+                // Safely credit vendor wallet if booking is complete
+                if (
+                    $data->bookings
+                    && $data->bookings->cars
+                    && $data->bookings->cars->vendor
+                    && $data->bookings->status == CarBookingConst::STATUSCOMPLETE
+                ) {
+                    $vendorWallet = VendorWallet::lockForUpdate()
+                        ->where('vendor_id', $data->bookings->cars->vendor->id)
+                        ->first();
+
+                    if ($vendorWallet) {
+                        $newBalance = bcadd((string) $vendorWallet->balance, (string) $amount, 8);
+                        $vendorWallet->update(['balance' => $newBalance]);
+                    }
+                }
+
+                $data->update(['status' => PaymentGatewayConst::STATUSSUCCESS]);
+
+                $user = User::where('id', $data->user_id)->first();
+                $basic_setting = BasicSettings::first();
+
+                // User Notification
+                $notification_content = [
+                    'title'   => "Payment Approved",
+                    'message' => "Admin approved your payment",
+                    'time'    => Carbon::now()->diffForHumans(),
+                    'image'   => files_asset_path('profile-default'),
+                ];
+
+                UserNotification::create([
+                    'type'    => NotificationConst::PAYMENT,
+                    'user_id' => $user->id,
+                    'message' => $notification_content,
                 ]);
-            }
-            $data->status = 1;
-            $data->save();
-            $user = User::where('id', $data->user_id)->first();
 
+                // Mail notification
+                if ($basic_setting->email_notification == true) {
+                    $user->notify(new ApprovedByAdminMail($user, $data));
+                }
 
+                // Vendor Notification
+                if (isset($vendorWallet)) {
+                    $vendor_notification = $notification_content;
+                    $vendor_notification['message'] = 'Due payment added to your wallet';
+                    VendorNotification::create([
+                        'type'      => NotificationConst::PAYMENT,
+                        'vendor_id' => $data->bookings->cars->vendor->id,
+                        'message'   => $vendor_notification,
+                    ]);
+                }
 
-            // notification created
-            $notification_content = [
-                'title'   => "Payment Approved",
-                'message' => "Admin approved your payment",
-                'time'    => Carbon::now()->diffForHumans(),
-                'image'   => files_asset_path('profile-default'),
-            ];
-            $basic_setting = BasicSettings::first();
-
-
-        // User Notification //
-            UserNotification::create([
-                'type'    => NotificationConst::PAYMENT,
-                'user_id' => $user->id,
-                'message' => $notification_content,
-            ]);
-
-            // mail notification
-            if ($basic_setting->email_notification == true) {
-                $user->notify(new ApprovedByAdminMail($user,$data));
-
-            }
-
-
-        // Vendor Notification
-            $notification_content['message'] = 'Due payment added to your wallet';
-            VendorNotification::create([
-                'type'      => NotificationConst::PAYMENT,
-                'vendor_id' => $data->bookings->cars->vendor->id,
-                'message'   => $notification_content,
-            ]);
-
-            // Push Notifications
-            event(new UserNotificationEvent($notification_content,$user));
-            send_push_notification(["user-".$user->id],[
-                'title'     => $notification_content['title'],
-                'body'      => $notification_content['message'],
-                'icon'      => $notification_content['image'],
-            ]);
+                // Push Notifications
+                event(new UserNotificationEvent($notification_content, $user));
+                send_push_notification(["user-" . $user->id], [
+                    'title' => $notification_content['title'],
+                    'body'  => $notification_content['message'],
+                    'icon'  => $notification_content['image'],
+                ]);
+            });
         } catch (Exception $e) {
             return back()->with(['error' => [$e->getMessage()]]);
         }
-        return redirect()
-            ->back()
-            ->with(['success' => ['Payment approved successfully']]);
+
+        return back()->with(['success' => ['Payment approved successfully']]);
     }
+
+    /**
+     * Reject a pending add-money transaction.
+     */
     public function rejected(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -182,21 +200,28 @@ class AddMoneyController extends Controller
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
-        $data = Transaction::where('id', $request->id)
-            ->where('status', 2)
-            ->where('type', 'add-money')
-            ->first();
-        $data->status = 4;
-        $data->reject_reason = $request->reject_reason;
-        $vendor = $data->bookings->cars->vendor;
+
         try {
-            $data->save();
+            $data = Transaction::where('id', $request->id)
+                ->where('status', PaymentGatewayConst::STATUSPENDING)
+                ->where('type', 'add-money')
+                ->first();
+
+            if (!$data) {
+                return back()->with(['error' => [__('Transaction not found or already processed.')]]);
+            }
+
+            $data->update([
+                'status'        => PaymentGatewayConst::STATUSREJECTED,
+                'reject_reason' => $request->reject_reason,
+            ]);
+
             $user = User::where('id', $data->user_id)->first();
 
-            // mail notification
-            $user->notify(new RejectedByAdminMail($user,$data));
+            // Mail notification
+            $user->notify(new RejectedByAdminMail($user, $data));
 
-            // notification created
+            // Notification created
             $notification_content = [
                 'title'   => "Payment Rejected",
                 'message' => "Admin Rejected your payment",
@@ -209,30 +234,32 @@ class AddMoneyController extends Controller
                 'user_id' => $user->id,
                 'message' => $notification_content,
             ]);
-            //Push Notifications
-            event(new UserNotificationEvent($notification_content,$user));
-            send_push_notification(["user-".$user->id],[
-                'title'     => $notification_content['title'],
-                'body'      => $notification_content['message'],
-                'icon'      => $notification_content['image'],
-            ]);
 
-            return redirect()
-                ->back()
-                ->with(['success' => ['Payment request rejected successfully']]);
+            // Push Notifications
+            event(new UserNotificationEvent($notification_content, $user));
+            send_push_notification(["user-" . $user->id], [
+                'title' => $notification_content['title'],
+                'body'  => $notification_content['message'],
+                'icon'  => $notification_content['image'],
+            ]);
         } catch (Exception $e) {
             return back()->with(['error' => [$e->getMessage()]]);
         }
+
+        return back()->with(['success' => ['Payment request rejected successfully']]);
     }
-    public function updateStatus(Request $request){
-        $validator = Validator::make($request->all(),[
+
+    public function updateStatus(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
             'target'       => "required|exists:transactions,trx_id",
             'status'       => "required",
         ]);
 
-        if($validator->fails()) return back()->withErrors($validator)->withInput()->with('modal','status-change');
+        if ($validator->fails()) return back()->withErrors($validator)->withInput()->with('modal', 'status-change');
         $validated = $validator->validate();
-        $info = Transaction::where('trx_id',$validated['target'])->first();
+        $info = Transaction::where('trx_id', $validated['target'])->first();
+
         try {
             $info->update([
                 'refundable' => $validated['status'],
@@ -250,11 +277,12 @@ class AddMoneyController extends Controller
                     'message' => $notification_content,
                 ]);
             }
-        }catch (Exception $e) {
+        } catch (Exception $e) {
             return back()->with(['error' => [__('Something went wrong! Please try again')]]);
         }
         return back()->with(['success' => [__('Status updated successfully!')]]);
     }
+
     public function search(Request $request)
     {
         $validator = Validator::make($request->all(), [

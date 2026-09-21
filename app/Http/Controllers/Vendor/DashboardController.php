@@ -137,7 +137,7 @@ class DashboardController extends Controller
 
             $start_month->addDay(); // Move to next day
         }
-
+        $default_wallet = VendorWallet::where('vendor_id', auth()->guard('vendor')->user()->id)->first();
         return view('vendor-end.sections.dashboard.index', compact('page_title', 'breadcrumb', 'round_trips', 'booking_rejects', 'bookings', 'ride_complete', 'total_income', 'chartData', 'booking_accept', 'booking_complete', 'booking_reject', 'month_day'));
     }
 

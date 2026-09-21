@@ -45,7 +45,7 @@ class CancellationRefundService
             throw new RuntimeException('No active cancellation policy found. Please configure one in the admin panel.');
         }
 
-        $rentalAmount    = (float) $booking->amount;
+        $rentalAmount    = (float) ($booking->total_amount ?? $booking->amount);
         $hoursUntilPickup = $this->hoursUntilPickup($booking);
         $isWithinWindow  = $hoursUntilPickup < $policy->cancellation_window_hours;
 

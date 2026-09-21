@@ -204,9 +204,6 @@ return [
         // Image Intervention
         Intervention\Image\ImageServiceProvider::class,
 
-        // Convert Image to WEBP
-        Buglinjo\LaravelWebp\WebpServiceProvider::class,
-
         // Custom Service Provider
         App\Providers\CustomServiceProvider::class,
         \Torann\GeoIP\GeoIPServiceProvider::class,
@@ -236,7 +233,6 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         'Image'     => Intervention\Image\Facades\Image::class,
-        'Webp'      => Buglinjo\LaravelWebp\Facades\Webp::class,
         'Response'  => App\Http\Helpers\Response::class,
         'Agent'     => Jenssegers\Agent\Facades\Agent::class,
         'Excel'     => Maatwebsite\Excel\Facades\Excel::class,

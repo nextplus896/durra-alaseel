@@ -98,12 +98,13 @@ class MoyasarService
      *
      * @param array $payload Decoded webhook body
      * @return bool
+     * @throws Exception If webhook secret is not configured
      */
     public function verifyWebhookSignature(array $payload): bool
     {
         if (empty($this->webhookSecret)) {
-            Log::warning('Moyasar webhook secret not configured — skipping verification.');
-            return false;
+            Log::critical('Moyasar webhook secret not configured — rejecting all webhooks!');
+            throw new Exception('Moyasar webhook secret not configured. Set MOYASAR_WEBHOOK_SECRET in .env');
         }
 
         $receivedToken = $payload['secret_token'] ?? '';
@@ -166,7 +167,9 @@ class MoyasarService
         $this->ensureConfigured();
 
         try {
-            $response = Http::withBasicAuth($this->apiKey, '')
+            $response = Http::timeout(10)
+                ->connectTimeout(5)
+                ->withBasicAuth($this->apiKey, '')
                 ->withHeaders([
                     'Content-Type' => 'application/json',
                     'Accept' => 'application/json',

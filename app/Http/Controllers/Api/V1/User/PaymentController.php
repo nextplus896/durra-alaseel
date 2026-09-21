@@ -30,7 +30,7 @@ class PaymentController extends Controller
      *
      * POST /api/v1/user/payments/{paymentId}/refund
      */
-    public function refund(Request $request, int $paymentId)
+    public function refund(Request $request, string $paymentId)
     {
         $user = Auth::guard('api')->user();
 
@@ -59,30 +59,21 @@ class PaymentController extends Controller
 
         try {
             DB::transaction(function () use ($paymentTx, $user, $amount) {
-                // Call Moyasar refund API
-                if ($paymentTx->payment_id) {
-                    $this->moyasarService->refundPayment($paymentTx->payment_id, $amount);
-                }
-
-                // Reverse wallet credit (withdraw the refunded amount)
-                $dto = WalletTransactionDTO::forRefund(
-                    amount: $amount,
-                    description: __('Payment refund — Moyasar invoice :id', ['id' => $paymentTx->invoice_id], 'ar'),
-                    referenceType: 'App\\Models\\PaymentTransaction',
-                    referenceId: $paymentTx->id,
-                    idempotencyKey: 'payment-refund-' . $paymentTx->id,
-                );
-
-                // For a payment refund, we WITHDRAW from the wallet (money goes back to card)
+                // 1. LOCAL first — rollback-safe if anything fails
                 $this->walletService->withdraw($user, $amount, new WalletTransactionDTO(
                     type: 'refund',
                     amount: $amount,
-                    description: __('Payment refund reversal — Moyasar invoice :id', ['id' => $paymentTx->invoice_id], 'ar'),
+                    description: __('Payment refund — Moyasar invoice :id', ['id' => $paymentTx->invoice_id], 'ar'),
                     referenceType: 'App\\Models\\PaymentTransaction',
                     referenceId: $paymentTx->id,
                     paymentMethod: 'moyasar',
                     idempotencyKey: 'payment-refund-' . $paymentTx->id,
                 ));
+
+                // 2. EXTERNAL last — if this fails, local changes roll back safely
+                // if ($paymentTx->payment_id) {
+                //     $this->moyasarService->refundPayment($paymentTx->payment_id, $amount);
+                // }
 
                 $paymentTx->markRefunded();
             });

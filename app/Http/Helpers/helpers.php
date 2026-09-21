@@ -23,7 +23,6 @@ use Intervention\Image\Facades\Image;
 use App\Constants\PaymentGatewayConst;
 use App\Constants\SiteSectionConst;
 use App\Imports\LanguageImport;
-use Buglinjo\LaravelWebp\Facades\Webp;
 use App\Models\Admin\AdminNotification;
 use App\Models\Admin\PaymentGateway;
 use App\Models\Admin\SetupPage;
@@ -234,8 +233,7 @@ function upload_files_from_path_dynamic($files_path, $destination_path, $old_fil
         $file_mime_type_array = explode('/', $file_mime_type);
         if (array_shift($file_mime_type_array) == "image" && $file_extension != "svg") { // If Image
 
-            $file = Image::make($path)->orientate();
-
+            $file = Image::make($path);
             $width = $file->width();
             $height = $file->height();
 
@@ -289,25 +287,16 @@ function upload_files_from_path_dynamic($files_path, $destination_path, $old_fil
                 }
             }
 
-            $file_instance = new UploadedFile(
-                $path,
-                $file_base_name,
-                $file_mime_type,
-                $file_size,
-            );
-
             $store_file_name = $file_name . ".webp";
-            try {
-                // dd($save_path);
-                if ($file_extension != "webp") {
-                    $webp = Webp::make($file_instance)->save($save_path . "/" . $store_file_name);
-                    array_push($output_files_name, $store_file_name);
-                } else {
-                    File::move($file_instance, $save_path . "/" . $file_base_name);
-                    array_push($output_files_name, $file_base_name);
-                }
-            } catch (Exception $e) {
-                return back()->with(['error' => ['Something went worng! Faild to upload file.']]);
+            $final_destination = $save_path . "/" . $store_file_name;
+
+            if ($file_extension != "webp") {
+                // Convert to WebP using Intervention Image
+                $file->encode('webp', 75)->save($final_destination);
+                array_push($output_files_name, $store_file_name);
+            } else {
+                File::move($path, $final_destination);
+                array_push($output_files_name, $store_file_name);
             }
         } else { // IF Other Files
             $file_instance = new UploadedFile(
@@ -710,8 +699,7 @@ function upload_files_from_path_static($files_path, $destination_path, $old_file
         $file_mime_type_array = explode('/', $file_mime_type);
         if (array_shift($file_mime_type_array) == "image" && $file_extension != "svg") { // If Image
 
-            $file = Image::make($path)->orientate();
-
+            $file = Image::make($path);
             $width = $file->width();
             $height = $file->height();
 
@@ -791,26 +779,20 @@ function upload_files_from_path_static($files_path, $destination_path, $old_file
                 return back()->with(['error' => ['Something went worng! Faild to save file.']]);
             }
 
-            $file_instance = new UploadedFile(
-                $path,
-                $file_base_name,
-                $file_mime_type,
-                $file_size,
-            );
-
             $store_file_name = $file_name . ".webp";
+            $final_destination = $save_path . "/" . $store_file_name;
+
             try {
                 if ($file_extension != "webp") {
-                    // dd($save_path);
-                    $webp = Webp::make($file_instance)->save($save_path . "/" . $store_file_name);
+                    // Convert to WebP using Intervention Image
+                    $file->encode('webp', 75)->save($final_destination);
                     array_push($output_files_name, $store_file_name);
                 } else {
-                    File::move($file_instance, $save_path . "/" . $file_base_name);
-                    array_push($output_files_name, $file_base_name);
+                    File::move($path, $final_destination);
+                    array_push($output_files_name, $store_file_name);
                 }
             } catch (Exception $e) {
-                // dd($e);
-                return back()->with(['error' => ['Something went worng! Faild to upload file.']]);
+                return back()->with(['error' => ['Something went wrong! Failed to upload file. Error: ' . $e->getMessage()]]);
             }
         } else { // IF Other Files
             $file_instance = new UploadedFile(

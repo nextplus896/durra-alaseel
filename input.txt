@@ -1,0 +1,5 @@
+app/Models/CarBookingTransaction.php
+database/migrations/2026_02_23_000001_create_car_booking_transactions_table.php
+database/migrations/2026_02_23_000003_merge_extensions_into_transactions_table.php
+public/frontend/sass/pages/dashboard.scss
+public/backend/css/style.css

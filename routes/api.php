@@ -19,6 +19,18 @@ use App\Http\Controllers\Webhooks\MoyasarWebhookController;
 |
 */
 
+Route::post('/passport-test', function (Illuminate\Http\Request $request) {
+    return response()->json([
+        'getHost' => $request->getHost(),
+        'httpHost' => $request->getHttpHost(),
+        'schemeAndHost' => $request->getSchemeAndHttpHost(),
+        'uri' => $request->getUri(),
+        'headers' => $request->headers->all(),
+        'server_http_host' => $_SERVER['HTTP_HOST'] ?? null,
+        'server_name' => $_SERVER['SERVER_NAME'] ?? null,
+    ]);
+});
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });

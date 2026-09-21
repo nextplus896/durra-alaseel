@@ -54,16 +54,11 @@ class CarModel extends Model
 
         if (!$image) return files_asset_path('default');
 
-        // If already a full URL or absolute path, return as-is
-        if (Str::startsWith($image, 'http') || Str::startsWith($image, '/')) {
+        // If already a full URL, return as-is
+        if (Str::startsWith($image, 'http')) {
             return $image;
         }
 
-        $relativePath = files_path('car-models')->path . '/' . $image;
-        if (file_exists(public_path($relativePath))) {
-            return asset($relativePath);
-        }
-
-        return files_asset_path('default');
+        return files_asset_path('car-models') . '/' . $image;
     }
 }

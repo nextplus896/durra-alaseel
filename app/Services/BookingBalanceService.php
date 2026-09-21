@@ -9,6 +9,8 @@ use App\Models\BalanceTransaction;
 use App\Models\Admin\BasicSettings;
 use App\Models\Vendor\Cars\Car;
 use App\DTO\WalletTransactionDTO;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class BookingBalanceService
 {
@@ -27,27 +29,65 @@ class BookingBalanceService
         $priceRule = '';
         $basePrice = 0;
 
+        // Cast to float explicitly — decimal fields can sometimes behave unexpectedly
+        $dailyPrice   = (float) ($car->price_per_day ?? 0);
+        $weeklyPrice  = (float) ($car->price_per_week ?? 0);
+        $monthlyPrice = (float) ($car->price_per_month ?? 0);
+
+        Log::info('calculateRentalFees', [
+            'car_id'          => $car->id,
+            'rental_days'     => $rentalDays,
+            'price_per_day'   => $dailyPrice,
+            'price_per_week'  => $weeklyPrice,
+            'price_per_month' => $monthlyPrice,
+        ]);
+
         if ($rentalDays <= 7) {
             // Daily pricing (1-7 days)
-            $basePrice = $car->price_per_day;
+            $basePrice = $dailyPrice;
             $priceRule = 'daily';
         } elseif ($rentalDays <= 30) {
-            // Weekly pricing (8-30 days)
-            $basePrice = $car->price_per_week;
-            $priceRule = 'weekly';
+            // Weekly pricing (8-30 days) — fallback to daily if weekly price not set
+            if ($weeklyPrice > 0) {
+                $basePrice = $weeklyPrice;
+                $priceRule = 'weekly';
+            } else {
+                $basePrice = $dailyPrice;
+                $priceRule = 'daily_fallback_weekly_missing';
+                Log::warning('calculateRentalFees: price_per_week is 0, falling back to daily', [
+                    'car_id' => $car->id,
+                    'rental_days' => $rentalDays,
+                ]);
+            }
         } else {
-            // Monthly pricing (31+ days)
-            $basePrice = $car->price_per_month;
-            $priceRule = 'monthly';
+            // Monthly pricing (31+ days) — cascade fallback: monthly → weekly → daily
+            if ($monthlyPrice > 0) {
+                $basePrice = $monthlyPrice;
+                $priceRule = 'monthly';
+            } elseif ($weeklyPrice > 0) {
+                $basePrice = $weeklyPrice;
+                $priceRule = 'weekly_fallback_monthly_missing';
+                Log::warning('calculateRentalFees: price_per_month is 0, falling back to weekly', [
+                    'car_id' => $car->id,
+                    'rental_days' => $rentalDays,
+                ]);
+            } else {
+                $basePrice = $dailyPrice;
+                $priceRule = 'daily_fallback_both_missing';
+                Log::warning('calculateRentalFees: price_per_week AND price_per_month are 0, falling back to daily', [
+                    'car_id' => $car->id,
+                    'rental_days' => $rentalDays,
+                ]);
+            }
         }
 
         $rentalFees = round($rentalDays * $basePrice, 2);
 
         return [
-            'rental_fees' => $rentalFees,
+            'rental_fees'       => $rentalFees,
             'price_rule_applied' => $priceRule,
-            'base_price' => $basePrice,
-            'rental_days' => $rentalDays,
+            'base_price'        => $basePrice,
+            'rental_days'       => $rentalDays,
         ];
     }
 
@@ -123,7 +163,7 @@ class BookingBalanceService
             'rental_fees'    => $rentalFees,
             'delivery_price' => $deliveryPrice,
             'charges'        => $charges,
-            'insurance_total'=> $insuranceTotal,
+            'insurance_total' => $insuranceTotal,
             'subtotal'       => $subtotal,
             'tax_percentage' => $taxCalculation['tax_percentage'],
             'tax_amount'     => $taxCalculation['tax_amount'],
@@ -173,7 +213,7 @@ class BookingBalanceService
             amount: $amount,
             description: __('Booking #:trx has been extended by :days', ['trx' => $booking->trip_id, 'days' => $arabicDays], 'ar'),
             bookingId: $booking->id,
-            idempotencyKey: 'extension-deduct-' . $booking->id . '-' . now()->timestamp,
+            idempotencyKey: 'extension-deduct-' . $booking->id . '-' . Str::uuid()->toString(),
         );
 
         return $this->walletService->withdraw($user, $amount, $dto);

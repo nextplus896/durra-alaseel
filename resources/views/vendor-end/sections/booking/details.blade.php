@@ -35,7 +35,7 @@
             <div class="col-md-6 mb-3 mb-md-0">
                 <h3 class="title mb-1 d-flex align-items-center gap-2">
                     {{ __('Booking Details') }}
-                    <span class="badge bg-primary bg-opacity-10 text-primary fs-6 px-3 py-2 rounded-pill">
+                    <span class="badge bg-primary bg-opacity-10 text-white fs-6 px-3 py-2 rounded-pill">
                         {{ $booking->trx_id ?? ($booking->trip_id ?? '#' . $booking->id) }}
                     </span>
                 </h3>
@@ -156,7 +156,7 @@
                                             class="w-100 h-100 object-fit-cover">
                                     @else
                                         <div
-                                            class="w-100 h-100 bg-primary bg-opacity-10 d-flex align-items-center justify-content-center fw-bold fs-1 text-primary">
+                                            class="w-100 h-100 bg-primary bg-opacity-10 d-flex align-items-center justify-content-center fw-bold fs-1 text-white">
                                             {{ substr($booking->user->firstname ?? 'U', 0, 1) }}
                                         </div>
                                     @endif
@@ -179,7 +179,7 @@
                                             : $kycObject ?? 'Unverified';
                                     @endphp
                                     <span
-                                        class="badge {{ $kycStatus == 1 ? 'bg-success bg-opacity-10 text-success' : 'bg-warning bg-opacity-10 text-warning' }} rounded-pill px-3 py-2 border {{ $kycStatus == 1 ? 'border-success border-opacity-25' : 'border-warning border-opacity-25' }}">
+                                        class="badge {{ $kycStatus == 1 ? 'bg-success bg-opacity-10 text-success' : 'bg-warning bg-opacity-10 text-white' }} rounded-pill px-3 py-2 border {{ $kycStatus == 1 ? 'border-success border-opacity-25' : 'border-warning border-opacity-25' }}">
                                         <i
                                             class="las {{ $kycStatus == 1 ? 'la-shield-alt' : 'la-exclamation-triangle' }} me-1"></i>
                                         {{ $kycLabel }}
@@ -326,21 +326,21 @@
                         <div class="d-flex flex-wrap gap-2 mt-2">
                             @if (!empty($car?->fuel_type))
                                 <span
-                                    class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-3 py-2 fw-medium">
+                                    class="badge bg-primary bg-opacity-10 text-white border border-primary border-opacity-25 rounded-pill px-3 py-2 fw-medium">
                                     <i class="las la-gas-pump me-1"></i> {{ $car->fuel_type }}
                                 </span>
                             @endif
 
                             @if (!empty($car?->seat))
                                 <span
-                                    class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-3 py-2 fw-medium">
+                                    class="badge bg-primary bg-opacity-10 text-white border border-primary border-opacity-25 rounded-pill px-3 py-2 fw-medium">
                                     <i class="las la-users me-1"></i> {{ $car->seat }} {{ __('Seats') }}
                                 </span>
                             @endif
 
                             @if (!empty($car?->top_speed))
                                 <span
-                                    class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-3 py-2 fw-medium">
+                                    class="badge bg-primary bg-opacity-10 text-white border border-primary border-opacity-25 rounded-pill px-3 py-2 fw-medium">
                                     <i class="las la-tachometer-alt me-1"></i> {{ $car->top_speed }} km/h
                                 </span>
                             @endif
@@ -354,6 +354,7 @@
             </div>
 
             {{-- Right Column: Trip Info --}}
+
             <div class="col-lg-8">
                 <div class="card border-0 shadow-sm h-100 rounded-4">
                     <div class="card-body p-4 p-md-5">
@@ -529,6 +530,122 @@
                         </ul>
 
                         <hr class="my-5 border-secondary opacity-10">
+
+                        {{-- ============================================================ --}}
+                        {{-- INSURANCE & DELIVERY SUMMARY CARDS                            --}}
+                        {{-- ============================================================ --}}
+                        <div class="row g-3 mb-4">
+                            {{-- Insurance Card --}}
+                            <div class="col-md-6">
+                                <div class="card border-0 shadow-sm rounded-4 h-100">
+                                    <div class="card-body p-4">
+                                        <div class="d-flex align-items-center gap-3 mb-3">
+                                            <div
+                                                class="bg-primary bg-opacity-10 rounded-circle p-3 d-flex align-items-center justify-content-center">
+                                                <i class="las la-shield-alt fs-4 text-white"></i>
+                                            </div>
+                                            <h6 class="fw-bold text-dark mb-0">{{ __('Insurance') }}</h6>
+                                        </div>
+                                        @if ($booking->insurance_total > 0)
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="text-muted small">{{ __('Type') }}</span>
+                                                <span class="fw-semibold text-dark">
+                                                    @if ($booking->insurance_type === 'daily')
+                                                        {{ __('Daily Insurance') }}
+                                                    @elseif($booking->insurance_type === 'deductible')
+                                                        {{ __('Deductible Insurance') }}
+                                                    @else
+                                                        {{ ucfirst($booking->insurance_type) }}
+                                                    @endif
+                                                </span>
+                                            </div>
+                                            @if ($booking->insurance_type === 'daily')
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <span class="text-muted small">{{ __('Daily Rate') }}</span>
+                                                    <span
+                                                        class="fw-semibold text-dark">{{ get_amount($booking->daily_insurance) }}
+                                                        {{ $booking->currency }}</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <span class="text-muted small">{{ __('Duration') }}</span>
+                                                    <span class="fw-semibold text-dark">{{ $rentalDays + $extensionDays }}
+                                                        {{ __('Days') }}</span>
+                                                </div>
+                                            @endif
+                                            @if ($booking->insurance_type === 'deductible' && $booking->deductible_insurance > 0)
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <span class="text-muted small">{{ __('Deductible Amount') }}</span>
+                                                    <span
+                                                        class="fw-semibold text-dark">{{ get_amount($booking->deductible_insurance) }}
+                                                        {{ $booking->currency }}</span>
+                                                </div>
+                                            @endif
+                                            <div class="border-top border-light pt-2 mt-2">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span class="fw-bold text-dark">{{ __('Total Insurance') }}</span>
+                                                    <span
+                                                        class="fw-bold text-primary fs-5">{{ get_amount($booking->insurance_total) }}
+                                                        {{ $booking->currency }}</span>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <p class="text-muted small mb-0 fst-italic">
+                                                {{ __('No insurance selected for this booking') }}</p>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Delivery Card --}}
+                            <div class="col-md-6">
+                                <div class="card border-0 shadow-sm rounded-4 h-100">
+                                    <div class="card-body p-4">
+                                        <div class="d-flex align-items-center gap-3 mb-3">
+                                            <div
+                                                class="bg-warning bg-opacity-10 rounded-circle p-3 d-flex align-items-center justify-content-center">
+                                                <i class="las la-truck fs-4 text-white"></i>
+                                            </div>
+                                            <h6 class="fw-bold text-dark mb-0">{{ __('Delivery') }}</h6>
+                                        </div>
+                                        @if ($booking->is_delivery)
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="text-muted small">{{ __('Status') }}</span>
+                                                <span
+                                                    class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-1">
+                                                    <i class="las la-check me-1"></i>{{ __('Delivery Enabled') }}
+                                                </span>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="text-muted small">{{ __('Delivery Fee') }}</span>
+                                                <span
+                                                    class="fw-semibold text-dark">{{ get_amount($booking->delivery_fee) }}
+                                                    {{ $booking->currency }}</span>
+                                            </div>
+                                            <div class="border-top border-light pt-2 mt-2">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span class="fw-bold text-dark">{{ __('Total Delivery') }}</span>
+                                                    <span
+                                                        class="fw-bold text-primary fs-5">{{ get_amount($booking->delivery_fee) }}
+                                                        {{ $booking->currency }}</span>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="text-muted small">{{ __('Status') }}</span>
+                                                <span
+                                                    class="badge bg-secondary bg-opacity-10 text-white border border-secondary border-opacity-25 rounded-pill px-3 py-1">
+                                                    <i class="las la-times me-1"></i>{{ __('Pickup at Branch') }}
+                                                </span>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="text-muted small">{{ __('Delivery Fee') }}</span>
+                                                <span class="fw-semibold text-dark">0.00 {{ $booking->currency }}</span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                         {{-- ============================================================ --}}
                         {{-- PRICING BREAKDOWN — per-transaction table                    --}}

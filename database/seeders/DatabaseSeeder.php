@@ -44,39 +44,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+
+
+
+
+
+
+
+
         // demo seeder
-        // $this->call([
-        //     AdminSeeder::class,
-        //     RoleSeeder::class,
-        //     TransactionSettingSeeder::class,
-        //     AnnouncementCategorySeeder::class,
-        //     AnnouncementSeeder::class,
-        //     CurrencySeeder::class,
-        //     BasicSettingsSeeder::class,
-        //     SetupSeoSeeder::class,
-        //     AppSettingsSeeder::class,
-        //     AppOnBoardSeeder::class,
-        //     SiteSectionsSeeder::class,
-        //     SetupKycSeeder::class,
-        //     ExtensionSeeder::class,
-        //     AdminHasRoleSeeder::class,
-        //     UserSeeder::class,
-        //     VendorSeeder::class,
-        //     VendorWalletSeeder::class,
-        //     SetupPageSeeder::class,
-        //     LanguageSeeder::class,
-        //     UsefulLinkSeeder::class,
-        //     PaymentGatewaySeeder::class,
-        //     AreaSeeder::class,
-        //     TypeSeeder::class,
-        //     AreaHasTypesSeeder::class,
-        //     CarSeeder::class,
-        //     SystemMaintenanceSeeder::class,
-        //     VendorAppOnBoardScreenSeeder::class,
-        //     SectionHasPageSeeder::class,
-        // ]);
-
-
         $this->call([
             AdminSeeder::class,
             RoleSeeder::class,
@@ -84,23 +60,55 @@ class DatabaseSeeder extends Seeder
             AnnouncementCategorySeeder::class,
             AnnouncementSeeder::class,
             CurrencySeeder::class,
-            FreshBasicSettings::class,
+            BasicSettingsSeeder::class,
             SetupSeoSeeder::class,
             AppSettingsSeeder::class,
+            AppOnBoardSeeder::class,
             SiteSectionsSeeder::class,
             SetupKycSeeder::class,
             ExtensionSeeder::class,
             AdminHasRoleSeeder::class,
-            AppOnBoardSeeder::class,
+            UserSeeder::class,
+            VendorSeeder::class,
+            VendorWalletSeeder::class,
             SetupPageSeeder::class,
             LanguageSeeder::class,
             UsefulLinkSeeder::class,
             PaymentGatewaySeeder::class,
-            VendorAppOnBoardScreenSeeder::class,
+            AreaSeeder::class,
+            TypeSeeder::class,
+            AreaHasTypesSeeder::class,
+            CarSeeder::class,
             SystemMaintenanceSeeder::class,
+            VendorAppOnBoardScreenSeeder::class,
             SectionHasPageSeeder::class,
-            BranchSeeder::class,
-            CancellationPolicySeeder::class,
         ]);
+
+
+        // $this->call([
+        //     AdminSeeder::class,
+        //     RoleSeeder::class,
+        //     TransactionSettingSeeder::class,
+        //     AnnouncementCategorySeeder::class,
+        //     AnnouncementSeeder::class,
+        //     CurrencySeeder::class,
+        //     FreshBasicSettings::class,
+        //     SetupSeoSeeder::class,
+        //     AppSettingsSeeder::class,
+        //     SiteSectionsSeeder::class,
+        //     SetupKycSeeder::class,
+        //     ExtensionSeeder::class,
+        //     AdminHasRoleSeeder::class,
+        //     AppOnBoardSeeder::class,
+        //     SetupPageSeeder::class,
+        //     LanguageSeeder::class,
+        //     UsefulLinkSeeder::class,
+        //     PaymentGatewaySeeder::class,
+        //     VendorAppOnBoardScreenSeeder::class,
+        //     SystemMaintenanceSeeder::class,
+        //     SectionHasPageSeeder::class,
+        //     BranchSeeder::class,
+        //     CancellationPolicySeeder::class,
+        // ]);
     }
 }
