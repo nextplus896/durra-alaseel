@@ -266,7 +266,7 @@
             editModal.find("input[name=old_image]").val(oldData.image);
             editModal.find("input[name=image_edit]").attr("data-preview-name",oldData.image);
 
-            fileHolderPreviewReInit("#client-feedback-update input[name=image_edit]");
+            dropzonePreviewReInit("#client-feedback-update input[name=image_edit]");
 
             openModalBySelector("#client-feedback-update");
 

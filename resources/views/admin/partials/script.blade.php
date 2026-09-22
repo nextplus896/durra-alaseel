@@ -26,7 +26,10 @@
     <div class="row align-items-center">
         <div class="col-xl-2 col-lg-2 form-group">
             <label>{{ __("Gateway Image") }}</label>
-            <input type="file" class="file-holder image" name="" accept="image/*">
+            <div class="dropzone-wrapper">
+                <div class="dropzone image" id="gateway-image-dropzone"></div>
+                <input type="hidden" name="" class="dropzone-hidden-input image" value="">
+            </div>
         </div>
         <div class="col-xl-3 col-lg-3 mb-10">
             <div class="custom-inner-card">

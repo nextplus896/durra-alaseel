@@ -26,10 +26,9 @@
 <link rel="stylesheet" href="{{ asset('frontend/css/typography.css') }}">
 <!-- Popup  -->
 <link rel="stylesheet" href="{{ asset('backend/library/popup/magnific-popup.css') }}">
-<!-- file holder css -->
-{{-- <link rel="stylesheet" href="https://rokon.appdevs.net/fileholder-laravel/public/fileholder/css/fileholder-style.css" type="text/css"> --}}
-<!-- Fileholder CSS CDN -->
-<link rel="stylesheet" href="https://appdevs.cloud/cdn/fileholder/v1.0/css/fileholder-style.css" type="text/css">
+<!-- dropzone css -->
+<link rel="stylesheet" href="{{ asset('backend/library/dropzone/dropzone.min.css') }}" type="text/css">
+<style>.dropzone{min-height:160px;border:2px dashed #bbb;border-radius:8px;background:#fafafa;padding:15px}.dropzone .dz-message{margin:1.5em 0;color:#888}.dropzone-wrapper{margin-bottom:5px}</style>
 
 
 <style>

@@ -18,9 +18,9 @@
         @elseif ($item->type == 'file')
             <div class="col-xl-4 col-lg-4 col-md-6 mb-20 form-group">
                 <label>{{ __($item->label) }} <span>@if ($item->validation->required)* @else {{ __('(Optional)') }} @endif</span></label>
-                <div class="file-holder-wrapper">
-                    <input type="{{ $item->type }}" class="file-holder" name="{{ $item->name }}" id="fileUpload" data-height="130" accept="image/*"
-                        data-max_size="20" data-file_limit="15" value="{{ old($item->name) }}">
+                <div class="dropzone-wrapper" data-direct="true">
+                    <div class="dropzone" id="{{ $item->name }}-dropzone"></div>
+                    <input type="{{ $item->type }}" name="{{ $item->name }}" data-direct-input accept="image/*" style="display:none">
                 </div>
             </div>
         @elseif ($item->type == 'text')

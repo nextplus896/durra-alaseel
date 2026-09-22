@@ -71,7 +71,7 @@
                 editModal.find("input[name=screen_title]").val(oldData.title);
                 editModal.find("input[name=screen_sub_title]").val(oldData.sub_title);
 
-                fileHolderPreviewReInit("#onboard-screen-edit input[name=screen_image]");
+                dropzonePreviewReInit("#onboard-screen-edit input[name=screen_image]");
                 openModalBySelector("#onboard-screen-edit");
 
             });

@@ -168,11 +168,17 @@ class WebSettingsController extends Controller
         }
 
         $images = [];
-        foreach ($validated as $input_name => $item) {
-            if ($request->hasFile($input_name)) {
-                $image = get_files_from_fileholder($request, $input_name);
-                $upload_image = upload_files_from_path_dynamic($image, 'image-assets', $basic_settings->$input_name);
-                $images[$input_name] = $upload_image;
+        $image_fields = ['site_logo','site_logo_dark','site_fav','site_fav_dark'];
+        foreach ($image_fields as $input_name) {
+            if ($request->hasFile($input_name) || $request->filled('fileholder-'.$input_name)) {
+                try {
+                    $image = get_files_from_fileholder($request, $input_name);
+                    $upload_image = upload_files_from_path_dynamic($image, 'image-assets', $basic_settings->$input_name);
+                    $images[$input_name] = $upload_image;
+                } catch (\Exception $e) {
+                    // skip invalid staged file, let validation handle if needed
+                    continue;
+                }
             }
         }
 
@@ -207,11 +213,16 @@ class WebSettingsController extends Controller
         }
 
         $images = [];
-        foreach ($validated as $input_name => $item) {
-            if ($request->hasFile($input_name)) {
-                $image = get_files_from_fileholder($request, $input_name);
-                $upload_image = upload_files_from_path_dynamic($image, 'image-assets', $basic_settings->$input_name);
-                $images[$input_name] = $upload_image;
+        $image_fields = ['vendor_logo','vendor_logo_dark','vendor_fav','vendor_fav_dark'];
+        foreach ($image_fields as $input_name) {
+            if ($request->hasFile($input_name) || $request->filled('fileholder-'.$input_name)) {
+                try {
+                    $image = get_files_from_fileholder($request, $input_name);
+                    $upload_image = upload_files_from_path_dynamic($image, 'image-assets', $basic_settings->$input_name);
+                    $images[$input_name] = $upload_image;
+                } catch (\Exception $e) {
+                    continue;
+                }
             }
         }
 

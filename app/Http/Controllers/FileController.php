@@ -15,8 +15,18 @@ class FileController extends Controller
         $data = [];
         if($request->hasFile('fileholder_files')) {
 
+            $mimes = trim((string) $request->input('mimes', ''));
+            // Map generic accept like image/* to concrete extensions; empty => allow common images
+            if ($mimes === '' || $mimes === 'image/*') {
+                $mimes = 'jpg,jpeg,png,webp,svg,gif';
+            } else {
+                // sanitize: strip dots, spaces, mime prefixes
+                $mimes = str_replace([' ', '.', 'image/*'], '', $mimes);
+                $mimes = trim($mimes, ',');
+                if ($mimes === '') $mimes = 'jpg,jpeg,png,webp,svg,gif';
+            }
             $validator = Validator::make($request->all(),[
-                'fileholder_files' => 'required|mimes:'.$request->mimes,
+                'fileholder_files' => 'required|file|mimes:'.$mimes,
             ]);
 
             if($validator->fails()) {

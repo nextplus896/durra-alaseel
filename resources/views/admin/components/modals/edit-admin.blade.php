@@ -131,7 +131,7 @@
 
                     editModal.find(".role-select-wrp select").select2();
 
-                    fileHolderPreviewReInit("#admin-edit input[name=edit_image]");
+                    dropzonePreviewReInit("#admin-edit input[name=edit_image]");
                     openModalBySelector("#admin-edit");
 
                 });

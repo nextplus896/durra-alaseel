@@ -63,7 +63,7 @@
                     editModal.find("input[name=old_image]").val(oldData.image);
 
                     refreshSwitchers("#car-model-edit");
-                    fileHolderPreviewReInit("#car-model-edit input[name=image]");
+                    dropzonePreviewReInit("#car-model-edit input[name=image]");
                     openModalBySelector("#car-model-edit");
                 });
             });

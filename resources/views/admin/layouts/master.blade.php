@@ -28,8 +28,13 @@
     <!-- Light case   -->
     <link rel="stylesheet" href="{{ asset('backend/css/lightcase.css') }}">
 
-    <!-- Fileholder CSS CDN -->
-    <link rel="stylesheet" href="https://appdevs.cloud/cdn/fileholder/v1.0/css/fileholder-style.css" type="text/css">
+    <!-- Dropzone CSS -->
+    <link rel="stylesheet" href="{{ asset('backend/library/dropzone/dropzone.min.css') }}" type="text/css">
+    <style>
+        .dropzone { min-height: 160px; border: 2px dashed #bbb; border-radius: 8px; background: #fafafa; padding: 15px; }
+        .dropzone .dz-message { margin: 1.5em 0; color: #888; }
+        .dropzone-wrapper { margin-bottom: 5px; }
+    </style>
 
     <!-- main style css link -->
     <link rel="stylesheet" href="{{ asset('backend/css/style.css') }}">
@@ -105,30 +110,11 @@
 @include('admin.partials.push-notification')
 
 <script>
-    var fileHolderAfterLoad = {};
+    window.dropzoneUploadUrl = "{{ setRoute('fileholder.upload') }}";
+    window.dropzoneRemoveUrl = "{{ setRoute('fileholder.remove') }}";
 </script>
-
-<script src="https://appdevs.cloud/cdn/fileholder/v1.0/js/fileholder-script.js" type="module"></script>
-<script type="module">
-    import { fileHolderSettings } from "https://appdevs.cloud/cdn/fileholder/v1.0/js/fileholder-settings.js";
-    import { previewFunctions } from "https://appdevs.cloud/cdn/fileholder/v1.0/js/fileholder-script.js";
-
-    var inputFields = document.querySelector(".file-holder");
-    fileHolderAfterLoad.previewReInit = function(inputFields){
-        previewFunctions.previewReInit(inputFields)
-    };
-
-    fileHolderSettings.urls.uploadUrl = "{{ setRoute('fileholder.upload') }}";
-    fileHolderSettings.urls.removeUrl = "{{ setRoute('fileholder.remove') }}";
-
-</script>
-
-<script>
-    function fileHolderPreviewReInit(selector) {
-        var inputField = document.querySelector(selector);
-        fileHolderAfterLoad.previewReInit(inputField);
-    }
-</script>
+<script src="{{ asset('backend/library/dropzone/dropzone.min.js') }}"></script>
+<script src="{{ asset('backend/js/dropzone-init.js') }}"></script>
 
 <script>
     // lightcase

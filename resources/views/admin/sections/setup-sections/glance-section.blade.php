@@ -248,7 +248,7 @@
             }
 
             editModal.find("input[name=image]").attr("data-preview-name",oldData.image);
-            fileHolderPreviewReInit("#glance-edit input[name=image]");
+            dropzonePreviewReInit("#glance-edit input[name=image]");
             openModalBySelector("#glance-edit");
 
         });

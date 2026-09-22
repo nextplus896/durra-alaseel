@@ -171,7 +171,7 @@
                     ?.title);
 
             });
-            fileHolderPreviewReInit("#vendor-requirements-edit input[name=image_edit]");
+            dropzonePreviewReInit("#vendor-requirements-edit input[name=image_edit]");
             openModalBySelector("#vendor-requirements-edit");
 
         });

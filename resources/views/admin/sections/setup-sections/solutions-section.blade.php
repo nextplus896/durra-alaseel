@@ -279,7 +279,7 @@
                 editModal.find("input[name="+item.code+"_link_edit]").val(oldData.language[item.code].link);
             });
             editModal.find("input[name=image]").attr("data-preview-name",oldData.image);
-            fileHolderPreviewReInit("#solution-edit input[name=image]");
+            dropzonePreviewReInit("#solution-edit input[name=image]");
             openModalBySelector("#solution-edit");
 
         });

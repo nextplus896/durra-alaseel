@@ -139,7 +139,7 @@
                         firstGatewayCurrencyItem.find(".default-currency").text(defaultCurrency);
 
                         setInputFieldsName(firstGatewayCurrencyItem,currency);
-                        fileHolderPreviewReInit(".gateway-currency .file-holder");
+                        dropzonePreviewReInit(".gateway-currency .dropzone");
 
                     }else {
                         credentialsElement.after(paymentGatewayCurrenciesWrapper);
@@ -157,7 +157,7 @@
                         firstGatewayCurrencyItem.find(".default-currency").text(defaultCurrency);
 
                         setInputFieldsName(firstGatewayCurrencyItem,currency);
-                        fileHolderPreviewReInit(".gateway-currency .file-holder");
+                        dropzonePreviewReInit(".gateway-currency .dropzone");
 
                     }
                 }else {
@@ -206,7 +206,14 @@
         });
 
         function setInputFieldsName(firstGatewayCurrencyItem,currency){
-            firstGatewayCurrencyItem.find(".image").attr("name",generateInputName(currency,"image"));
+            var imgEl = firstGatewayCurrencyItem.find(".image");
+            if (imgEl.hasClass('dropzone-hidden-input') || imgEl.hasClass('dropzone')) {
+                // Dropzone mode: hidden holds staged filenames, name must be fileholder-*
+                imgEl.filter('.dropzone-hidden-input').attr("name","fileholder-" + generateInputName(currency,"image"));
+                // dropzone div id not needed
+            } else {
+                imgEl.attr("name",generateInputName(currency,"image"));
+            }
             firstGatewayCurrencyItem.find(".min-limit").attr("name",generateInputName(currency,"min_limit"));
             firstGatewayCurrencyItem.find(".max-limit").attr("name",generateInputName(currency,"max_limit"));
             firstGatewayCurrencyItem.find(".fixed-charge").attr("name",generateInputName(currency,"fixed_charge"));

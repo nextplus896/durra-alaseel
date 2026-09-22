@@ -54,7 +54,10 @@
                             </div>
                             <div class="col-xl-12 col-lg-12 form-group">
                                 <label>{{ __("Attachments") }}<span>*</span></label>
-                                <input type="file" class="file-holder" name="attachment[]" id="attachment" multiple>
+                                <div class="dropzone-wrapper" data-direct="true" data-file_limit="15" data-max_size="20">
+                                    <div class="dropzone dropzone-standalone" id="attachment-dropzone"></div>
+                                    <input type="file" name="attachment[]" id="attachment" data-direct-input multiple style="display:none">
+                                </div>
                             </div>
                         </div>
                         <div class="col-xl-12 col-lg-12">

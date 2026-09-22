@@ -187,9 +187,18 @@ function get_files_from_fileholder($request, $file_input_name)
     $fileholder_stored_file_path = public_path('fileholder/img');
 
     $files_link = [];
-    if ($request->hasFile($file_input_name)) {
-        $input_name = $keyword . "-" . $file_input_name;
-        $file_name_array = explode(',', $request->$input_name);
+    $hidden_name = $keyword . "-" . $file_input_name;
+    $hasHidden = $request->filled($hidden_name) || $request->has($hidden_name);
+    if ($request->hasFile($file_input_name) || $hasHidden) {
+        $input_name = $hidden_name;
+        $raw = $request->input($input_name, $request->$input_name ?? '');
+        if (empty($raw) && $request->hasFile($file_input_name)) {
+            // no staged file but direct upload present — fallback to handling direct file via temp? treat as no-op
+            throw ValidationException::withMessages([
+                $file_input_name => "Uploaded file is staged but hidden input is empty. Please re-upload.",
+            ]);
+        }
+        $file_name_array = explode(',', (string) $raw);
 
         foreach ($file_name_array as $item) {
             $file_link = $fileholder_stored_file_path . "/" . $item;

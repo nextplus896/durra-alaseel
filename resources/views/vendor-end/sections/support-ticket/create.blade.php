@@ -36,9 +36,9 @@
                             </div>
                             <div class="col-xl-12 col-lg-12 form-group">
                                 <label>{{ __('Attachments') }} <span>{{ __('(Optional)') }}</span></label>
-                                <div class="file-holder-wrapper">
-                                    <input type="file" class="file-holder" name="attachment[]" id="fileUpload"
-                                        data-height="130" accept="image/*" data-max_size="20" data-file_limit="15" multiple>
+                                <div class="dropzone-wrapper" data-direct="true" data-file_limit="15" data-max_size="20" data-accepted="image/*">
+                                    <div class="dropzone dropzone-standalone" id="fileUpload-dropzone"></div>
+                                    <input type="file" name="attachment[]" id="fileUpload" data-direct-input accept="image/*" data-max_size="20" data-file_limit="15" multiple style="display:none">
                                 </div>
                             </div>
                         </div>

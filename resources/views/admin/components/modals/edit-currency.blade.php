@@ -104,7 +104,7 @@
 
                     selectFormRadio("#currency-edit input[name=currency_role]",oldData.role);
                     reloadAllCountries("select[name=currency_country]");
-                    fileHolderPreviewReInit("#currency-edit input[name=currency_flag]");
+                    dropzonePreviewReInit("#currency-edit input[name=currency_flag]");
                     refreshSwitchers("#currency-edit");
                     openModalBySelector("#currency-edit");
 

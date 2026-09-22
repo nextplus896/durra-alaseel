@@ -18,38 +18,19 @@
 <script src="{{ asset('frontend/js/jquery.nice-select.js') }}"></script>
 <!-- select2 -->
 <script src="{{ asset('frontend/js/select2.js') }}"></script>
-<!-- file holder js -->
-{{-- <script src="https://rokon.appdevs.net/fileholder-laravel/public/fileholder/js/fileholder-script.js" type="module"></script> --}}
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<script>
+    window.dropzoneUploadUrl = "{{ setRoute('fileholder.upload') }}";
+    window.dropzoneRemoveUrl = "{{ setRoute('fileholder.remove') }}";
+</script>
 <!-- main -->
 <!--  Popup -->
 <script src="{{ asset('backend/library/popup/jquery.magnific-popup.js') }}"></script>
 <!-- ApexCharts -->
 <script src="{{ asset('frontend/js/apexcharts.js') }}"></script>
 <script src="{{ asset('frontend/js/main.js') }}"></script>
-
-
-<script>
-    var fileHolderAfterLoad = {};
-</script>
-
-<script src="https://appdevs.cloud/cdn/fileholder/v1.0/js/fileholder-script.js" type="module"></script>
-<script type="module">
-    import { fileHolderSettings } from "https://appdevs.cloud/cdn/fileholder/v1.0/js/fileholder-settings.js";
-    import { previewFunctions } from "https://appdevs.cloud/cdn/fileholder/v1.0/js/fileholder-script.js";
-    var inputFields = document.querySelector(".file-holder");
-    fileHolderAfterLoad.previewReInit = function(inputFields){
-        previewFunctions.previewReInit(inputFields)
-    };
-    fileHolderSettings.urls.uploadUrl = "{{ setRoute('fileholder.upload') }}";
-    fileHolderSettings.urls.removeUrl = "{{ setRoute('fileholder.remove') }}";
-</script>
-
-<script>
-    function fileHolderPreviewReInit(selector) {
-        var inputField = document.querySelector(selector);
-        fileHolderAfterLoad.previewReInit(inputField);
-    }
-</script>
+<script src="{{ asset('backend/library/dropzone/dropzone.min.js') }}"></script>
+<script src="{{ asset('backend/js/dropzone-init.js') }}"></script>
 
 <script>
     function openDeleteModal(URL,target,message,actionBtnText = "{{ __('Remove') }}",method = "DELETE"){
