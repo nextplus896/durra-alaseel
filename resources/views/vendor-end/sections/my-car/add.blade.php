@@ -125,14 +125,21 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
-                                        <label>{{ __('Rental Price Day') }}<span>*</span></label>
-                                        <input type="text" class="form--control klm-charge" name="fees"
-                                            placeholder="{{ __('Enter Rental Price') }}" value="{{ old('fees') }}">
+                                    {{-- Hidden fees syncer --}}
+                                    <input type="hidden" name="fees" id="fees_input"
+                                        value="{{ old('fees', old('price_per_day')) }}">
+
+                                    <div class="col-xl-4 col-lg-6 col-md-6 mb-10 form-group">
+                                        <label>{{ __('Price per Day') }}<span>*</span></label>
+                                        <input type="number" step="0.01" class="form--control klm-charge"
+                                            name="price_per_day" id="price_per_day"
+                                            placeholder="{{ __('Enter Daily Price') }}"
+                                            value="{{ old('price_per_day', old('fees')) }}"
+                                            oninput="document.getElementById('fees_input').value = this.value">
                                         <span class="charge-currency">{{ get_default_currency_code() }}</span>
                                     </div>
 
-                                    <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
+                                    <div class="col-xl-4 col-lg-6 col-md-6 mb-10 form-group">
                                         <label>{{ __('Price per Week') }}<span>*</span></label>
                                         <input type="number" step="0.01" class="form--control klm-charge"
                                             name="price_per_week" placeholder="{{ __('Enter Weekly Price') }}"
@@ -140,7 +147,7 @@
                                         <span class="charge-currency">{{ get_default_currency_code() }}</span>
                                     </div>
 
-                                    <div class="col-xl-6 col-lg-6 col-md-6 mb-10 form-group">
+                                    <div class="col-xl-4 col-lg-6 col-md-6 mb-10 form-group">
                                         <label>{{ __('Price per Month') }}<span>*</span></label>
                                         <input type="number" step="0.01" class="form--control klm-charge"
                                             name="price_per_month" placeholder="{{ __('Enter Monthly Price') }}"

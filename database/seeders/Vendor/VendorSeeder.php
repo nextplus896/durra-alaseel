@@ -21,6 +21,8 @@ class VendorSeeder extends Seeder
             array('id' => '2', 'firstname' => 'vendor', 'lastname' => 'test2', 'username' => 'vendor', 'email' => 'vendor2@appdevs.net', 'mobile_code' => NULL, 'mobile' => NULL, 'full_mobile' => NULL, 'password' =>  Hash::make("vendor"), 'referral_id' => NULL, 'image' => NULL, 'status' => '1', 'address' => NULL, 'email_verified' => '1', 'sms_verified' => '1', 'kyc_verified' => '1', 'ver_code' => NULL, 'ver_code_send_at' => NULL, 'two_factor_verified' => '0', 'two_factor_status' => '0', 'two_factor_secret' => 'WBPNEUFEQEKNM5XH', 'email_verified_at' => NULL, 'remember_token' => NULL, 'deleted_at' => NULL, 'created_at' => '2025-01-08 07:28:28', 'updated_at' => '2025-01-08 07:31:24'),
         );
 
-        Vendor::insert($data);
+        foreach ($data as $vendor) {
+            Vendor::updateOrCreate(['id' => $vendor['id']], $vendor);
+        }
     }
 }

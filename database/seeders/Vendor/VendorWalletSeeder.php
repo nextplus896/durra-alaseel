@@ -20,6 +20,8 @@ class VendorWalletSeeder extends Seeder
             array('id' => '2','vendor_id' => '2','currency_id' => '1','balance' => '10000.0000000','due_payment' => '0.00000000','status' => '1','created_at' => '2025-01-08 07:28:28','updated_at' => '2025-01-08 09:22:45'),
         );
 
-        VendorWallet::insert($vendor_wallets);
+        foreach ($vendor_wallets as $wallet) {
+            VendorWallet::updateOrCreate(['id' => $wallet['id']], $wallet);
+        }
     }
 }

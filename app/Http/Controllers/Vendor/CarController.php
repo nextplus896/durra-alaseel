@@ -74,6 +74,12 @@ class CarController extends Controller
      */
     public function store(Request $request)
     {
+        if ($request->filled('fees') && !$request->filled('price_per_day')) {
+            $request->merge(['price_per_day' => $request->fees]);
+        } elseif ($request->filled('price_per_day') && !$request->filled('fees')) {
+            $request->merge(['fees' => $request->price_per_day]);
+        }
+
         $validator = Validator::make($request->all(), [
             'type'            => 'required|integer|exists:car_types,id',
             'car_model_id'    => 'required|integer|exists:car_models,id',
@@ -228,6 +234,12 @@ class CarController extends Controller
 
         if (!$car) {
             return back()->with(['error' => [__('Car not found or access denied.')]]);
+        }
+
+        if ($request->filled('fees') && !$request->filled('price_per_day')) {
+            $request->merge(['price_per_day' => $request->fees]);
+        } elseif ($request->filled('price_per_day') && !$request->filled('fees')) {
+            $request->merge(['fees' => $request->price_per_day]);
         }
 
         $validator = Validator::make($request->all(), [
