@@ -3,17 +3,29 @@ set -e
 
 echo "🚀 Starting Deployment..."
 
-# 0. تجاهل تغيير الصلاحيات (filemode) في git على لينكس
+# 0. تجهيز وتأمين الصلاحيات فوراً في بداية السكريبت لمنع أي توقف
 git config core.fileMode false || true
 
+echo "🔒 Preparing directories and permissions..."
+mkdir -p bootstrap/cache storage/framework/{sessions,views,cache,cache/data} storage/logs
+DEPLOY_USER=$(whoami)
+sudo usermod -a -G www-data "$DEPLOY_USER" 2>/dev/null || true
+sudo chown -R "$DEPLOY_USER:www-data" storage bootstrap/cache 2>/dev/null || chown -R "$DEPLOY_USER:www-data" storage bootstrap/cache 2>/dev/null || true
+sudo chmod -R 775 storage bootstrap/cache 2>/dev/null || chmod -R 775 storage bootstrap/cache 2>/dev/null || true
+sudo chmod -R g+s storage bootstrap/cache 2>/dev/null || true
+
 # 1. تفعيل وضع الصيانة (Maintenance Mode)
-# يمكنك الدخول للموقع أثناء الصيانة عبر الرابط: yoursite.com/secret-token-123
 php artisan down --secret="secret-token-123" --render="errors::503" || true
 
 # 2. سحب آخر التعديلات من Git
 echo "📥 Pulling latest changes from Git..."
 git fetch origin main
 git reset --hard origin/main
+
+# إعادة التأكد من الصلاحيات بعد سحب الكود
+mkdir -p bootstrap/cache storage/framework/{sessions,views,cache,cache/data} storage/logs
+sudo chown -R "$DEPLOY_USER:www-data" storage bootstrap/cache 2>/dev/null || true
+sudo chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 
 # 3. تحديث حزم Composer للإنتاج (بدون حزم dev)
 echo "📦 Installing Composer dependencies..."
@@ -69,10 +81,8 @@ if [ ! -L "public/storage" ]; then
     php artisan storage:link || true
 fi
 
-# 8. ضبط الصلاحيات للمجلدات الحساسة بحيث يشترك فيها مستخدم الـ deploy وخادم الويب www-data
-echo "🔒 Fixing directory permissions..."
-DEPLOY_USER=$(whoami)
-sudo usermod -a -G www-data "$DEPLOY_USER" 2>/dev/null || true
+# 8. ضبط الصلاحيات النهائية للمجلدات
+echo "🔒 Finalizing directory permissions..."
 sudo chown -R "$DEPLOY_USER:www-data" storage bootstrap/cache 2>/dev/null || true
 sudo chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 sudo chmod -R g+s storage bootstrap/cache 2>/dev/null || true
