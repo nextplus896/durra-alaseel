@@ -65,12 +65,17 @@ php artisan route:cache
 php artisan view:cache
 
 # 7. التأكد من رابط التخزين storage symlink
-php artisan storage:link || true
+if [ ! -L "public/storage" ]; then
+    php artisan storage:link || true
+fi
 
-# 8. ضبط الصلاحيات للمجلدات الحساسة
+# 8. ضبط الصلاحيات للمجلدات الحساسة بحيث يشترك فيها مستخدم الـ deploy وخادم الويب www-data
 echo "🔒 Fixing directory permissions..."
-sudo chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
-sudo chmod -R 775 storage bootstrap/cache 2>/dev/null || chmod -R 775 storage bootstrap/cache 2>/dev/null || true
+DEPLOY_USER=$(whoami)
+sudo usermod -a -G www-data "$DEPLOY_USER" 2>/dev/null || true
+sudo chown -R "$DEPLOY_USER:www-data" storage bootstrap/cache 2>/dev/null || true
+sudo chmod -R 775 storage bootstrap/cache 2>/dev/null || true
+sudo chmod -R g+s storage bootstrap/cache 2>/dev/null || true
 
 # 9. إعادة تشغيل الـ Queue Workers (إن وجدت)
 php artisan queue:restart || true
@@ -81,6 +86,6 @@ PHP_VERSION=$(php -r "echo PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;" 2>/dev/
 sudo systemctl reload "php${PHP_VERSION}-fpm" 2>/dev/null || sudo systemctl reload php-fpm 2>/dev/null || true
 
 # 11. إيقاف وضع الصيانة وإعادة الموقع للعمل
-php artisan up
+php artisan up || sudo rm -f storage/framework/down || true
 
 echo "✅ Deployment completed successfully!"
