@@ -3,6 +3,9 @@ set -e
 
 echo "🚀 Starting Deployment..."
 
+# 0. تجاهل تغيير الصلاحيات (filemode) في git على لينكس
+git config core.fileMode false
+
 # 1. تفعيل وضع الصيانة (Maintenance Mode)
 # يمكنك الدخول للموقع أثناء الصيانة عبر الرابط: yoursite.com/secret-token-123
 php artisan down --secret="secret-token-123" --render="errors::503" || true

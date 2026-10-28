@@ -20,12 +20,32 @@ yarn-error.log
 /.vscode
 /public/html
 /*.zip
+/storage/debugbar
 /storage/debugber
 /storage/debugber/.*
-/public/fileholder/img/*.jpg
-/public/fileholder/img/*.jpeg
-/public/fileholder/img/*.webp
-/public/fileholder/img/*.png
+/storage/user
+/storage/logs/*.log
+
+# Storage gitignores
+/storage/app/.gitignore
+/storage/app/public/.gitignore
+/storage/debugbar/.gitignore
+/storage/framework/.gitignore
+/storage/framework/cache/.gitignore
+/storage/framework/cache/data/.gitignore
+/storage/framework/sessions/.gitignore
+/storage/framework/testing/.gitignore
+/storage/framework/views/.gitignore
+/storage/logs/.gitignore
+
+# Balance and temporary files
+/balance
+/public/backend/images/default/default
+
+# Fileholder uploads
+/public/fileholder/img/*
+!/public/fileholder/img/.gitkeep
+!/public/fileholder/img/text.txt
 
 /tinker
 docker-compose.yml
