@@ -4,8 +4,30 @@ $default_lng = 'en';
 ?>
 @extends('vendor-end.layouts.master')
 @section('content')
-    <div class="selon-add-btn ptb-20 text-end">
-        <a href="{{ setRoute('vendor.car.create') }}" class="btn--base"><i class="las la-plus"></i> {{ __('Add car') }}</a>
+    <div class="ptb-20 d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div class="branch-filter-box d-flex align-items-center">
+            <form action="{{ setRoute('vendor.car.index') }}" method="GET" class="d-flex align-items-center flex-wrap gap-2" id="branchFilterForm">
+                <label class="mb-0 fw-bold me-2"><i class="las la-filter"></i> {{ __('Branch') }}:</label>
+                <div style="min-width: 220px;">
+                    <select class="form-control form--control" name="branch_id" onchange="document.getElementById('branchFilterForm').submit();">
+                        <option value="">{{ __('All Branches') }}</option>
+                        @foreach ($branches ?? [] as $branch)
+                            <option value="{{ $branch->id }}" {{ request('branch_id') == $branch->id ? 'selected' : '' }}>
+                                {{ $branch->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                @if (request()->filled('branch_id'))
+                    <a href="{{ setRoute('vendor.car.index') }}" class="btn btn-sm btn-outline-secondary" title="{{ __('Clear Filter') }}">
+                        <i class="las la-times"></i>
+                    </a>
+                @endif
+            </form>
+        </div>
+        <div class="selon-add-btn">
+            <a href="{{ setRoute('vendor.car.create') }}" class="btn--base"><i class="las la-plus"></i> {{ __('Add car') }}</a>
+        </div>
     </div>
     <div class="my-car-details">
         <div class="row justify-content-center mb-20-none">
@@ -61,6 +83,11 @@ $default_lng = 'en';
                                     <small
                                         style="color: #888; font-size: 0.75rem; display: block;">{{ __('Seats') }}</small>
                                     <span style="font-weight: 500; color: #555;">{{ $car->seat ?? '-' }}</span>
+                                </div>
+                                <div class="info-item" style="grid-column: span 2;">
+                                    <small
+                                        style="color: #888; font-size: 0.75rem; display: block;"><i class="las la-map-marker-alt"></i> {{ __('Branch') }}</small>
+                                    <span style="font-weight: 600; color: #2d3748;">{{ $car->branch->name ?? __('No Branch Assigned') }}</span>
                                 </div>
                             </div>
                             <div class="price-tag"

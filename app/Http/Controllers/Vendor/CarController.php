@@ -22,12 +22,23 @@ use ParagonIE\Sodium\Compat;
 
 class CarController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $page_title = __("My Cars");
-        $cars = Car::where('vendor_id', auth()->guard('vendor')->user()->id)->paginate(6);
+        $vendor_id = auth()->guard('vendor')->user()->id;
 
-        return view('vendor-end.sections.my-car.index', compact('page_title', 'cars'));
+        $branches = Branch::where('status', true)->orderBy('name', 'ASC')->get();
+
+        $cars = Car::with(['type', 'carModel', 'branch'])
+            ->where('vendor_id', $vendor_id)
+            ->when($request->filled('branch_id'), function ($query) use ($request) {
+                return $query->where('branch_id', $request->branch_id);
+            })
+            ->latest('id')
+            ->paginate(6)
+            ->appends($request->all());
+
+        return view('vendor-end.sections.my-car.index', compact('page_title', 'cars', 'branches'));
     }
     /**
      * Method for show car create page

@@ -3,11 +3,11 @@
   "created_at": "2026-06-03T23:09:43.450Z",
   "lifetime": {
     "total_tokens_estimated": 170330,
-    "total_reads": 94,
+    "total_reads": 113,
     "total_writes": 45,
-    "total_sessions": 3,
+    "total_sessions": 7,
     "anatomy_hits": 33,
-    "anatomy_misses": 61,
+    "anatomy_misses": 80,
     "repeated_reads_blocked": 21,
     "estimated_savings_vs_bare_cli": 7290
   },
@@ -935,6 +935,152 @@
         "writes_count": 10,
         "repeated_reads_blocked": 4,
         "anatomy_lookups": 6
+      }
+    },
+    {
+      "id": "session-2026-10-31-1528",
+      "started": "2026-10-31T13:28:10.997Z",
+      "ended": "2026-10-31T13:50:52.781Z",
+      "reads": [
+        {
+          "file": "C:/Users/PC/AppData/Local/Temp/claude/L--DATA-Dora-Alaseel-Source-Code-durra-alaseel-web/47b343a5-7277-4f27-a0e2-4ab2ef48e238/scratchpad/frames/f_01.jpg",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "C:/Users/PC/AppData/Local/Temp/claude/L--DATA-Dora-Alaseel-Source-Code-durra-alaseel-web/47b343a5-7277-4f27-a0e2-4ab2ef48e238/scratchpad/frames/f_03.jpg",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "C:/Users/PC/AppData/Local/Temp/claude/L--DATA-Dora-Alaseel-Source-Code-durra-alaseel-web/47b343a5-7277-4f27-a0e2-4ab2ef48e238/scratchpad/frames/f_05.jpg",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "C:/Users/PC/AppData/Local/Temp/claude/L--DATA-Dora-Alaseel-Source-Code-durra-alaseel-web/47b343a5-7277-4f27-a0e2-4ab2ef48e238/scratchpad/frames/f_07.jpg",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "C:/Users/PC/AppData/Local/Temp/claude/L--DATA-Dora-Alaseel-Source-Code-durra-alaseel-web/47b343a5-7277-4f27-a0e2-4ab2ef48e238/scratchpad/frames/f_09.jpg",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "C:/Users/PC/AppData/Local/Temp/claude/L--DATA-Dora-Alaseel-Source-Code-durra-alaseel-web/47b343a5-7277-4f27-a0e2-4ab2ef48e238/scratchpad/frames/f_11.jpg",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "C:/Users/PC/AppData/Local/Temp/claude/L--DATA-Dora-Alaseel-Source-Code-durra-alaseel-web/47b343a5-7277-4f27-a0e2-4ab2ef48e238/scratchpad/frames/f_13.jpg",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "C:/Users/PC/AppData/Local/Temp/claude/L--DATA-Dora-Alaseel-Source-Code-durra-alaseel-web/47b343a5-7277-4f27-a0e2-4ab2ef48e238/scratchpad/frames/f_15.jpg",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "C:/Users/PC/AppData/Local/Temp/claude/L--DATA-Dora-Alaseel-Source-Code-durra-alaseel-web/47b343a5-7277-4f27-a0e2-4ab2ef48e238/scratchpad/frames/f_17.jpg",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 0,
+        "reads_count": 9,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 0
+      }
+    },
+    {
+      "id": "session-2026-10-31-1528",
+      "started": "2026-10-31T13:28:10.997Z",
+      "ended": "2026-10-31T14:07:10.056Z",
+      "reads": [
+        {
+          "file": "C:/Users/PC/AppData/Local/Temp/claude/L--DATA-Dora-Alaseel-Source-Code-durra-alaseel-web/47b343a5-7277-4f27-a0e2-4ab2ef48e238/scratchpad/frames/f_01.jpg",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "C:/Users/PC/AppData/Local/Temp/claude/L--DATA-Dora-Alaseel-Source-Code-durra-alaseel-web/47b343a5-7277-4f27-a0e2-4ab2ef48e238/scratchpad/frames/f_03.jpg",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "C:/Users/PC/AppData/Local/Temp/claude/L--DATA-Dora-Alaseel-Source-Code-durra-alaseel-web/47b343a5-7277-4f27-a0e2-4ab2ef48e238/scratchpad/frames/f_05.jpg",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "C:/Users/PC/AppData/Local/Temp/claude/L--DATA-Dora-Alaseel-Source-Code-durra-alaseel-web/47b343a5-7277-4f27-a0e2-4ab2ef48e238/scratchpad/frames/f_07.jpg",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "C:/Users/PC/AppData/Local/Temp/claude/L--DATA-Dora-Alaseel-Source-Code-durra-alaseel-web/47b343a5-7277-4f27-a0e2-4ab2ef48e238/scratchpad/frames/f_09.jpg",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "C:/Users/PC/AppData/Local/Temp/claude/L--DATA-Dora-Alaseel-Source-Code-durra-alaseel-web/47b343a5-7277-4f27-a0e2-4ab2ef48e238/scratchpad/frames/f_11.jpg",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "C:/Users/PC/AppData/Local/Temp/claude/L--DATA-Dora-Alaseel-Source-Code-durra-alaseel-web/47b343a5-7277-4f27-a0e2-4ab2ef48e238/scratchpad/frames/f_13.jpg",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "C:/Users/PC/AppData/Local/Temp/claude/L--DATA-Dora-Alaseel-Source-Code-durra-alaseel-web/47b343a5-7277-4f27-a0e2-4ab2ef48e238/scratchpad/frames/f_15.jpg",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "C:/Users/PC/AppData/Local/Temp/claude/L--DATA-Dora-Alaseel-Source-Code-durra-alaseel-web/47b343a5-7277-4f27-a0e2-4ab2ef48e238/scratchpad/frames/f_17.jpg",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "C:/Users/PC/AppData/Local/Temp/claude/L--DATA-Dora-Alaseel-Source-Code-durra-alaseel-web/47b343a5-7277-4f27-a0e2-4ab2ef48e238/tasks/buz9gh93l.output",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 0,
+        "reads_count": 10,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 0
       }
     }
   ],
