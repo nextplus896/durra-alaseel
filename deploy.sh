@@ -83,11 +83,11 @@ on_error() {
     echo -e "\n${COLOR_BOLD}${COLOR_RED}=================================================================${COLOR_RESET}"
     log_error "Deployment failed at line ${line_no} with exit code ${exit_code}!"
     echo -e "${COLOR_BOLD}${COLOR_RED}=================================================================${COLOR_RESET}"
-    
+
     # محاولة إعادة تشغيل الموقع تلقائياً إذا فشل النشر لمنع بقاء الموقع معطلاً
     log_warn "Attempting to disable maintenance mode to restore site accessibility..."
     php artisan up 2>/dev/null || run_sudo rm -f storage/framework/down 2>/dev/null || true
-    
+
     exit "${exit_code}"
 }
 trap 'on_error $? $LINENO' ERR
@@ -216,7 +216,6 @@ log_success "Database migrations executed."
 # 6. مسح وإعادة بناء الكاش للأداء العالي
 log_step "7/11" "⚡ Optimizing application cache..."
 php artisan optimize:clear
-php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 log_success "Cache cleared and optimized."
