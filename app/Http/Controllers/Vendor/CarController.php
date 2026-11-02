@@ -29,16 +29,45 @@ class CarController extends Controller
 
         $branches = Branch::where('status', true)->orderBy('name', 'ASC')->get();
 
-        $cars = Car::with(['type', 'carModel', 'branch'])
+        // Statistics for top summary
+        $total_cars = Car::where('vendor_id', $vendor_id)->count();
+        $active_cars = Car::where('vendor_id', $vendor_id)->where('status', 1)->count();
+        $inactive_cars = Car::where('vendor_id', $vendor_id)->where('status', 0)->count();
+
+        $query = Car::with(['type', 'carModel', 'branch'])
             ->where('vendor_id', $vendor_id)
-            ->when($request->filled('branch_id'), function ($query) use ($request) {
-                return $query->where('branch_id', $request->branch_id);
+            ->when($request->filled('branch_id'), function ($q) use ($request) {
+                return $q->where('branch_id', $request->branch_id);
             })
-            ->latest('id')
-            ->paginate(6)
+            ->when($request->filled('status') && $request->status !== 'all', function ($q) use ($request) {
+                return $q->where('status', $request->status);
+            })
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $search = $request->search;
+                return $q->where(function ($subQuery) use ($search) {
+                    $subQuery->where('car_number', 'like', "%".$search."%")
+                        ->orWhere('car_model', 'like', "%".$search."%")
+                        ->orWhereHas('carModel', function ($modelQuery) use ($search) {
+                            $modelQuery->where('name', 'like', "%".$search."%");
+                        })
+                        ->orWhereHas('type', function ($typeQuery) use ($search) {
+                            $typeQuery->where('name', 'like', "%".$search."%");
+                        });
+                });
+            });
+
+        $cars = $query->latest('id')
+            ->paginate(9)
             ->appends($request->all());
 
-        return view('vendor-end.sections.my-car.index', compact('page_title', 'cars', 'branches'));
+        return view('vendor-end.sections.my-car.index', compact(
+            'page_title',
+            'cars',
+            'branches',
+            'total_cars',
+            'active_cars',
+            'inactive_cars'
+        ));
     }
     /**
      * Method for show car create page
