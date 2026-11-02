@@ -182,7 +182,7 @@ class PayTabsService
             'tran_type' => 'refund',
             'tran_class' => 'ecom',
             'cart_id' => 'REFUND-' . time(),
-            'cart_currency' => get_default_currency_code(),
+            'cart_currency' => get_default_currency_iso_code(),
             'cart_amount' => $amount,
             'cart_description' => $description,
             'tran_ref' => $tranRef,

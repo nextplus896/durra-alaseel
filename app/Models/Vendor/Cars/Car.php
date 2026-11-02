@@ -77,10 +77,29 @@ class Car extends Model
      */
     public function getImageUrlAttribute()
     {
-        if ($this->image) {
-            return files_asset_path('car-models') . '/' . $this->image;
+        $image = $this->image;
+        if (!$image && $this->carModel) {
+            $image = $this->carModel->image;
         }
-        return files_asset_path('default');
+        if (!$image) {
+            return asset('backend/images/default/default.webp');
+        }
+        if (is_string($image) && (\Illuminate\Support\Str::startsWith($image, "[") || \Illuminate\Support\Str::startsWith($image, '"'))) {
+            $decoded = json_decode($image, true);
+            if (is_array($decoded) && count($decoded) > 0) {
+                $image = $decoded[0];
+            }
+        }
+        if (is_array($image)) {
+            $image = $image[0] ?? null;
+        }
+        if (!$image) {
+            return asset('backend/images/default/default.webp');
+        }
+        if (\Illuminate\Support\Str::startsWith($image, 'http')) {
+            return $image;
+        }
+        return files_asset_path('car-models') . '/' . $image;
     }
 
     /**

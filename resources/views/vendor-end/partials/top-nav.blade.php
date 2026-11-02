@@ -1,20 +1,32 @@
+@php
+    $vendorUser = auth()->guard('vendor')->user();
+    $avatarImg = $vendorUser->userImage ?? asset('backend/images/default/profile-default.webp');
+    $defaultAvatar = asset('backend/images/default/profile-default.webp');
+@endphp
 <nav class="navbar-wrapper">
     <div class="dashboard-title-part">
+        {{-- Left / Start side (Breadcrumbs & Sidebar Toggle) --}}
         <div class="left">
-            <div class="icon">
-                <button class="sidebar-menu-bar">
-                    <i class="fas fa-exchange-alt"></i>
-                </button>
-            </div>
+            <button class="sidebar-menu-bar btn-header-toggle" type="button" title="{{ __('Toggle Menu') }}">
+                <i class="fas fa-bars"></i>
+            </button>
             <div class="dashboard-path">
-                <span class="main-path"><a href="{{ setRoute('vendor.profile.index') }}">{{ __('Dashboard') }}</a></span>
-                <i class="las la-angle-right"></i>
-                <span class="active-path">{{ $page_title ?? '' }}</span>
+                <span class="main-path">
+                    <a href="{{ setRoute('vendor.dashboard.index') }}">{{ __('Dashboard') }}</a>
+                </span>
+                @if(isset($page_title) && !empty($page_title))
+                    <i class="las la-angle-left path-arrow rtl-arrow"></i>
+                    <i class="las la-angle-right path-arrow ltr-arrow"></i>
+                    <span class="active-path">{{ $page_title }}</span>
+                @endif
             </div>
         </div>
+
+        {{-- Right / End side (Notifications, Language, Profile) --}}
         <div class="right">
+            {{-- Notification Dropdown --}}
             <div class="header-notification-wrapper">
-                <button class="notification-icon">
+                <button class="notification-icon" type="button" title="{{ __('Notification') }}">
                     <i class="las la-bell"></i>
                     <span class="bling-area" style="display:none;"></span>
                 </button>
@@ -22,14 +34,14 @@
                     <div class="notification-header">
                         <h5 class="title">{{ __('Notification') }}</h5>
                         <button class="notifications-clear-all-btn d-none"
-                            style="background:none;border:none;color:#667eea;cursor:pointer;font-size:12px;">{{ __('Clear All') }}</button>
+                            style="background:none;border:none;color:#4338ca;cursor:pointer;font-size:12px;font-weight:700;">{{ __('Clear All') }}</button>
                     </div>
                     <ul class="notification-list">
                         @forelse (get_vendor_notifications() ?? [] as $item)
                             <li>
                                 <div class="thumb">
-                                    <img src="{{ $item->message->image ?? auth()->guard('vendor')->user()->userImage }}"
-                                        alt="user">
+                                    <img src="{{ $item->message->image ?? $avatarImg }}"
+                                        alt="user" onerror="this.onerror=null;this.src='{{ $defaultAvatar }}';">
                                 </div>
                                 <div class="content">
                                     <div class="title-area">
@@ -45,8 +57,10 @@
                     </ul>
                 </div>
             </div>
+
+            {{-- Language Selector Dropdown --}}
             <div class="header-language-wrapper">
-                <button class="language-icon">
+                <button class="language-icon" type="button" title="{{ __('Language') }}">
                     <i class="las la-globe"></i>
                 </button>
                 <div class="language-wrapper">
@@ -70,304 +84,362 @@
                     </ul>
                 </div>
             </div>
+
+            {{-- User Profile Pill (Avatar + Name) --}}
             <div class="header-user-wrapper">
-                <div class="header-user-thumb">
-                    <a href="{{ setRoute('vendor.profile.index') }}"><img
-                            src="{{ auth()->user()->userImage ?? asset('frontend/assets/images/client/client-3.webp') }}"
-                            alt="client"></a>
-                </div>
+                <a href="{{ setRoute('vendor.profile.index') }}" class="header-user-pill" title="{{ __('Profile') }}">
+                    <div class="header-user-info d-none d-md-flex flex-column text-start">
+                        <span class="header-user-name">{{ $vendorUser->fullname ?? $vendorUser->username ?? __('Vendor') }}</span>
+                        <small class="header-user-role">{{ __('Merchant Account') }}</small>
+                    </div>
+                    <div class="header-user-thumb">
+                        <img src="{{ $avatarImg }}" alt="profile" onerror="this.onerror=null;this.src='{{ $defaultAvatar }}';">
+                    </div>
+                </a>
             </div>
         </div>
     </div>
 </nav>
 
-
 <style>
-    .header-language-wrapper {
-        position: relative;
-        margin-inline-end: 15px;
+    /* Top Navbar Clean, Professional Layout */
+    .navbar-wrapper {
+        padding-top: 16px;
+        padding-bottom: 8px;
+        padding-inline-start: 270px;
+        padding-inline-end: 20px;
+        margin: 0 !important;
+        transition: all 0.5s ease;
+    }
+    .navbar-wrapper.active {
+        padding-inline-start: 85px !important;
+        padding-inline-end: 10px !important;
+    }
+    @media only screen and (max-width: 1199px) {
+        .navbar-wrapper {
+            padding-inline-start: 15px !important;
+            padding-inline-end: 15px !important;
+            padding-top: 14px;
+            padding-bottom: 8px;
+        }
+        .navbar-wrapper.active {
+            padding-inline-start: 20px !important;
+            padding-inline-end: 15px !important;
+        }
     }
 
-    .header-language-wrapper .language-icon {
-        background: transparent;
-        border: none;
-        font-size: 20px;
-        color: #6c757d;
-        cursor: pointer;
-        padding: 8px;
-        transition: all 0.3s ease;
+    .dashboard-title-part {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        align-items: center;
+        background: #ffffff;
+        border-radius: 14px;
+        padding: 10px 20px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+        border: 1px solid #edf2f7;
+        margin: 0;
+    }
+
+    /* Left side: Toggle button and Breadcrumb */
+    .dashboard-title-part .left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+    }
+    .btn-header-toggle {
+        width: 38px;
+        height: 38px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        color: #334155;
+        font-size: 15px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+    .btn-header-toggle:hover {
+        background: var(--primary-color, #4338ca);
+        border-color: var(--primary-color, #4338ca);
+        color: #ffffff;
+    }
+    .dashboard-path {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.92rem;
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .dashboard-path .main-path a {
+        color: #64748b;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+    .dashboard-path .main-path a:hover {
+        color: var(--primary-color, #4338ca);
+    }
+    .dashboard-path .active-path {
+        color: #0f172a;
+        font-weight: 800;
+    }
+    
+    /* Arrow direction handling */
+    body.rtl .dashboard-path .ltr-arrow {
+        display: none !important;
+    }
+    body.rtl .dashboard-path .rtl-arrow {
+        display: inline-block !important;
+        font-size: 13px;
+        color: #94a3b8;
+    }
+    body:not(.rtl) .dashboard-path .rtl-arrow {
+        display: none !important;
+    }
+    body:not(.rtl) .dashboard-path .ltr-arrow {
+        display: inline-block !important;
+        font-size: 13px;
+        color: #94a3b8;
     }
 
+    /* Right side: Actions & User */
+    .dashboard-title-part .right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+    }
+
+    /* Icon Buttons (Notification & Language) */
+    .header-notification-wrapper,
+    .header-language-wrapper {
+        position: relative;
+    }
+    .header-notification-wrapper .notification-icon,
+    .header-language-wrapper .language-icon {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        font-size: 19px;
+        color: #475569;
+        cursor: pointer;
+        padding: 0;
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        transition: all 0.2s ease;
+    }
+    .header-notification-wrapper .notification-icon:hover,
     .header-language-wrapper .language-icon:hover {
-        color: #212529;
-        background: rgba(0, 0, 0, 0.05);
+        background: #ffffff;
+        color: var(--primary-color, #4338ca);
+        border-color: #cbd5e1;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     }
 
+    .header-notification-wrapper .bling-area {
+        position: absolute;
+        top: 6px;
+        inset-inline-end: 6px;
+        width: 8px;
+        height: 8px;
+        background: #ef4444;
+        border-radius: 50%;
+        border: 2px solid #ffffff;
+    }
+
+    /* User Profile Pill */
+    .header-user-wrapper {
+        display: flex;
+        align-items: center;
+    }
+    .header-user-pill {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 4px 6px 4px 10px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 30px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    body.rtl .header-user-pill {
+        padding: 4px 10px 4px 6px;
+    }
+    .header-user-pill:hover {
+        background: #ffffff;
+        border-color: #cbd5e1;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    .header-user-name {
+        font-size: 0.82rem;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1.2;
+    }
+    .header-user-role {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #64748b;
+        line-height: 1;
+    }
+    .header-user-thumb {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 1.5px solid #cbd5e1;
+        background: #e2e8f0;
+        flex-shrink: 0;
+    }
+    .header-user-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Notification & Language Dropdown Windows */
+    .header-notification-wrapper .notification-wrapper,
     .header-language-wrapper .language-wrapper {
         position: fixed;
-        width: 280px;
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        width: 320px;
+        max-height: 420px;
+        overflow-y: auto;
+        background: #ffffff;
+        border-radius: 14px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         opacity: 0;
         visibility: hidden;
         transform: translateY(-8px);
-        transition: all 0.3s ease;
+        transition: all 0.25s ease;
         z-index: 9999;
-        border: 1px solid #e9ecef;
+        border: 1px solid #edf2f7;
     }
-
+    .header-notification-wrapper.active .notification-wrapper,
     .header-language-wrapper.active .language-wrapper {
         opacity: 1;
         visibility: visible;
         transform: translateY(0);
     }
 
-    .language-wrapper .language-header {
-        padding: 16px 20px;
-        border-bottom: 1px solid #e9ecef;
-    }
-
-    .language-wrapper .language-header .title {
-        margin: 0;
-        font-size: 14px;
-        font-weight: 600;
-        color: #212529;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .language-wrapper .language-list {
-        list-style: none;
-        padding: 8px 0;
-        margin: 0;
-        max-height: 320px;
-        overflow-y: auto;
-    }
-
-    .language-wrapper .language-list li {
-        padding: 0;
-    }
-
-    .language-wrapper .language-list li a {
+    .notification-header,
+    .language-header {
+        padding: 14px 18px;
+        border-bottom: 1px solid #f1f5f9;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 12px 20px;
-        color: #6c757d;
-        text-decoration: none;
-        transition: all 0.2s ease;
-        font-size: 14px;
+    }
+    .notification-header .title,
+    .language-header .title {
+        margin: 0;
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: #0f172a;
     }
 
-    .language-list li a:hover {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding-inline-start: 24px;
+    .language-list {
+        list-style: none;
+        padding: 6px 0;
+        margin: 0;
+    }
+    .language-list li a {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 18px;
+        color: #334155;
+        font-size: 0.88rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    .language-list li a:hover,
+    .language-list li a.active {
+        background: #f8fafc;
+        color: var(--primary-color, #4338ca);
+    }
+    .language-list li a .language-code {
+        font-size: 0.7rem;
+        font-weight: 800;
+        padding: 2px 6px;
+        background: #e2e8f0;
+        border-radius: 6px;
+    }
+    .language-list li a.active .language-code {
+        background: var(--primary-color, #4338ca);
+        color: #ffffff;
+    }
 
-        .language-wrapper .language-list li a.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff;
-        }
-
-        .language-wrapper .language-list li a .language-name {
-            font-weight: 500;
-            flex: 1;
-        }
-
-        .language-wrapper .language-list li a .language-code {
-            font-size: 11px;
-            padding: 4px 10px;
-            background: #e9ecef;
-            border-radius: 6px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            margin-inline-start: 8px;
-        }
-
-        .language-wrapper .language-list li a:hover .language-code {
-            background: #dee2e6;
-        }
-
-        .language-wrapper .language-list li a.active .language-code {
-            background: rgba(255, 255, 255, 0.25);
-            color: #fff;
-        }
-
-        /* Scrollbar styling */
-        .language-wrapper .language-list::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .language-wrapper .language-list::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .language-wrapper .language-list::-webkit-scrollbar-thumb {
-            background: #dee2e6;
-            border-radius: 3px;
-        }
-
-        .language-wrapper .language-list::-webkit-scrollbar-thumb:hover {
-            background: #adb5bd;
-        }
-
-        .header-notification-wrapper {
-            position: relative;
-        }
-
-        .header-notification-wrapper .notification-icon {
-            background: transparent;
-            border: none;
-            font-size: 20px;
-            color: #6c757d;
-            cursor: pointer;
-            padding: 8px;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            transition: all 0.3s ease;
-        }
-
-        .header-notification-wrapper .notification-icon:hover {
-            color: #212529;
-            background: rgba(0, 0, 0, 0.05);
-        }
-
-        .header-notification-wrapper .bling-area {
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            width: 10px;
-            height: 10px;
-            background: #e74c3c;
-            border-radius: 50%;
-            border: 2px solid #fff;
-        }
-
-        .header-notification-wrapper .notification-wrapper {
-            position: fixed;
-            width: 340px;
-            max-height: 420px;
-            overflow-y: auto;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-8px);
-            transition: all 0.3s ease;
-            z-index: 9999;
-            border: 1px solid #e9ecef;
-        }
-
-        .header-notification-wrapper.active .notification-wrapper {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .header-notification-wrapper .notification-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid #e9ecef;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-notification-wrapper .notification-list {
-            list-style: none;
-            padding: 8px 0;
-            margin: 0;
-        }
-
-        .header-notification-wrapper .notification-list li {
-            padding: 12px 20px;
-            display: flex;
-            gap: 12px;
-            transition: background 0.2s ease;
-            cursor: pointer;
-        }
-
-        .header-notification-wrapper .notification-list li:hover {
-            background: rgba(0, 0, 0, 0.03);
-        }
-
-        .header-notification-wrapper .notification-list .thumb img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .header-notification-wrapper .notification-list .content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .header-notification-wrapper .notification-list .title-area {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 4px;
-        }
-
-        .header-notification-wrapper .notification-list .title {
-            margin: 0;
-            font-size: 13px;
-            font-weight: 600;
-            color: #212529;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .header-notification-wrapper .notification-list .time {
-            font-size: 11px;
-            color: #adb5bd;
-            white-space: nowrap;
-            margin-inline-start: 8px;
-        }
-
-        .header-notification-wrapper .notification-list .sub-title {
-            font-size: 12px;
-            color: #6c757d;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .header-notification-wrapper .notification-list .not-found {
-            text-align: center;
-            padding: 30px 20px;
-            color: #adb5bd;
-            font-size: 14px;
-        }
-
-        .header-notification-wrapper .notification-wrapper::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .header-notification-wrapper .notification-wrapper::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .header-notification-wrapper .notification-wrapper::-webkit-scrollbar-thumb {
-            background: #dee2e6;
-            border-radius: 3px;
-        }
+    .notification-list {
+        list-style: none;
+        padding: 6px 0;
+        margin: 0;
+    }
+    .notification-list li {
+        padding: 12px 18px;
+        display: flex;
+        gap: 10px;
+        border-bottom: 1px solid #f8fafc;
+        transition: background 0.2s ease;
+    }
+    .notification-list li:hover {
+        background: #f8fafc;
+    }
+    .notification-list .thumb img {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    .notification-list .content {
+        flex: 1;
+        min-width: 0;
+    }
+    .notification-list .title-area {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 3px;
+    }
+    .notification-list .title {
+        margin: 0;
+        font-size: 0.84rem;
+        font-weight: 700;
+        color: #1e293b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .notification-list .time {
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+    .notification-list .sub-title {
+        font-size: 0.78rem;
+        color: #64748b;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .notification-list .not-found {
+        text-align: center;
+        padding: 24px 16px;
+        color: #94a3b8;
+        font-size: 0.88rem;
+    }
 </style>
 
 <script>
@@ -379,13 +451,12 @@
 
         // Position language dropdown correctly
         function positionLanguageDropdown() {
-            if (languageWrapper.classList.contains('active')) {
+            if (languageWrapper && languageWrapper.classList.contains('active')) {
                 const rect = languageIcon.getBoundingClientRect();
-                const isRTL = document.dir === 'rtl' || document.documentElement.dir === 'rtl';
+                const isRTL = document.dir === 'rtl' || document.documentElement.dir === 'rtl' || document.body.classList.contains('rtl');
                 languageDropdown.style.position = 'fixed';
                 languageDropdown.style.top = (rect.bottom + 10) + 'px';
 
-                // Use logical positioning based on text direction
                 if (isRTL) {
                     languageDropdown.style.left = rect.left + 'px';
                     languageDropdown.style.right = 'auto';
@@ -407,7 +478,6 @@
             });
         }
 
-        // Reposition on scroll and resize
         window.addEventListener('scroll', positionLanguageDropdown);
         window.addEventListener('resize', positionLanguageDropdown);
 
@@ -420,7 +490,6 @@
                 const code = this.dataset.code;
                 const dir = this.dataset.dir;
 
-                // Send AJAX request
                 fetch('{{ setRoute('vendor.profile.language.switch') }}', {
                         method: 'POST',
                         headers: {
@@ -436,7 +505,6 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // Reload page to apply language changes
                             window.location.reload();
                         }
                     })
@@ -460,9 +528,9 @@
     const notifDropdown = document.querySelector('.notification-wrapper');
 
     function positionNotifDropdown() {
-        if (notifWrapper.classList.contains('active')) {
+        if (notifWrapper && notifWrapper.classList.contains('active')) {
             const rect = notifIcon.getBoundingClientRect();
-            const isRTL = document.dir === 'rtl' || document.documentElement.dir === 'rtl';
+            const isRTL = document.dir === 'rtl' || document.documentElement.dir === 'rtl' || document.body.classList.contains('rtl');
             notifDropdown.style.position = 'fixed';
             notifDropdown.style.top = (rect.bottom + 10) + 'px';
             if (isRTL) {

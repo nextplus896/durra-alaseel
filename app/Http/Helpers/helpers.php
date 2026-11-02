@@ -860,11 +860,25 @@ function delete_file($file_link)
 
 function get_default_currency_code($default_currency = null)
 {
+    $locale = App::getLocale() ?? session()->get('local') ?? 'ar';
+    if ($default_currency == null) $default_currency = CurrencyProvider::default();
+    if ($default_currency != false) {
+        $code = $default_currency->code;
+        if (strtoupper($code) === 'SAR') {
+            return ($locale === 'ar') ? 'ر.س' : 'SAR';
+        }
+        return $code;
+    }
+    return ($locale === 'ar') ? 'ر.س' : 'SAR';
+}
+
+function get_default_currency_iso_code($default_currency = null)
+{
     if ($default_currency == null) $default_currency = CurrencyProvider::default();
     if ($default_currency != false) {
         return $default_currency->code;
     }
-    return "";
+    return "SAR";
 }
 
 function replace_array_key($array, $remove_keyword, $replace_keyword = "")
@@ -1983,11 +1997,15 @@ function get_vendor_notifications()
 
 function get_default_currency_symbol($default_currency = null)
 {
+    $locale = App::getLocale() ?? session()->get('local') ?? 'ar';
     if ($default_currency == null) $default_currency = CurrencyProvider::default();
     if ($default_currency != false) {
+        if (strtoupper($default_currency->code) === 'SAR' || strtoupper($default_currency->symbol) === 'SAR') {
+            return ($locale === 'ar') ? 'ر.س' : 'SAR';
+        }
         return $default_currency->symbol;
     }
-    return "";
+    return ($locale === 'ar') ? 'ر.س' : 'SAR';
 }
 
 function booking_count($id)
