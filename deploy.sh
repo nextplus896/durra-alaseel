@@ -114,12 +114,13 @@ setup_permissions() {
              storage/framework/sessions \
              storage/framework/views \
              storage/framework/cache/data \
-             storage/logs
+             storage/logs \
+             public/fileholder/img
 
     run_sudo usermod -a -G "$WEB_GROUP" "$DEPLOY_USER" 2>/dev/null || true
-    run_sudo chown -R "$DEPLOY_USER:$WEB_GROUP" storage bootstrap/cache 2>/dev/null || chown -R "$DEPLOY_USER:$WEB_GROUP" storage bootstrap/cache 2>/dev/null || true
-    run_sudo chmod -R 775 storage bootstrap/cache 2>/dev/null || chmod -R 775 storage bootstrap/cache 2>/dev/null || true
-    run_sudo chmod -R g+s storage bootstrap/cache 2>/dev/null || true
+    run_sudo chown -R "$DEPLOY_USER:$WEB_GROUP" storage bootstrap/cache public/fileholder 2>/dev/null || chown -R "$DEPLOY_USER:$WEB_GROUP" storage bootstrap/cache public/fileholder 2>/dev/null || true
+    run_sudo chmod -R 775 storage bootstrap/cache public/fileholder 2>/dev/null || chmod -R 775 storage bootstrap/cache public/fileholder 2>/dev/null || true
+    run_sudo chmod -R g+s storage bootstrap/cache public/fileholder 2>/dev/null || true
 }
 
 # ==============================================================================
