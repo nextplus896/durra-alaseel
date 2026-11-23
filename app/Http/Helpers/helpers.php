@@ -68,11 +68,13 @@ function setRoute($route_name, $param = null)
 function get_all_countries($item = [])
 {
     $countries = json_decode(file_get_contents(resource_path('world/countries.json')), true);
+    $arabic_names = json_decode(file_get_contents(resource_path('world/countries_ar.json')), true);
 
-    $countries = array_map(function ($array) {
+    $countries = array_map(function ($array) use ($arabic_names) {
         return [
             'id'                    => $array['id'],
             'name'                  => $array['name'],
+            'name_ar'               => $arabic_names[$array['iso2']] ?? $array['name'],
             'mobile_code'           => $array['phone_code'],
             'currency_name'         => $array['currency_name'],
             'currency_code'         => $array['currency'],
