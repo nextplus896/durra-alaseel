@@ -258,6 +258,7 @@ Route::prefix('user')
         Route::controller(WalletController::class)->prefix('wallet')->name('wallet.')->group(function () {
             Route::get('/', 'index')->name('index');
             Route::post('/recharge', 'recharge')->name('recharge');
+            Route::post('/recharge/{invoiceId}/verify', 'verifyRecharge')->name('recharge.verify');
             Route::get('/transactions', 'transactions')->name('transactions');
         });
 

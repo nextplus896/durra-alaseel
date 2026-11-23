@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\V1\User;
 
 use Exception;
+use App\DTO\WalletTransactionDTO;
+use Illuminate\Support\Facades\DB;
 use App\Models\BalanceTransaction;
 use App\Models\PaymentTransaction;
 use App\Services\MoyasarService;
@@ -168,6 +170,52 @@ class WalletController extends Controller
                 500
             );
         }
+    }
+
+    public function verifyRecharge(string $invoiceId)
+    {
+        $user      = Auth::guard('api')->user();
+        $paymentTx = PaymentTransaction::where('invoice_id', $invoiceId)->where('user_id', $user->id)->first();
+
+        if (!$paymentTx) {
+            return Response::error([__('Payment not found')], [], 404);
+        }
+
+        if ($paymentTx->isPaid()) {
+            return Response::success([__('Wallet already credited')], ['credited' => true], 200);
+        }
+
+        try {
+            $invoice = $this->moyasarService->getInvoice($invoiceId);
+        } catch (Exception $e) {
+            Log::error('Wallet Recharge Verify Error', ['invoice_id' => $invoiceId, 'error' => $e->getMessage()]);
+            return Response::error([__('Failed to verify payment. Please try again.')], [], 500);
+        }
+
+        if (!$this->moyasarService->isInvoicePaid($invoice)) {
+            return Response::success([__('Payment not completed yet')], ['credited' => false], 200);
+        }
+
+        $paymentId = collect($invoice['payments'] ?? [])->firstWhere('status', 'paid')['id'] ?? '';
+
+        DB::transaction(function () use ($user, $paymentTx, $invoiceId, $paymentId) {
+            $locked = PaymentTransaction::whereKey($paymentTx->id)->lockForUpdate()->first();
+            if ($locked->isPaid()) return;
+
+            $dto = WalletTransactionDTO::forDeposit(
+                amount: (float) $locked->amount,
+                description: __('Wallet recharge', [], 'ar'),
+                referenceType: 'App\Models\PaymentTransaction',
+                referenceId: $locked->id,
+                idempotencyKey: 'webhook-' . $invoiceId,
+                moyasarInvoiceId: $invoiceId,
+            );
+
+            $this->walletService->deposit($user, (float) $locked->amount, $dto);
+            $locked->markPaid($paymentId);
+        });
+
+        return Response::success([__('Wallet credited successfully')], ['credited' => true], 200);
     }
 
     /**

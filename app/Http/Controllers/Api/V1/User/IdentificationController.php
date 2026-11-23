@@ -31,8 +31,8 @@ class IdentificationController extends Controller
 
             $image_paths = [
                 'base_url'              => url("/"),
-                'national_id_path'      => "public/frontend/user-national-id",
-                'driving_license_path'  => "public/frontend/user-driving-license",
+                'national_id_path'      => files_asset_path_basename('user-national-id'),
+                'driving_license_path'  => files_asset_path_basename('user-driving-license'),
             ];
 
             $instructions = [
@@ -267,8 +267,8 @@ class IdentificationController extends Controller
 
             $image_paths = [
                 'base_url'              => url("/"),
-                'national_id_path'      => "public/frontend/user-national-id",
-                'driving_license_path'  => "public/frontend/user-driving-license",
+                'national_id_path'      => files_asset_path_basename('user-national-id'),
+                'driving_license_path'  => files_asset_path_basename('user-driving-license'),
             ];
 
             return Response::success(

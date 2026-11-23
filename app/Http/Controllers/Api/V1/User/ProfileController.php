@@ -37,6 +37,7 @@ class ProfileController extends Controller
         $response_data['state']          = $user->address->state ?? "";
         $response_data['postal_code']    = $user->address->postal_code ?? "";
         $response_data['address']        = $user->address->address ?? "";
+        $response_data['gender']         = $user->gender ?? "";
         $response_data['kyc']            = [
             'data'          => $user->kyc->data ?? [],
             'reject_reason' => $user->kyc->reject_reason ?? "",
@@ -72,6 +73,7 @@ class ProfileController extends Controller
             'city'          => "nullable|string|max:50",
             'postal_code'   => "nullable|numeric",
             'address'       => "nullable|string|max:250",
+            'gender'        => "nullable|in:male,female",
             'image'         => "nullable|image|mimes:jpg,png,svg,webp|max:10240",
         ]);
 
